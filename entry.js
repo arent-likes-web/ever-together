@@ -13,12 +13,14 @@ const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
 const loginForm = document.getElementById('loginForm');
+const verificationForm = document.getElementById('verificationForm');
 const errorMessage = document.getElementById('errorMessage');
+const verificationErrorMessage = document.getElementById('verificationErrorMessage');
 
 // Список разрешенных пользователей
 const allowedUsers = [
-  { email: "aretren@gmail.com", password: "esc5re8UfBPJyXBADi4eMJHDU9O2" },
-  { email: "choisalery@gmail.com", password: "qY5pMWARb2SRVXiUTxyipyICUJ53" }
+  { email: "aretren@gmail.com" },
+  { email: "choisalery@gmail.com" }
 ];
 
 // Проверка, что пользователь в списке разрешенных
@@ -26,12 +28,11 @@ function isUserAllowed(email) {
   return allowedUsers.some(user => user.email === email);
 }
 
-// Обработчик отправки формы
+// Обработчик отправки email для получения кода
 loginForm.addEventListener('submit', async (e) => {
-  e.preventDefault(); // Предотвратить перезагрузку страницы
+  e.preventDefault();
 
   const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
 
   if (!isUserAllowed(email)) {
     errorMessage.textContent = "Этот email не разрешен для входа.";
@@ -39,22 +40,42 @@ loginForm.addEventListener('submit', async (e) => {
   }
 
   try {
-    // Вход с помощью email и пароля
-    await auth.signInWithEmailAndPassword(email, password);
+    const actionCodeSettings = {
+      // Тема и URL для перехода после успешного подтверждения
+      url: 'https://arent-likes-web.github.io/ever-together/main-page.html',  // адрес страницы, куда будет перенаправлен пользователь после подтверждения
+      handleCodeInApp: true
+    };
 
-    // Проверяем, подтвержден ли email пользователя
-    const user = auth.currentUser;
-    if (!user.emailVerified) {
-      // Если email не подтвержден, отправляем письмо с подтверждением
-      await user.sendEmailVerification();
-      errorMessage.textContent = "Пожалуйста, подтвердите ваш email перед входом. Мы отправили письмо для подтверждения.";
-      return;
-    }
+    // Отправляем ссылку для входа на email
+    await auth.sendSignInLinkToEmail(email, actionCodeSettings);
 
-    // Перенаправление на main-page после успешного входа
-    window.location.href = "main-page.html";  // Заменить на нужный URL
+    // Сохраняем email в localStorage для последующего использования
+    window.localStorage.setItem('emailForSignIn', email);
+
+    // Показываем форму для ввода кода
+    loginForm.style.display = 'none';
+    verificationForm.style.display = 'block';
+
+    errorMessage.textContent = 'Письмо с кодом было отправлено на вашу почту!';
   } catch (error) {
-    // Показ ошибки, если вход не удался
     errorMessage.textContent = error.message;
+  }
+});
+
+// Обработчик отправки кода подтверждения
+verificationForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const code = document.getElementById('verificationCode').value;
+  const email = window.localStorage.getItem('emailForSignIn');
+
+  try {
+    // Проверка на правильность кода и завершение аутентификации
+    const result = await auth.signInWithEmailLink(email, window.location.href);
+
+    // Если код правильный, перенаправляем на main-page.html
+    window.location.href = "main-page.html";
+  } catch (error) {
+    verificationErrorMessage.textContent = "Неверный код. Попробуйте снова.";
   }
 });
