@@ -4,42 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Вход пользователя</title>
-  <style>
-    /* Простейшие стили для формы */
-    .login-form {
-      max-width: 400px;
-      margin: 50px auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background-color: #f9f9f9;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    .form-group input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    .btn {
-      width: 100%;
-      padding: 10px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .btn:hover {
-      background-color: #45a049;
-    }
-    .error {
-      color: red;
-      margin-top: 10px;
-    }
-  </style>
+
+  <!-- Подключаем внешний файл стилей -->
+  <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
 
@@ -59,42 +27,9 @@
     </form>
   </div>
 
+  <!-- Подключаем внешний JavaScript файл -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script>
-    // Инициализация Firebase
-    const firebaseConfig = {
-      apiKey: "your-api-key",
-      authDomain: "your-auth-domain",
-      projectId: "your-project-id",
-      storageBucket: "your-storage-bucket",
-      messagingSenderId: "your-sender-id",
-      appId: "your-app-id"
-    };
-
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    const loginForm = document.getElementById('loginForm');
-    const errorMessage = document.getElementById('errorMessage');
-
-    // Обработчик отправки формы
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault(); // Предотвратить перезагрузку страницы
-
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-
-      try {
-        // Вход с помощью email и пароля
-        await auth.signInWithEmailAndPassword(email, password);
-        // Перенаправление на другую страницу после успешного входа
-        window.location.href = "dashboard.html";  // Заменить на нужный URL
-      } catch (error) {
-        // Показ ошибки, если вход не удался
-        errorMessage.textContent = error.message;
-      }
-    });
-  </script>
+  <script src="entry.js"></script>
 </body>
 </html>
