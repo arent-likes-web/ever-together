@@ -41,10 +41,12 @@ loginForm.addEventListener('submit', async (e) => {
 
   try {
     const actionCodeSettings = {
-      // Тема и URL для перехода после успешного подтверждения
+      // URL для перехода после успешного подтверждения
       url: 'https://arent-likes-web.github.io/ever-together/main-page.html',  // адрес страницы, куда будет перенаправлен пользователь после подтверждения
-      handleCodeInApp: true
+      handleCodeInApp: true  // Указывает, что код обрабатывается в приложении
     };
+
+    console.log('Отправка письма на email:', email);
 
     // Отправляем ссылку для входа на email
     await auth.sendSignInLinkToEmail(email, actionCodeSettings);
@@ -58,6 +60,7 @@ loginForm.addEventListener('submit', async (e) => {
 
     errorMessage.textContent = 'Письмо с кодом было отправлено на вашу почту!';
   } catch (error) {
+    console.error("Ошибка при отправке письма:", error);  // Логируем ошибку
     errorMessage.textContent = error.message;
   }
 });
@@ -77,5 +80,6 @@ verificationForm.addEventListener('submit', async (e) => {
     window.location.href = "main-page.html";
   } catch (error) {
     verificationErrorMessage.textContent = "Неверный код. Попробуйте снова.";
+    console.error("Ошибка при подтверждении кода:", error);  // Логируем ошибку
   }
 });
