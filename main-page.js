@@ -1,9 +1,8 @@
-// Импорт необходимых функций из Firebase
+// Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
-// Конфигурация Firebase
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDIMvnTxfnpDr72fIIexWcO2Jl0_fqM7tw",
   authDomain: "ever-together.firebaseapp.com",
@@ -16,8 +15,11 @@ const firebaseConfig = {
 
 // Инициализация Firebase
 const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
 const database = getDatabase(app);
+
+// Cloudinary Config (Использование Unsigned Upload Preset)
+const cloudName = "dozbf3jis"; // Твой Cloud Name
+const uploadPreset = "ever_together_upload"; // Используй созданный Unsigned Upload Preset
 
 // Элементы интерфейса
 const uploadLeft = document.getElementById('uploadLeft');
@@ -48,32 +50,39 @@ function triggerUpload(column) {
   fileInput.click();
 }
 
-// Обработка загрузки файла
+// Загрузка файла в Cloudinary
 fileInput.addEventListener('change', (event) => {
   const file = event.target.files[0];
   if (file && file.type.startsWith('image/')) {
     const column = fileInput.dataset.column;
     const timestamp = new Date().toISOString();
 
-    const storageReference = storageRef(storage, `images/${Date.now()}-${file.name}`);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
 
-    uploadBytes(storageReference, file).then((snapshot) => {
-      return getDownloadURL(snapshot.ref);
-    }).then((downloadURL) => {
-      const imageData = {
-        url: downloadURL,
-        timestamp: timestamp,
-        views: 0,
-        column: column
-      };
+    fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: "POST",
+      body: formData
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        const imageData = {
+          url: data.secure_url,
+          timestamp: timestamp,
+          views: 0,
+          column: column
+        };
 
-      const newImageRef = push(dbRef(database, 'images'));
-      set(newImageRef, imageData);
-
-      displayImage(imageData, newImageRef.key);
-    }).catch((error) => {
-      console.error("Ошибка при загрузке изображения:", error);
-    });
+        const newImageRef = push(dbRef(database, 'images'));
+        return set(newImageRef, imageData);
+      })
+      .then(() => {
+        loadImagesFromFirebase(); // Обновление изображений
+      })
+      .catch((error) => {
+        console.error("Ошибка при загрузке изображения:", error);
+      });
   }
   fileInput.value = ''; // Сброс выбора файла
 });
@@ -92,7 +101,7 @@ function loadImagesFromFirebase() {
   });
 }
 
-// Отображение изображения на странице
+// Отображение изображения
 function displayImage(imageData, imageId) {
   const img = document.createElement('img');
   img.src = imageData.url;
