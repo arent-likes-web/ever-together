@@ -1,3 +1,5 @@
+/* Обновленный стиль для всего проекта */
+
 /* Global Styles */
 * {
   margin: 0;
@@ -6,103 +8,118 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f4f4;
-  color: #333;
-  line-height: 1.6;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(to right, #f8cdda, #2c2c2c);
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
 }
 
 h2 {
-  text-align: center;
   margin-bottom: 20px;
+  color: #f8cdda;
 }
 
 /* Form Styles */
 .login-form {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background-color: #fff;
+  width: 100%;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
-  font-size: 14px;
-  color: #555;
+  display: block;
+  margin-bottom: 5px;
+  color: #ddd;
 }
 
 .form-group input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(248, 205, 218, 0.8);
 }
 
 .btn {
   width: 100%;
-  padding: 10px;
-  background-color: #4CAF50;
-  color: white;
+  padding: 12px;
+  background-color: #f8cdda;
+  color: #2c2c2c;
   border: none;
-  border-radius: 5px;
+  border-radius: 15px;
   cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s;
+  font-weight: bold;
 }
 
 .btn:hover {
-  background-color: #45a049;
+  background-color: #e89bb8;
+  transform: translateY(-3px);
 }
 
 .error {
-  color: red;
+  color: #ff6b6b;
   margin-top: 10px;
-  font-size: 14px;
-}
-
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
   text-align: center;
+  font-weight: bold;
 }
 
-header {
-  background-color: #333;
-  color: white;
-  padding: 15px 0;
-  font-size: 24px;
-}
-
-.upload-buttons {
-  margin: 20px;
-}
-
-button {
+/* Upload Buttons */
+.upload-buttons button {
   margin: 5px;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
+  border: none;
+  border-radius: 12px;
+  background-color: #e89bb8;
+  color: white;
+  transition: background 0.3s ease, transform 0.2s;
 }
 
+.upload-buttons button:hover {
+  background-color: #d06f9c;
+  transform: translateY(-3px);
+}
+
+/* Image Container */
 .image-container {
   display: flex;
   justify-content: space-around;
   padding: 20px;
+  gap: 20px;
 }
 
 .image-column {
   width: 30%;
-  background-color: white;
-  padding: 10px;
-  border: 1px solid #ccc;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  border-radius: 12px;
   min-height: 400px;
   overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
 }
 
 .thumbnail {
@@ -110,6 +127,7 @@ button {
   margin-bottom: 10px;
   cursor: pointer;
   transition: transform 0.3s;
+  border-radius: 10px;
 }
 
 .thumbnail:hover {
@@ -134,6 +152,7 @@ button {
   display: block;
   max-width: 80%;
   max-height: 80%;
+  border-radius: 15px;
 }
 
 .close {
