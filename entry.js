@@ -1,6 +1,6 @@
 // Импорт необходимых функций из SDK Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getAuth, sendSignInLinkToEmail, signInWithEmailLink, isSignInWithEmailLink } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
 // Конфигурация Firebase
 const firebaseConfig = {
@@ -19,9 +19,8 @@ const auth = getAuth(app);
 
 // Работа с формами
 const loginForm = document.getElementById('loginForm');
-const verificationForm = document.getElementById('verificationForm');
+const messageContainer = document.getElementById('messageContainer');
 const errorMessage = document.getElementById('errorMessage');
-const verificationErrorMessage = document.getElementById('verificationErrorMessage');
 
 // Разрешённые пользователи
 const allowedUsers = [
@@ -33,7 +32,7 @@ function isUserAllowed(email) {
   return allowedUsers.some(user => user.email === email);
 }
 
-// Обработка отправки формы для отправки кода
+// Обработка отправки формы для отправки ссылки
 loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('email').value;
@@ -52,28 +51,10 @@ loginForm.addEventListener('submit', async (e) => {
     await sendSignInLinkToEmail(auth, email, actionCodeSettings);
     window.localStorage.setItem('emailForSignIn', email);
     loginForm.style.display = 'none';
-    verificationForm.style.display = 'block';
-    errorMessage.textContent = 'Письмо с кодом отправлено на вашу почту!';
+    messageContainer.style.display = 'block';
+    errorMessage.textContent = '';
   } catch (error) {
     console.error("Ошибка при отправке письма:", error);
     errorMessage.textContent = `Ошибка: ${error.message}`;
-  }
-});
-
-// Обработка отправки формы для подтверждения кода
-verificationForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = window.localStorage.getItem('emailForSignIn');
-
-  if (isSignInWithEmailLink(auth, window.location.href)) {
-    try {
-      await signInWithEmailLink(auth, email, window.location.href);
-      window.location.href = "main-page.html";
-    } catch (error) {
-      console.error("Ошибка при подтверждении кода:", error);
-      verificationErrorMessage.textContent = "Неверный код. Попробуйте снова.";
-    }
-  } else {
-    verificationErrorMessage.textContent = "Недействительная ссылка для подтверждения.";
   }
 });
