@@ -25,7 +25,7 @@ onAuthStateChanged(auth, (user) => {
     console.log("Пользователь авторизован:", user.email);
     window.currentUser = user.email;  // Сохраняем email для проверки
     loadImagesFromFirebase();
-    updateWidget(); // Инициализация виджета при старте
+    updateBackgroundGradient(); // Инициализация градиента при старте
   } else {
     console.log("Пользователь не авторизован. Перенаправление на страницу входа.");
     window.location.href = "entry.html";
@@ -46,7 +46,7 @@ function loadImagesFromFirebase() {
         displayImage(data[key], key);
       });
 
-      updateWidget(); // Обновление виджета после загрузки изображений
+      updateBackgroundGradient(); // Обновление градиента после загрузки изображений
     }
   });
 }
@@ -118,37 +118,18 @@ window.addEventListener('click', (event) => {
   }
 });
 
-// Инициализация и обновление виджета с бегунком в виде сердечка
-function updateWidget() {
+// Перетекание цвета для градиента
+function updateBackgroundGradient() {
   const leftViews = getColumnViews('left');
   const centerViews = getColumnViews('center');
   const rightViews = getColumnViews('right');
 
   const totalViews = leftViews + centerViews + rightViews;
-  const balance = totalViews ? ((rightViews - leftViews) / totalViews) * 50 + 50 : 50;
+  const balance = totalViews ? (leftViews - rightViews) / totalViews : 0;
 
-  const slider = document.getElementById('balanceSlider');
-  if (!slider) {
-    createSlider(balance);
-  } else {
-    slider.value = balance;
-  }
-}
+  const gradientPosition = 50 + (balance * 50);
 
-function createSlider(initialValue) {
-  const widgetContainer = document.createElement('div');
-  widgetContainer.classList.add('balance-widget');
-
-  const slider = document.createElement('input');
-  slider.type = 'range';
-  slider.id = 'balanceSlider';
-  slider.min = 0;
-  slider.max = 100;
-  slider.value = initialValue;
-  slider.disabled = true;
-
-  widgetContainer.appendChild(slider);
-  document.body.insertBefore(widgetContainer, document.querySelector('.image-container'));
+  document.body.style.background = `linear-gradient(to right, #c084fc ${gradientPosition}%, #2c2c2c)`;
 }
 
 function getColumnViews(column) {
