@@ -69,66 +69,41 @@ function displayImage(imageData, imageId) {
   }
 }
 
-// Открытие модального окна с учётом условий для счётчиков
-function openModal(imgElement) {
-  const modal = document.getElementById('imageModal');
-  const modalImage = document.getElementById('modalImage');
-  const imageInfo = document.getElementById('imageInfo');
+// Обработчики событий для кнопок загрузки
+const uploadLeftButton = document.getElementById('uploadLeft');
+const uploadCenterButton = document.getElementById('uploadCenter');
+const uploadRightButton = document.getElementById('uploadRight');
 
-  modal.style.display = 'block';
-  modalImage.src = imgElement.src;
-  modalImage.dataset.id = imgElement.dataset.id;
+uploadLeftButton.addEventListener('click', () => handleImageUpload('left'));
+uploadCenterButton.addEventListener('click', () => handleImageUpload('center'));
+uploadRightButton.addEventListener('click', () => handleImageUpload('right'));
 
-  const imageId = imgElement.dataset.id;
-  const column = imgElement.dataset.column; 
-  const newViews = parseInt(imgElement.dataset.views);
+function handleImageUpload(column) {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
 
-  const shouldIncrementView =
-    (column === 'left' && window.currentUser === 'aretren@gmail.com') ||
-    (column === 'right' && window.currentUser === 'choisalery@gmail.com') ||
-    (column === 'center' && (window.currentUser === 'aretren@gmail.com' || window.currentUser === 'choisalery@gmail.com'));
+  fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target.result;
+        const timestamp = new Date().toISOString();
 
-  if (shouldIncrementView) {
-    const updatedViews = newViews + 1;
-    imgElement.dataset.views = updatedViews;
+        const newImageRef = push(dbRef(database, 'images'));
+        set(newImageRef, {
+          url: imageUrl,
+          timestamp: timestamp,
+          views: 0,
+          column: column
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
-    const imageRef = dbRef(database, `images/${imageId}`);
-    update(imageRef, { views: updatedViews });
-
-    imageInfo.innerHTML = `
-      📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>
-      👁️ Просмотров: ${updatedViews}
-    `;
-  } else {
-    imageInfo.innerHTML = `
-      📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>
-      👁️ Просмотров: ${newViews}
-    `;
-  }
-
-  updateWidget(); // Обновление виджета после увеличения просмотров
-}
-
-// Обновление виджета для отображения баланса просмотров
-function updateWidget() {
-  const leftViews = getColumnViews('left');
-  const centerViews = getColumnViews('center');
-  const rightViews = getColumnViews('right');
-
-  const totalViews = leftViews + centerViews + rightViews;
-  const balance = totalViews
-    ? ((rightViews - leftViews) / totalViews) * 50 + 50 // Исправление направления бегунка
-    : 50; // Центр, если просмотров нет
-
-  const slider = document.getElementById('balanceSlider');
-  if (slider) {
-    slider.value = balance;
-  }
-}
-
-function getColumnViews(column) {
-  const images = document.querySelectorAll(`[data-column='${column}']`);
-  return Array.from(images).reduce((acc, img) => acc + parseInt(img.dataset.views), 0);
+  fileInput.click();
 }
 
 // Закрытие модального окна
