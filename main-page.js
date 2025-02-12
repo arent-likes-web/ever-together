@@ -117,3 +117,41 @@ window.addEventListener('click', (event) => {
     document.getElementById('imageModal').style.display = 'none';
   }
 });
+
+// Инициализация и обновление виджета с бегунком в виде сердечка
+function updateWidget() {
+  const leftViews = getColumnViews('left');
+  const centerViews = getColumnViews('center');
+  const rightViews = getColumnViews('right');
+
+  const totalViews = leftViews + centerViews + rightViews;
+  const balance = totalViews ? ((rightViews - leftViews) / totalViews) * 50 + 50 : 50;
+
+  const slider = document.getElementById('balanceSlider');
+  if (!slider) {
+    createSlider(balance);
+  } else {
+    slider.value = balance;
+  }
+}
+
+function createSlider(initialValue) {
+  const widgetContainer = document.createElement('div');
+  widgetContainer.classList.add('balance-widget');
+
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.id = 'balanceSlider';
+  slider.min = 0;
+  slider.max = 100;
+  slider.value = initialValue;
+  slider.disabled = true;
+
+  widgetContainer.appendChild(slider);
+  document.body.insertBefore(widgetContainer, document.querySelector('.image-container'));
+}
+
+function getColumnViews(column) {
+  const images = document.querySelectorAll(`[data-column='${column}']`);
+  return Array.from(images).reduce((acc, img) => acc + parseInt(img.dataset.views), 0);
+} 
