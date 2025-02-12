@@ -1,6 +1,6 @@
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getDatabase, ref as dbRef, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
 // Firebase Config
@@ -23,10 +23,10 @@ const auth = getAuth();
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("Пользователь авторизован:", user.email);
-    loadImagesFromFirebase(); // Загружаем изображения только если пользователь авторизован
+    loadImagesFromFirebase();
   } else {
     console.log("Пользователь не авторизован. Перенаправление на страницу входа.");
-    window.location.href = "entry.html"; // Перенаправление на страницу входа
+    window.location.href = "entry.html";
   }
 });
 
@@ -44,6 +44,7 @@ const modal = document.getElementById('imageModal');
 const modalImage = document.getElementById('modalImage');
 const imageInfo = document.getElementById('imageInfo');
 const closeModal = document.querySelector('.close');
+const deleteButton = document.getElementById('deleteButton');
 
 // Слушатели событий для загрузки
 uploadLeft.addEventListener('click', () => triggerUpload('left'));
@@ -65,7 +66,7 @@ fileInput.addEventListener('change', (event) => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "ever_together_upload"); // Upload Preset
+    formData.append("upload_preset", "ever_together_upload");
 
     fetch(`https://api.cloudinary.com/v1_1/dozbf3jis/image/upload`, {
       method: "POST",
@@ -84,13 +85,13 @@ fileInput.addEventListener('change', (event) => {
         return set(newImageRef, imageData);
       })
       .then(() => {
-        loadImagesFromFirebase(); // Обновление изображений
+        loadImagesFromFirebase();
       })
       .catch((error) => {
         console.error("Ошибка при загрузке изображения:", error);
       });
   }
-  fileInput.value = ''; // Сброс выбора файла
+  fileInput.value = '';
 });
 
 // Загрузка изображений из Firebase
@@ -128,6 +129,7 @@ function displayImage(imageData, imageId) {
 function openModal(imgElement) {
   modal.style.display = 'block';
   modalImage.src = imgElement.src;
+  modalImage.dataset.id = imgElement.dataset.id;
 
   const imageId = imgElement.dataset.id;
   const newViews = parseInt(imgElement.dataset.views) + 1;
@@ -151,4 +153,20 @@ window.addEventListener('click', (event) => {
   if (event.target === modal) {
     modal.style.display = 'none';
   }
+});
+
+// Удаление изображения
+deleteButton.addEventListener('click', () => {
+  const imageId = modalImage.dataset.id;
+  const imageRef = dbRef(database, `images/${imageId}`);
+
+  remove(imageRef)
+    .then(() => {
+      console.log("Изображение успешно удалено.");
+      modal.style.display = 'none';
+      loadImagesFromFirebase();
+    })
+    .catch((error) => {
+      console.error("Ошибка при удалении изображения:", error);
+    });
 });
