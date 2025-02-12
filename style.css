@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background: linear-gradient(to right, #f8cdda, #2c2c2c);
+  background: linear-gradient(to right, #e6e6fa, #2c2c2c); /* Пастельно-сиреневый к темно-серому */
   color: #fff;
   min-height: 100vh;
   display: flex;
@@ -21,7 +21,7 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #f8cdda;
+  color: #e6e6fa;
 }
 
 /* Form Styles */
@@ -58,13 +58,13 @@ h2 {
 
 .form-group input:focus {
   background-color: #fff;
-  box-shadow: 0 0 10px rgba(248, 205, 218, 0.8);
+  box-shadow: 0 0 10px rgba(230, 230, 250, 0.8);
 }
 
 .btn {
   width: 100%;
   padding: 12px;
-  background-color: #f8cdda;
+  background-color: #e6e6fa;
   color: #2c2c2c;
   border: none;
   border-radius: 15px;
@@ -74,7 +74,7 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #e89bb8;
+  background-color: #d8bfd8;
   transform: translateY(-3px);
 }
 
@@ -93,13 +93,13 @@ h2 {
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  background-color: #e89bb8;
+  background-color: #d8bfd8;
   color: white;
   transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #d06f9c;
+  background-color: #c8a2c8;
   transform: translateY(-3px);
 }
 
