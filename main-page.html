@@ -19,6 +19,12 @@
     <input type="file" id="fileInput" style="display: none;" accept="image/*">
   </div>
 
+  <!-- Виджет баланса просмотров -->
+  <div class="balance-widget">
+    <label for="balanceSlider">Баланс просмотров</label>
+    <input type="range" id="balanceSlider" min="0" max="100" value="50" disabled>
+  </div>
+
   <div class="image-container">
     <div id="leftColumn" class="image-column"></div>
     <div id="centerColumn" class="image-column"></div>
@@ -29,7 +35,7 @@
     <span class="close">&times;</span>
     <img class="modal-content" id="modalImage">
     <div id="imageInfo"></div>
-    <button id="deleteButton" class="btn">Удалить изображение</button> <!-- Добавленная кнопка -->
+    <button id="deleteButton" class="btn">Удалить изображение</button>
   </div>
 
   <script type="module" src="main-page.js"></script>
