@@ -215,10 +215,11 @@ h2 {
   appearance: none;
   width: 30px;
   height: 30px;
-  background: transparent;
+  background: none;
   background-image: url('heart.png');
-  background-size: 100% 100%; /* Сжатие изображения до размеров бегунка */
+  background-size: contain; /* Подгонка изображения по размеру */
   background-repeat: no-repeat;
+  background-position: center;
   border: none;
   cursor: pointer;
   transition: transform 0.3s;
@@ -229,5 +230,5 @@ h2 {
 }
 
 #balanceSlider:disabled::-webkit-slider-thumb {
-  background: #c084fc;
+  background: none;
 } 
