@@ -9,8 +9,8 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background: linear-gradient(to right, #d8b4fe, #2c2c2c); /* Более яркий сиреневый */
-  color: #fff;
+  background: linear-gradient(to right, #c084fc, #3b3b3b); /* Мягкий фиолетово-серый градиент */
+  color: #f0f0f0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -21,16 +21,16 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #c084fc; /* Яркий акцент */
+  color: #ff9a9e; /* Яркий акцент */
 }
 
 .login-form {
-  background-color: rgba(208, 180, 254, 0.2);
+  background-color: rgba(255, 182, 193, 0.2);
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   max-width: 400px;
   width: 100%;
   margin-bottom: 20px;
@@ -43,7 +43,7 @@ h2 {
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #e0aaff;
+  color: #ffb6c1;
 }
 
 .form-group input {
@@ -58,13 +58,13 @@ h2 {
 
 .form-group input:focus {
   background-color: #fff;
-  box-shadow: 0 0 10px rgba(208, 180, 254, 0.8);
+  box-shadow: 0 0 12px rgba(255, 182, 193, 0.9);
 }
 
 .btn {
   width: 100%;
   padding: 12px;
-  background-color: #f3c4fb; /* Пастельный розовый */
+  background-color: #ffa7c4; /* Пастельно-розовый */
   color: #4a4a4a;
   border: none;
   border-radius: 15px;
@@ -74,12 +74,12 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #e6aef7; /* Нежный розово-сиреневый */
+  background-color: #ff8fa3; /* Нежно-розовый */
   transform: translateY(-3px);
 }
 
 .error {
-  color: #ff8a80;
+  color: #ff6b6b;
   margin-top: 10px;
   text-align: center;
   font-weight: bold;
@@ -97,13 +97,13 @@ h2 {
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  background-color: #f3c4fb; /* Пастельный розовый */
+  background-color: #ffa7c4;
   color: #4a4a4a;
   transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #e6aef7;
+  background-color: #ff8fa3;
   transform: translateY(-3px);
 }
 
@@ -117,14 +117,14 @@ h2 {
 }
 
 .image-column {
-  background-color: rgba(216, 180, 254, 0.15);
+  background-color: rgba(192, 132, 252, 0.15);
   padding: 15px;
   border-radius: 12px;
   min-height: 400px;
   width: 30%;
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(6px);
 }
 
 .thumbnail {
@@ -133,10 +133,12 @@ h2 {
   cursor: pointer;
   transition: transform 0.3s;
   border-radius: 10px;
+  border: 2px solid rgba(255, 182, 193, 0.5);
 }
 
 .thumbnail:hover {
   transform: scale(1.05);
+  border-color: #ff9a9e;
 }
 
 .modal {
@@ -176,7 +178,7 @@ h2 {
 }
 
 #deleteButton {
-  background-color: #f3c4fb;
+  background-color: #ffa7c4;
   color: #4a4a4a;
   padding: 10px 20px;
   border: none;
@@ -187,21 +189,21 @@ h2 {
 }
 
 #deleteButton:hover {
-  background-color: #e6aef7;
+  background-color: #ff8fa3;
 }
 
 .balance-widget {
   margin: 20px 0;
   text-align: center;
-  width: 100%; /* Растягиваем виджет на всю ширину */
-  padding: 0 10px; /* Небольшие отступы по краям */
+  width: 100%;
+  padding: 0 10px;
 }
 
 #balanceSlider {
   width: 100%;
   -webkit-appearance: none;
   height: 10px;
-  background: linear-gradient(to right, #ff9a9e, #fad0c4, #fad0c4, #a18cd1);
+  background: linear-gradient(to right, #ff9a9e, #fad0c4, #c084fc);
   border-radius: 5px;
   outline: none;
   opacity: 0.9;
@@ -211,12 +213,18 @@ h2 {
 #balanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 40px;
+  width: 20px;
   height: 20px;
-  background: #4a4a4a;
-  border-radius: 50%;
+  background: transparent;
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/49/Red_Heart.svg');
+  background-size: cover;
+  border: none;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: transform 0.3s;
+}
+
+#balanceSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
 }
 
 #balanceSlider:disabled::-webkit-slider-thumb {
