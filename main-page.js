@@ -25,6 +25,7 @@ onAuthStateChanged(auth, (user) => {
     console.log("Пользователь авторизован:", user.email);
     window.currentUser = user.email;  // Сохраняем email для проверки
     loadImagesFromFirebase();
+    updateWidget(); // Инициализация виджета при старте
   } else {
     console.log("Пользователь не авторизован. Перенаправление на страницу входа.");
     window.location.href = "entry.html";
@@ -44,6 +45,8 @@ function loadImagesFromFirebase() {
       Object.keys(data).forEach((key) => {
         displayImage(data[key], key);
       });
+
+      updateWidget(); // Обновление виджета после загрузки изображений
     }
   });
 }
@@ -77,10 +80,9 @@ function openModal(imgElement) {
   modalImage.dataset.id = imgElement.dataset.id;
 
   const imageId = imgElement.dataset.id;
-  const column = imgElement.dataset.column; // Определяем столбец из данных изображения
+  const column = imgElement.dataset.column; 
   const newViews = parseInt(imgElement.dataset.views);
 
-  // Проверка условий для увеличения счётчика
   const shouldIncrementView =
     (column === 'left' && window.currentUser === 'aretren@gmail.com') ||
     (column === 'right' && window.currentUser === 'choisalery@gmail.com') ||
@@ -103,6 +105,30 @@ function openModal(imgElement) {
       👁️ Просмотров: ${newViews}
     `;
   }
+
+  updateWidget(); // Обновление виджета после увеличения просмотров
+}
+
+// Обновление виджета для отображения баланса просмотров
+function updateWidget() {
+  const leftViews = getColumnViews('left');
+  const centerViews = getColumnViews('center');
+  const rightViews = getColumnViews('right');
+
+  const totalViews = leftViews + centerViews + rightViews;
+  const balance = totalViews
+    ? ((leftViews - rightViews) / totalViews) * 50 + 50 // Смещение бегунка в зависимости от баланса
+    : 50; // Центр, если просмотров нет
+
+  const slider = document.getElementById('balanceSlider');
+  if (slider) {
+    slider.value = balance;
+  }
+}
+
+function getColumnViews(column) {
+  const images = document.querySelectorAll(`[data-column='${column}']`);
+  return Array.from(images).reduce((acc, img) => acc + parseInt(img.dataset.views), 0);
 }
 
 // Закрытие модального окна
