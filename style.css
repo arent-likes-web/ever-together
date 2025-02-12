@@ -13,7 +13,7 @@ body {
   color: #fff;
   min-height: 100vh;
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* Изменение на вертикальное расположение */
   align-items: center;
   padding: 20px;
   text-align: center;
@@ -21,12 +21,12 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #e6e6fa;
+  color: #d1c4e9; /* Светлый оттенок сиреневого */
 }
 
 /* Form Styles */
 .login-form {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(209, 196, 233, 0.2); /* Мягкий сиреневый фон */
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
@@ -34,6 +34,7 @@ h2 {
   border: 1px solid rgba(255, 255, 255, 0.18);
   max-width: 400px;
   width: 100%;
+  margin-bottom: 20px; /* Отступ снизу */
 }
 
 .form-group {
@@ -43,7 +44,7 @@ h2 {
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #ddd;
+  color: #e1bee7; /* Нежный розово-сиреневый */
 }
 
 .form-group input {
@@ -51,21 +52,21 @@ h2 {
   padding: 12px;
   border: none;
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.9);
   outline: none;
   transition: all 0.3s ease;
 }
 
 .form-group input:focus {
   background-color: #fff;
-  box-shadow: 0 0 10px rgba(230, 230, 250, 0.8);
+  box-shadow: 0 0 10px rgba(209, 196, 233, 0.8);
 }
 
 .btn {
   width: 100%;
   padding: 12px;
-  background-color: #e6e6fa;
-  color: #2c2c2c;
+  background-color: #9575cd; /* Яркий сиреневый */
+  color: white;
   border: none;
   border-radius: 15px;
   cursor: pointer;
@@ -74,46 +75,51 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #d8bfd8;
+  background-color: #7e57c2; /* Темно-сиреневый */
   transform: translateY(-3px);
 }
 
 .error {
-  color: #ff6b6b;
+  color: #ff8a80; /* Мягкий красно-розовый */
   margin-top: 10px;
   text-align: center;
   font-weight: bold;
 }
 
 /* Upload Buttons */
+.upload-buttons {
+  margin: 20px 0; /* Отступы сверху и снизу */
+  display: flex;
+  gap: 10px; /* Промежуток между кнопками */
+}
+
 .upload-buttons button {
-  margin: 5px;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  background-color: #d8bfd8;
+  background-color: #ba68c8; /* Сливовый сиреневый */
   color: white;
   transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #c8a2c8;
+  background-color: #ab47bc; /* Темный оттенок сиреневого */
   transform: translateY(-3px);
 }
 
 /* Image Container */
 .image-container {
   display: flex;
-  justify-content: space-around;
-  padding: 20px;
+  flex-direction: column; /* Вертикальное расположение */
   gap: 20px;
+  width: 90%;
+  max-width: 1200px;
 }
 
 .image-column {
-  width: 30%;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(209, 196, 233, 0.15); /* Мягкий сиреневый */
   padding: 15px;
   border-radius: 12px;
   min-height: 400px;
