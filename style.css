@@ -189,14 +189,16 @@ h2 {
 #deleteButton:hover {
   background-color: #e6aef7;
 }
+
 .balance-widget {
   margin: 20px 0;
   text-align: center;
+  width: 100%; /* Растягиваем виджет на всю ширину */
+  padding: 0 10px; /* Небольшие отступы по краям */
 }
 
 #balanceSlider {
-  width: 80%;
-  margin: 10px auto;
+  width: 100%;
   -webkit-appearance: none;
   height: 10px;
   background: linear-gradient(to right, #ff9a9e, #fad0c4, #fad0c4, #a18cd1);
@@ -209,10 +211,8 @@ h2 {
 #balanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 95%;
+  width: 40px;
   height: 20px;
-  margin: 0 auto;
-  display: block;
   background: #4a4a4a;
   border-radius: 50%;
   cursor: pointer;
