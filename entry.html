@@ -4,10 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Вход пользователя</title>
-
-  <!-- Подключаем внешний файл стилей -->
   <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
 
@@ -21,6 +18,7 @@
       <button type="submit" class="btn">Отправить код</button>
       <p class="error" id="errorMessage"></p>
     </form>
+
     <form id="verificationForm" style="display: none;">
       <div class="form-group">
         <label for="verificationCode">Код подтверждения</label>
@@ -31,9 +29,7 @@
     </form>
   </div>
 
-  <!-- Подключаем внешний JavaScript файл -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-  <script src="entry.js"></script>
+  <!-- Подключение JS -->
+  <script type="module" src="entry.js"></script>
 </body>
 </html>
