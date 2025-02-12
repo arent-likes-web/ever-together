@@ -1,6 +1,7 @@
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
 // Firebase Config
 const firebaseConfig = {
@@ -16,10 +17,18 @@ const firebaseConfig = {
 // Инициализация Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+const auth = getAuth();
 
-// Cloudinary Config (Использование Unsigned Upload Preset)
-const cloudName = "dozbf3jis"; // Твой Cloud Name
-const uploadPreset = "ever_together_upload"; // Используй созданный Unsigned Upload Preset
+// Проверка авторизации при загрузке страницы
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("Пользователь авторизован:", user.email);
+    loadImagesFromFirebase(); // Загружаем изображения только если пользователь авторизован
+  } else {
+    console.log("Пользователь не авторизован. Перенаправление на страницу входа.");
+    window.location.href = "entry.html"; // Перенаправление на страницу входа
+  }
+});
 
 // Элементы интерфейса
 const uploadLeft = document.getElementById('uploadLeft');
@@ -35,9 +44,6 @@ const modal = document.getElementById('imageModal');
 const modalImage = document.getElementById('modalImage');
 const imageInfo = document.getElementById('imageInfo');
 const closeModal = document.querySelector('.close');
-
-// Загрузка изображений из Firebase при старте
-loadImagesFromFirebase();
 
 // Слушатели событий для загрузки
 uploadLeft.addEventListener('click', () => triggerUpload('left'));
@@ -59,9 +65,9 @@ fileInput.addEventListener('change', (event) => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", uploadPreset);
+    formData.append("upload_preset", "ever_together_upload"); // Upload Preset
 
-    fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    fetch(`https://api.cloudinary.com/v1_1/dozbf3jis/image/upload`, {
       method: "POST",
       body: formData
     })
