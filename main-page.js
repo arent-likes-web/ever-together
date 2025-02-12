@@ -117,7 +117,7 @@ function updateWidget() {
 
   const totalViews = leftViews + centerViews + rightViews;
   const balance = totalViews
-    ? ((leftViews - rightViews) / totalViews) * 50 + 50 // Смещение бегунка в зависимости от баланса
+    ? ((rightViews - leftViews) / totalViews) * 50 + 50 // Исправление направления бегунка
     : 50; // Центр, если просмотров нет
 
   const slider = document.getElementById('balanceSlider');
