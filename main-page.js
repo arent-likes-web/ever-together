@@ -31,6 +31,41 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// Загрузка изображений из Firebase
+function loadImagesFromFirebase() {
+  const imagesRef = dbRef(database, 'images');
+  onValue(imagesRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      document.getElementById('leftColumn').innerHTML = '';
+      document.getElementById('centerColumn').innerHTML = '';
+      document.getElementById('rightColumn').innerHTML = '';
+
+      Object.keys(data).forEach((key) => {
+        displayImage(data[key], key);
+      });
+    }
+  });
+}
+
+// Отображение изображения
+function displayImage(imageData, imageId) {
+  const img = document.createElement('img');
+  img.src = imageData.url;
+  img.classList.add('thumbnail');
+  img.dataset.timestamp = imageData.timestamp;
+  img.dataset.views = imageData.views;
+  img.dataset.id = imageId;
+  img.dataset.column = imageData.column;
+
+  img.addEventListener('click', () => openModal(img));
+
+  const targetColumn = document.getElementById(`${imageData.column}Column`);
+  if (targetColumn) {
+    targetColumn.prepend(img);
+  }
+}
+
 // Открытие модального окна с учётом условий для счётчиков
 function openModal(imgElement) {
   modal.style.display = 'block';
@@ -38,14 +73,14 @@ function openModal(imgElement) {
   modalImage.dataset.id = imgElement.dataset.id;
 
   const imageId = imgElement.dataset.id;
-  const column = imgElement.closest('.image-column').id; // Определяем столбец
+  const column = imgElement.dataset.column; // Определяем столбец из данных изображения
   const newViews = parseInt(imgElement.dataset.views);
 
   // Проверка условий для увеличения счётчика
   const shouldIncrementView =
-    (column === 'leftColumn' && window.currentUser === 'aretren@gmail.com') ||
-    (column === 'rightColumn' && window.currentUser === 'choisalery@gmail.com') ||
-    (column === 'centerColumn' && (window.currentUser === 'aretren@gmail.com' || window.currentUser === 'choisalery@gmail.com'));
+    (column === 'left' && window.currentUser === 'aretren@gmail.com') ||
+    (column === 'right' && window.currentUser === 'choisalery@gmail.com') ||
+    (column === 'center' && (window.currentUser === 'aretren@gmail.com' || window.currentUser === 'choisalery@gmail.com'));
 
   if (shouldIncrementView) {
     const updatedViews = newViews + 1;
