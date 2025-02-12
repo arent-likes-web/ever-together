@@ -68,6 +68,10 @@ function displayImage(imageData, imageId) {
 
 // Открытие модального окна с учётом условий для счётчиков
 function openModal(imgElement) {
+  const modal = document.getElementById('imageModal');
+  const modalImage = document.getElementById('modalImage');
+  const imageInfo = document.getElementById('imageInfo');
+
   modal.style.display = 'block';
   modalImage.src = imgElement.src;
   modalImage.dataset.id = imgElement.dataset.id;
@@ -100,3 +104,15 @@ function openModal(imgElement) {
     `;
   }
 }
+
+// Закрытие модального окна
+const closeModal = document.querySelector('.close');
+closeModal.addEventListener('click', () => {
+  document.getElementById('imageModal').style.display = 'none';
+});
+
+window.addEventListener('click', (event) => {
+  if (event.target === document.getElementById('imageModal')) {
+    document.getElementById('imageModal').style.display = 'none';
+  }
+});
