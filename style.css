@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background: linear-gradient(to right, #e6e6fa, #2c2c2c);
+  background: linear-gradient(to right, #d8b4fe, #2c2c2c); /* Более яркий сиреневый */
   color: #fff;
   min-height: 100vh;
   display: flex;
@@ -21,11 +21,11 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #d1c4e9;
+  color: #c084fc; /* Яркий акцент */
 }
 
 .login-form {
-  background-color: rgba(209, 196, 233, 0.2);
+  background-color: rgba(208, 180, 254, 0.2);
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
@@ -43,7 +43,7 @@ h2 {
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #e1bee7;
+  color: #e0aaff;
 }
 
 .form-group input {
@@ -58,14 +58,14 @@ h2 {
 
 .form-group input:focus {
   background-color: #fff;
-  box-shadow: 0 0 10px rgba(209, 196, 233, 0.8);
+  box-shadow: 0 0 10px rgba(208, 180, 254, 0.8);
 }
 
 .btn {
   width: 100%;
   padding: 12px;
-  background-color: #9575cd;
-  color: white;
+  background-color: #f3c4fb; /* Пастельный розовый */
+  color: #4a4a4a;
   border: none;
   border-radius: 15px;
   cursor: pointer;
@@ -74,11 +74,11 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #7e57c2;
+  background-color: #e6aef7; /* Нежный розово-сиреневый */
   transform: translateY(-3px);
 }
 
-#error {
+.error {
   color: #ff8a80;
   margin-top: 10px;
   text-align: center;
@@ -97,13 +97,13 @@ h2 {
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  background-color: #ba68c8;
-  color: white;
+  background-color: #f3c4fb; /* Пастельный розовый */
+  color: #4a4a4a;
   transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #ab47bc;
+  background-color: #e6aef7;
   transform: translateY(-3px);
 }
 
@@ -117,7 +117,7 @@ h2 {
 }
 
 .image-column {
-  background-color: rgba(209, 196, 233, 0.15);
+  background-color: rgba(216, 180, 254, 0.15);
   padding: 15px;
   border-radius: 12px;
   min-height: 400px;
@@ -176,8 +176,8 @@ h2 {
 }
 
 #deleteButton {
-  background-color: #ff6b6b;
-  color: white;
+  background-color: #f3c4fb;
+  color: #4a4a4a;
   padding: 10px 20px;
   border: none;
   border-radius: 12px;
@@ -187,5 +187,5 @@ h2 {
 }
 
 #deleteButton:hover {
-  background-color: #e53935;
+  background-color: #e6aef7;
 }
