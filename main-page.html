@@ -1,1 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EVER TOGETHER</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>EVER TOGETHER</h1>
+  </header>
+
+  <div class="upload-buttons">
+    <button id="uploadLeft">Загрузить в левый столбец</button>
+    <button id="uploadCenter">Загрузить в центральный столбец</button>
+    <button id="uploadRight">Загрузить в правый столбец</button>
+    <input type="file" id="fileInput" style="display: none;" accept="image/*">
+  </div>
+
+  <div class="image-container">
+    <div id="leftColumn" class="image-column"></div>
+    <div id="centerColumn" class="image-column"></div>
+    <div id="rightColumn" class="image-column"></div>
+  </div>
+
+  <div id="imageModal" class="modal" style="display: none;">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modalImage">
+    <div id="imageInfo"></div>
+  </div>
+
+  <script type="module" src="main-page.js"></script>
+</body>
+</html>
 
