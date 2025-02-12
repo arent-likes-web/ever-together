@@ -9,11 +9,11 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background: linear-gradient(to right, #e6e6fa, #2c2c2c); /* Пастельно-сиреневый к темно-серому */
+  background: linear-gradient(to right, #e6e6fa, #2c2c2c);
   color: #fff;
   min-height: 100vh;
   display: flex;
-  flex-direction: column; /* Изменение на вертикальное расположение */
+  flex-direction: column;
   align-items: center;
   padding: 20px;
   text-align: center;
@@ -21,12 +21,11 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #d1c4e9; /* Светлый оттенок сиреневого */
+  color: #d1c4e9;
 }
 
-/* Form Styles */
 .login-form {
-  background-color: rgba(209, 196, 233, 0.2); /* Мягкий сиреневый фон */
+  background-color: rgba(209, 196, 233, 0.2);
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
@@ -34,7 +33,7 @@ h2 {
   border: 1px solid rgba(255, 255, 255, 0.18);
   max-width: 400px;
   width: 100%;
-  margin-bottom: 20px; /* Отступ снизу */
+  margin-bottom: 20px;
 }
 
 .form-group {
@@ -44,7 +43,7 @@ h2 {
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #e1bee7; /* Нежный розово-сиреневый */
+  color: #e1bee7;
 }
 
 .form-group input {
@@ -65,7 +64,7 @@ h2 {
 .btn {
   width: 100%;
   padding: 12px;
-  background-color: #9575cd; /* Яркий сиреневый */
+  background-color: #9575cd;
   color: white;
   border: none;
   border-radius: 15px;
@@ -75,22 +74,21 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #7e57c2; /* Темно-сиреневый */
+  background-color: #7e57c2;
   transform: translateY(-3px);
 }
 
-.error {
-  color: #ff8a80; /* Мягкий красно-розовый */
+#error {
+  color: #ff8a80;
   margin-top: 10px;
   text-align: center;
   font-weight: bold;
 }
 
-/* Upload Buttons */
 .upload-buttons {
-  margin: 20px 0; /* Отступы сверху и снизу */
+  margin: 20px 0;
   display: flex;
-  gap: 10px; /* Промежуток между кнопками */
+  gap: 10px;
 }
 
 .upload-buttons button {
@@ -99,32 +97,31 @@ h2 {
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  background-color: #ba68c8; /* Сливовый сиреневый */
+  background-color: #ba68c8;
   color: white;
   transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #ab47bc; /* Темный оттенок сиреневого */
+  background-color: #ab47bc;
   transform: translateY(-3px);
 }
 
-/* Image Container */
 .image-container {
   display: flex;
-  flex-direction: row; /* Горизонтальное расположение */
+  flex-direction: row;
   gap: 20px;
   width: 90%;
   max-width: 1200px;
-  justify-content: center; /* Центрирование столбцов */
+  justify-content: center;
 }
 
 .image-column {
-  background-color: rgba(209, 196, 233, 0.15); /* Мягкий сиреневый */
+  background-color: rgba(209, 196, 233, 0.15);
   padding: 15px;
   border-radius: 12px;
   min-height: 400px;
-  width: 30%; /* Установка ширины для равномерного размещения */
+  width: 30%;
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
@@ -142,7 +139,6 @@ h2 {
   transform: scale(1.05);
 }
 
-/* Модальное окно */
 .modal {
   display: none;
   position: fixed;
@@ -177,4 +173,19 @@ h2 {
   color: white;
   margin-top: 10px;
   font-size: 18px;
+}
+
+#deleteButton {
+  background-color: #ff6b6b;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background 0.3s ease;
+}
+
+#deleteButton:hover {
+  background-color: #e53935;
 }
