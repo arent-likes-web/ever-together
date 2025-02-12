@@ -213,10 +213,10 @@ h2 {
 #balanceSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   background: transparent;
-  background-image: url('https://upload.wikimedia.org/wikipedia/commons/4/49/Red_Heart.svg');
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/70/Purple_Heart_Symbol.png');
   background-size: cover;
   border: none;
   cursor: pointer;
@@ -228,5 +228,5 @@ h2 {
 }
 
 #balanceSlider:disabled::-webkit-slider-thumb {
-  background: #6c757d;
-}
+  background: #c084fc;
+} 
