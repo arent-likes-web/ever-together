@@ -112,10 +112,11 @@ h2 {
 /* Image Container */
 .image-container {
   display: flex;
-  flex-direction: column; /* Вертикальное расположение */
+  flex-direction: row; /* Горизонтальное расположение */
   gap: 20px;
   width: 90%;
   max-width: 1200px;
+  justify-content: center; /* Центрирование столбцов */
 }
 
 .image-column {
@@ -123,6 +124,7 @@ h2 {
   padding: 15px;
   border-radius: 12px;
   min-height: 400px;
+  width: 30%; /* Установка ширины для равномерного размещения */
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(4px);
