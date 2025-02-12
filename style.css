@@ -189,3 +189,34 @@ h2 {
 #deleteButton:hover {
   background-color: #e6aef7;
 }
+.balance-widget {
+  margin: 20px 0;
+  text-align: center;
+}
+
+#balanceSlider {
+  width: 80%;
+  margin: 10px auto;
+  -webkit-appearance: none;
+  height: 10px;
+  background: linear-gradient(to right, #ff9a9e, #fad0c4, #fad0c4, #a18cd1);
+  border-radius: 5px;
+  outline: none;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+#balanceSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #4a4a4a;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#balanceSlider:disabled::-webkit-slider-thumb {
+  background: #6c757d;
+}
