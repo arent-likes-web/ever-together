@@ -1,8 +1,7 @@
-// Импорт необходимых функций из SDK Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
-// Конфигурация Firebase
+// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDIMvnTxfnpDr72fIIexWcO2Jl0_fqM7tw",
   authDomain: "ever-together.firebaseapp.com",
@@ -15,46 +14,25 @@ const firebaseConfig = {
 
 // Инициализация Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const auth = getAuth();
 
-// Работа с формами
+// Обработка формы входа
 const loginForm = document.getElementById('loginForm');
-const messageContainer = document.getElementById('messageContainer');
 const errorMessage = document.getElementById('errorMessage');
 
-// Разрешённые пользователи
-const allowedUsers = [
-  { email: "aretren@gmail.com" },
-  { email: "choisalery@gmail.com" }
-];
-
-function isUserAllowed(email) {
-  return allowedUsers.some(user => user.email === email);
-}
-
-// Обработка отправки формы для отправки ссылки
-loginForm.addEventListener('submit', async (e) => {
+loginForm.addEventListener('submit', (e) => {
   e.preventDefault();
+
   const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
 
-  if (!isUserAllowed(email)) {
-    errorMessage.textContent = "Этот email не разрешён для входа.";
-    return;
-  }
-
-  const actionCodeSettings = {
-    url: 'https://arent-likes-web.github.io/ever-together/main-page.html',
-    handleCodeInApp: true
-  };
-
-  try {
-    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
-    window.localStorage.setItem('emailForSignIn', email);
-    loginForm.style.display = 'none';
-    messageContainer.style.display = 'block';
-    errorMessage.textContent = '';
-  } catch (error) {
-    console.error("Ошибка при отправке письма:", error);
-    errorMessage.textContent = `Ошибка: ${error.message}`;
-  }
+  signInWithEmailAndPassword(auth, email, password)
+    .then(() => {
+      console.log("Авторизация успешна");
+      window.location.href = "main-page.html";
+    })
+    .catch((error) => {
+      console.error("Ошибка авторизации:", error);
+      errorMessage.textContent = "Неверный email или пароль.";
+    });
 });
