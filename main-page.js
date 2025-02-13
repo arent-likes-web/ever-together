@@ -74,22 +74,24 @@ function openModal(imgElement) {
   const modal = document.getElementById('imageModal');
   const modalImage = document.getElementById('modalImage');
   const imageInfo = document.getElementById('imageInfo');
+  const closeModal = document.getElementById('closeModal');
 
   modal.style.display = 'block';
   modalImage.src = imgElement.src;
   modalImage.dataset.id = imgElement.dataset.id;
   imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${imgElement.dataset.views}`;
+
+  // Обработчик закрытия окна при нажатии на крестик
+  closeModal.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
 }
 
-// Закрытие модального окна
-const closeModal = document.getElementById('closeModal');
-closeModal.addEventListener('click', () => {
-  document.getElementById('imageModal').style.display = 'none';
-});
-
+// Закрытие модального окна при клике вне изображения
 window.addEventListener('click', (event) => {
-  if (event.target === document.getElementById('imageModal')) {
-    document.getElementById('imageModal').style.display = 'none';
+  const modal = document.getElementById('imageModal');
+  if (event.target === modal) {
+    modal.style.display = 'none';
   }
 });
 
