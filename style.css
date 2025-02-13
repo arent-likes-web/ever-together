@@ -1,4 +1,4 @@
-/* Современная обновленная цветовая палитра */
+/* Современная обновленная цветовая палитра - белый, темно-синий и золотой */
 
 /* Global Styles */
 * {
@@ -9,8 +9,8 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background: linear-gradient(to right, #1E3A8A, #111827);
-  color: #E5E7EB;
+  background: linear-gradient(to right, #0a0f2c, #1c2541);
+  color: #f5f5f5;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -21,16 +21,16 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #F59E0B;
+  color: #ffd700;
 }
 
 .login-form {
-  background-color: rgba(30, 58, 138, 0.3);
+  background-color: rgba(10, 15, 44, 0.8);
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 215, 0, 0.5);
   max-width: 400px;
   width: 100%;
   margin-bottom: 20px;
@@ -39,7 +39,7 @@ h2 {
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #F59E0B;
+  color: #ffd700;
 }
 
 .form-group input {
@@ -54,14 +54,14 @@ h2 {
 
 .form-group input:focus {
   background-color: #fff;
-  box-shadow: 0 0 12px rgba(30, 58, 138, 0.8);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
 }
 
 .btn {
   width: 100%;
   padding: 12px;
-  background-color: #F59E0B;
-  color: #fff;
+  background-color: #ffd700;
+  color: #0a0f2c;
   border: none;
   border-radius: 15px;
   cursor: pointer;
@@ -70,7 +70,7 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #D97706;
+  background-color: #e6c200;
   transform: translateY(-3px);
 }
 
@@ -86,13 +86,13 @@ h2 {
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  background-color: #F59E0B;
-  color: #fff;
+  background-color: #ffd700;
+  color: #0a0f2c;
   transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #D97706;
+  background-color: #e6c200;
   transform: translateY(-3px);
 }
 
@@ -106,13 +106,13 @@ h2 {
 }
 
 .image-column {
-  background-color: rgba(30, 58, 138, 0.3);
+  background-color: rgba(10, 15, 44, 0.8);
   padding: 10px;
   border-radius: 12px;
   min-height: 400px;
   width: 32%;
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 215, 0, 0.5);
   backdrop-filter: blur(6px);
 }
 
@@ -122,12 +122,12 @@ h2 {
   cursor: pointer;
   transition: transform 0.3s;
   border-radius: 15px;
-  border: 2px solid rgba(255, 255, 255, 0.5);
+  border: 2px solid rgba(255, 215, 0, 0.5);
 }
 
 .thumbnail:hover {
   transform: scale(1.05);
-  border-color: #F59E0B;
+  border-color: #ffd700;
 }
 
 .modal {
@@ -151,8 +151,8 @@ h2 {
 }
 
 #deleteButton {
-  background-color: #F59E0B;
-  color: #fff;
+  background-color: #ffd700;
+  color: #0a0f2c;
   padding: 10px 20px;
   border: none;
   border-radius: 12px;
@@ -162,7 +162,7 @@ h2 {
 }
 
 #deleteButton:hover {
-  background-color: #D97706;
+  background-color: #e6c200;
 }
 
 .balance-widget {
