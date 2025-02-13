@@ -135,8 +135,21 @@ h2 {
     gap: 5px;
     width: 100%;
     overflow-x: auto;
-    justify-content: flex-start;
+    justify-content: space-between;
   }
+  
+  .image-column {
+    flex: 0 0 32%;
+    padding: 5px;
+    min-height: auto;
+  }
+  
+  .thumbnail {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+}
   
   .image-column {
     min-width: 32%;
