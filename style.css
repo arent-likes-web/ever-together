@@ -65,6 +65,7 @@ h2 {
 }
 
 .btn {
+  font-family: 'Taler', sans-serif;
   width: 100%;
   padding: 12px;
   background-color: #ffd700;
@@ -88,6 +89,7 @@ h2 {
 }
 
 .upload-buttons button {
+  font-family: 'Taler', sans-serif;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
@@ -158,6 +160,7 @@ h2 {
 }
 
 #deleteButton {
+  font-family: 'Taler', sans-serif;
   background-color: #ffd700;
   color: #0a0f2c;
   padding: 10px 20px;
