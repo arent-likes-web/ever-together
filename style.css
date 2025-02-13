@@ -129,10 +129,20 @@ h2 {
 
 @media (max-width: 768px) {
   .image-container {
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 5px;
     width: 100%;
+    overflow-x: auto;
+    justify-content: space-between;
   }
+  
+  .image-column {
+    width: 32%;
+    padding: 5px;
+    min-height: auto;
+  }
+}
   
   .image-column {
     width: 100%;
