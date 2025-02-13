@@ -125,7 +125,7 @@ h2 {
   min-height: 400px;
   width: 32%;
   overflow-y: auto;
-  border: 1px solid #f1c40f;
+  border: 1px solid #fffbe6;
   backdrop-filter: blur(6px);
 }
 
@@ -135,12 +135,12 @@ h2 {
   cursor: pointer;
   transition: transform 0.3s;
   border-radius: 15px;
-  border: 2px solid #f1c40f;
+  border: 2px solid #fcefc5;
 }
 
 .thumbnail:hover {
   transform: scale(1.05);
-  border-color: #d4ac0d;
+  border-color: #fcefc5;
 }
 
 .modal {
