@@ -1,4 +1,4 @@
-/* Современная цветовая палитра для проекта */
+/* Современная обновленная цветовая палитра */
 
 /* Global Styles */
 * {
@@ -9,8 +9,8 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background: linear-gradient(to right, #4b0082, #1a1a2e);
-  color: #e0e0e0;
+  background: linear-gradient(to right, #1E3A8A, #111827);
+  color: #E5E7EB;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -21,11 +21,11 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #ff6b6b;
+  color: #F59E0B;
 }
 
 .login-form {
-  background-color: rgba(75, 0, 130, 0.3);
+  background-color: rgba(30, 58, 138, 0.3);
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
@@ -39,7 +39,7 @@ h2 {
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #ff6b6b;
+  color: #F59E0B;
 }
 
 .form-group input {
@@ -54,13 +54,13 @@ h2 {
 
 .form-group input:focus {
   background-color: #fff;
-  box-shadow: 0 0 12px rgba(75, 0, 130, 0.8);
+  box-shadow: 0 0 12px rgba(30, 58, 138, 0.8);
 }
 
 .btn {
   width: 100%;
   padding: 12px;
-  background-color: #ff6b6b;
+  background-color: #F59E0B;
   color: #fff;
   border: none;
   border-radius: 15px;
@@ -70,7 +70,7 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #d43f3f;
+  background-color: #D97706;
   transform: translateY(-3px);
 }
 
@@ -86,13 +86,13 @@ h2 {
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  background-color: #ff6b6b;
+  background-color: #F59E0B;
   color: #fff;
   transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #d43f3f;
+  background-color: #D97706;
   transform: translateY(-3px);
 }
 
@@ -106,7 +106,7 @@ h2 {
 }
 
 .image-column {
-  background-color: rgba(75, 0, 130, 0.3);
+  background-color: rgba(30, 58, 138, 0.3);
   padding: 10px;
   border-radius: 12px;
   min-height: 400px;
@@ -127,7 +127,7 @@ h2 {
 
 .thumbnail:hover {
   transform: scale(1.05);
-  border-color: #ff6b6b;
+  border-color: #F59E0B;
 }
 
 .modal {
@@ -151,7 +151,7 @@ h2 {
 }
 
 #deleteButton {
-  background-color: #ff6b6b;
+  background-color: #F59E0B;
   color: #fff;
   padding: 10px 20px;
   border: none;
@@ -162,7 +162,7 @@ h2 {
 }
 
 #deleteButton:hover {
-  background-color: #d43f3f;
+  background-color: #D97706;
 }
 
 .balance-widget {
