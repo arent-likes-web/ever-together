@@ -164,7 +164,7 @@ function updateBackgroundGradient() {
   const balance = totalViews ? (leftViews - rightViews) / totalViews : 0;
   const gradientPosition = 50 + (balance * 50);
 
-  document.body.style.background = `linear-gradient(to right, #fffbe6 ${gradientPosition}%, #ffd700)`;
+  document.body.style.background = `linear-gradient(to right, #fffbe6 ${gradientPosition}%, #001524)`;
 }
 
 function getColumnViews(column) {
