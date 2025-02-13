@@ -66,6 +66,7 @@ h2 {
 }
 
 .btn {
+  color: #000000;
   font-family: 'Taler', sans-serif;
   width: 100%;
   padding: 12px;
@@ -90,6 +91,7 @@ h2 {
 }
 
 .upload-buttons button {
+  color: #000000;
   font-family: 'Taler', sans-serif;
   padding: 10px 20px;
   font-size: 16px;
@@ -116,7 +118,7 @@ h2 {
 }
 
 .image-column {
-  background-color: rgba(44, 62, 80, 0.75);
+  background-color: rgba(44, 62, 80, 0.75); rgba(44, 62, 80, 0.75);
   background-color: rgba(44, 62, 80, 0.8);
   padding: 10px;
   border-radius: 12px;
@@ -162,6 +164,7 @@ h2 {
 }
 
 #deleteButton {
+  color: #000000;
   font-family: 'Taler', sans-serif;
   background-color: #f1c40f;
   color: #2c3e50;
