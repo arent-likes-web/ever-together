@@ -84,7 +84,6 @@ function openModal(imgElement) {
   const column = imgElement.dataset.column;
   let newViews = parseInt(imgElement.dataset.views);
 
-  // Условие для обновления просмотров
   const shouldIncrementView =
     (column === 'left' && window.currentUser === 'aretren@gmail.com') ||
     (column === 'right' && window.currentUser === 'choisalery@gmail.com') ||
@@ -100,19 +99,56 @@ function openModal(imgElement) {
 
   imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${newViews}`;
 
-  // Обработчик закрытия окна
-  closeModal.addEventListener('click', () => {
+  closeModal.onclick = () => {
     modal.style.display = 'none';
-  });
+  };
 }
 
 // Закрытие модального окна при клике вне изображения
-window.addEventListener('click', (event) => {
+window.onclick = (event) => {
   const modal = document.getElementById('imageModal');
   if (event.target === modal) {
     modal.style.display = 'none';
   }
+};
+
+// Восстановление функциональности кнопки загрузки изображений
+const uploadButtons = document.querySelectorAll('.upload-buttons button');
+
+uploadButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const column = button.id.replace('upload', '').toLowerCase();
+    handleImageUpload(column);
+  });
 });
+
+function handleImageUpload(column) {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  
+  fileInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target.result;
+        const timestamp = new Date().toISOString();
+
+        const newImageRef = push(dbRef(database, 'images'));
+        set(newImageRef, {
+          url: imageUrl,
+          timestamp: timestamp,
+          views: 0,
+          column: column
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  fileInput.click();
+}
 
 // Перетекание цвета для градиента
 function updateBackgroundGradient() {
