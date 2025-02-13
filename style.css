@@ -145,10 +145,14 @@ h2 {
   }
   
   .thumbnail {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-  }
+  width: 100%;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform 0.3s;
+  border-radius: 15px;
+  border: 2px solid rgba(255, 182, 193, 0.5);
+  overflow: hidden;
+}
 }
   
   .image-column {
