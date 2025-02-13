@@ -74,7 +74,7 @@ function openModal(imgElement) {
   const modal = document.getElementById('imageModal');
   const modalImage = document.getElementById('modalImage');
   const imageInfo = document.getElementById('imageInfo');
-  const closeModal = document.getElementById('closeModal');
+  
 
   modal.style.display = 'block';
   modalImage.src = imgElement.src;
@@ -112,43 +112,42 @@ window.onclick = (event) => {
   }
 };
 
+// Глобальный input для загрузки файлов
+const fileInput = document.createElement('input');
+fileInput.type = 'file';
+fileInput.accept = 'image/*';
+document.body.appendChild(fileInput);
+
 // Восстановление функциональности кнопки загрузки изображений
 const uploadButtons = document.querySelectorAll('.upload-buttons button');
 
 uploadButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const column = button.id.replace('upload', '').toLowerCase();
-    handleImageUpload(column);
+    fileInput.dataset.column = column;
+    fileInput.click();
   });
 });
 
-function handleImageUpload(column) {
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = 'image/*';
-  
-  fileInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageUrl = e.target.result;
-        const timestamp = new Date().toISOString();
+fileInput.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imageUrl = e.target.result;
+      const timestamp = new Date().toISOString();
 
-        const newImageRef = push(dbRef(database, 'images'));
-        set(newImageRef, {
-          url: imageUrl,
-          timestamp: timestamp,
-          views: 0,
-          column: column
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  fileInput.click();
-}
+      const newImageRef = push(dbRef(database, 'images'));
+      set(newImageRef, {
+        url: imageUrl,
+        timestamp: timestamp,
+        views: 0,
+        column: fileInput.dataset.column
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+});
 
 // Перетекание цвета для градиента
 function updateBackgroundGradient() {
