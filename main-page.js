@@ -23,9 +23,9 @@ const auth = getAuth();
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("Пользователь авторизован:", user.email);
-    window.currentUser = user.email;  // Сохраняем email для проверки
+    window.currentUser = user.email;
     loadImagesFromFirebase();
-    updateBackgroundGradient(); // Инициализация градиента при старте
+    updateBackgroundGradient();
   } else {
     console.log("Пользователь не авторизован. Перенаправление на страницу входа.");
     window.location.href = "entry.html";
@@ -46,7 +46,7 @@ function loadImagesFromFirebase() {
         displayImage(data[key], key);
       });
 
-      updateBackgroundGradient(); // Обновление градиента после загрузки изображений
+      updateBackgroundGradient();
     }
   });
 }
@@ -69,45 +69,20 @@ function displayImage(imageData, imageId) {
   }
 }
 
-// Обработчики событий для кнопок загрузки
-const uploadLeftButton = document.getElementById('uploadLeft');
-const uploadCenterButton = document.getElementById('uploadCenter');
-const uploadRightButton = document.getElementById('uploadRight');
+// Открытие модального окна
+function openModal(imgElement) {
+  const modal = document.getElementById('imageModal');
+  const modalImage = document.getElementById('modalImage');
+  const imageInfo = document.getElementById('imageInfo');
 
-uploadLeftButton.addEventListener('click', () => handleImageUpload('left'));
-uploadCenterButton.addEventListener('click', () => handleImageUpload('center'));
-uploadRightButton.addEventListener('click', () => handleImageUpload('right'));
-
-function handleImageUpload(column) {
-  const fileInput = document.createElement('input');
-  fileInput.type = 'file';
-  fileInput.accept = 'image/*';
-
-  fileInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageUrl = e.target.result;
-        const timestamp = new Date().toISOString();
-
-        const newImageRef = push(dbRef(database, 'images'));
-        set(newImageRef, {
-          url: imageUrl,
-          timestamp: timestamp,
-          views: 0,
-          column: column
-        });
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  fileInput.click();
+  modal.style.display = 'block';
+  modalImage.src = imgElement.src;
+  modalImage.dataset.id = imgElement.dataset.id;
+  imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${imgElement.dataset.views}`;
 }
 
 // Закрытие модального окна
-const closeModal = document.querySelector('.close');
+const closeModal = document.getElementById('closeModal');
 closeModal.addEventListener('click', () => {
   document.getElementById('imageModal').style.display = 'none';
 });
@@ -126,7 +101,6 @@ function updateBackgroundGradient() {
 
   const totalViews = leftViews + centerViews + rightViews;
   const balance = totalViews ? (leftViews - rightViews) / totalViews : 0;
-
   const gradientPosition = 50 + (balance * 50);
 
   document.body.style.background = `linear-gradient(to right, #c084fc ${gradientPosition}%, #2c2c2c)`;
