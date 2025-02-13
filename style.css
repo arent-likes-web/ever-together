@@ -1,4 +1,4 @@
-/* Современная обновленная цветовая палитра - белый, черный и золотой */
+/* Современная обновленная цветовая палитра для галереи фото */
 
 @font-face {
   font-family: 'Taler';
@@ -16,8 +16,8 @@
 
 body {
   font-family: 'Taler', sans-serif;
-  background: linear-gradient(to right, #000000, #ffffff);
-  color: #000000;
+  background: linear-gradient(to right, #121212, #2c3e50);
+  color: #f5f5f5;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -28,16 +28,16 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #ffd700;
+  color: #f1c40f;
 }
 
 .login-form {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(44, 62, 80, 0.9);
   padding: 30px;
   border-radius: 15px;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
-  border: 1px solid #ffd700;
+  border: 1px solid #f1c40f;
   max-width: 400px;
   width: 100%;
   margin-bottom: 20px;
@@ -46,7 +46,7 @@ h2 {
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #ffd700;
+  color: #f1c40f;
 }
 
 .form-group input {
@@ -62,15 +62,15 @@ h2 {
 
 .form-group input:focus {
   background-color: #fff;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.8);
+  box-shadow: 0 0 12px rgba(241, 196, 15, 0.8);
 }
 
 .btn {
   font-family: 'Taler', sans-serif;
   width: 100%;
   padding: 12px;
-  background-color: #ffd700;
-  color: #000000;
+  background-color: #f1c40f;
+  color: #2c3e50;
   border: none;
   border-radius: 15px;
   cursor: pointer;
@@ -79,7 +79,7 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #e6c200;
+  background-color: #d4ac0d;
   transform: translateY(-3px);
 }
 
@@ -96,13 +96,13 @@ h2 {
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  background-color: #ffd700;
-  color: #000000;
+  background-color: #f1c40f;
+  color: #2c3e50;
   transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #e6c200;
+  background-color: #d4ac0d;
   transform: translateY(-3px);
 }
 
@@ -116,13 +116,14 @@ h2 {
 }
 
 .image-column {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(44, 62, 80, 0.75);
+  background-color: rgba(44, 62, 80, 0.8);
   padding: 10px;
   border-radius: 12px;
   min-height: 400px;
   width: 32%;
   overflow-y: auto;
-  border: 1px solid #ffd700;
+  border: 1px solid #f1c40f;
   backdrop-filter: blur(6px);
 }
 
@@ -132,12 +133,12 @@ h2 {
   cursor: pointer;
   transition: transform 0.3s;
   border-radius: 15px;
-  border: 2px solid #ffd700;
+  border: 2px solid #f1c40f;
 }
 
 .thumbnail:hover {
   transform: scale(1.05);
-  border-color: #e6c200;
+  border-color: #d4ac0d;
 }
 
 .modal {
@@ -162,8 +163,8 @@ h2 {
 
 #deleteButton {
   font-family: 'Taler', sans-serif;
-  background-color: #ffd700;
-  color: #000000;
+  background-color: #f1c40f;
+  color: #2c3e50;
   padding: 10px 20px;
   border: none;
   border-radius: 12px;
@@ -173,7 +174,7 @@ h2 {
 }
 
 #deleteButton:hover {
-  background-color: #e6c200;
+  background-color: #d4ac0d;
 }
 
 .balance-widget {
