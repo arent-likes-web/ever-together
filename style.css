@@ -1,4 +1,4 @@
-/* Обновленный стиль для всего проекта */
+/* Современная цветовая палитра для проекта */
 
 /* Global Styles */
 * {
@@ -9,8 +9,8 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background: linear-gradient(to right, #c084fc, #3b3b3b);
-  color: #f0f0f0;
+  background: linear-gradient(to right, #4b0082, #1a1a2e);
+  color: #e0e0e0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -21,14 +21,14 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #ff9a9e;
+  color: #ff6b6b;
 }
 
 .login-form {
-  background-color: rgba(255, 182, 193, 0.2);
+  background-color: rgba(75, 0, 130, 0.3);
   padding: 30px;
   border-radius: 15px;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   max-width: 400px;
@@ -36,14 +36,10 @@ h2 {
   margin-bottom: 20px;
 }
 
-.form-group {
-  margin-bottom: 20px;
-}
-
 .form-group label {
   display: block;
   margin-bottom: 5px;
-  color: #ffb6c1;
+  color: #ff6b6b;
 }
 
 .form-group input {
@@ -58,14 +54,14 @@ h2 {
 
 .form-group input:focus {
   background-color: #fff;
-  box-shadow: 0 0 12px rgba(255, 182, 193, 0.9);
+  box-shadow: 0 0 12px rgba(75, 0, 130, 0.8);
 }
 
 .btn {
   width: 100%;
   padding: 12px;
-  background-color: #ffa7c4;
-  color: #4a4a4a;
+  background-color: #ff6b6b;
+  color: #fff;
   border: none;
   border-radius: 15px;
   cursor: pointer;
@@ -74,15 +70,8 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #ff8fa3;
+  background-color: #d43f3f;
   transform: translateY(-3px);
-}
-
-.error {
-  color: #ff6b6b;
-  margin-top: 10px;
-  text-align: center;
-  font-weight: bold;
 }
 
 .upload-buttons {
@@ -97,13 +86,13 @@ h2 {
   cursor: pointer;
   border: none;
   border-radius: 12px;
-  background-color: #ffa7c4;
-  color: #4a4a4a;
+  background-color: #ff6b6b;
+  color: #fff;
   transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #ff8fa3;
+  background-color: #d43f3f;
   transform: translateY(-3px);
 }
 
@@ -117,7 +106,7 @@ h2 {
 }
 
 .image-column {
-  background-color: rgba(192, 132, 252, 0.15);
+  background-color: rgba(75, 0, 130, 0.3);
   padding: 10px;
   border-radius: 12px;
   min-height: 400px;
@@ -127,75 +116,18 @@ h2 {
   backdrop-filter: blur(6px);
 }
 
-@media (max-width: 768px) {
-  .image-container {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    gap: 5px;
-    width: 100%;
-    overflow-x: auto;
-    justify-content: space-between;
-  }
-  
-  .image-column {
-    flex: 0 0 32%;
-    padding: 5px;
-    min-height: auto;
-  }
-  
-  .thumbnail {
-  width: 100%;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: transform 0.3s;
-  border-radius: 15px;
-  border: 2px solid rgba(255, 182, 193, 0.5);
-  overflow: hidden;
-  object-fit: cover;
-}
-}
-  
-  .image-column {
-    min-width: 32%;
-    flex: 0 0 auto;
-    padding: 5px;
-    min-height: auto;
-  }
-  
-  .thumbnail {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-  }
-}
-  
-  .image-column {
-    width: 32%;
-    padding: 5px;
-    min-height: auto;
-  }
-}
-  
-  .image-column {
-    width: 100%;
-    padding: 8px;
-    min-height: auto;
-  }
-}
-
 .thumbnail {
   width: 100%;
   margin-bottom: 8px;
   cursor: pointer;
   transition: transform 0.3s;
-  border-radius: 10px;
-  border: 2px solid rgba(255, 182, 193, 0.5);
+  border-radius: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .thumbnail:hover {
   transform: scale(1.05);
-  border-color: #ff9a9e;
+  border-color: #ff6b6b;
 }
 
 .modal {
@@ -218,15 +150,9 @@ h2 {
   border-radius: 15px;
 }
 
-#imageInfo {
-  color: white;
-  margin-top: 10px;
-  font-size: 18px;
-}
-
 #deleteButton {
-  background-color: #ffa7c4;
-  color: #4a4a4a;
+  background-color: #ff6b6b;
+  color: #fff;
   padding: 10px 20px;
   border: none;
   border-radius: 12px;
@@ -236,7 +162,7 @@ h2 {
 }
 
 #deleteButton:hover {
-  background-color: #ff8fa3;
+  background-color: #d43f3f;
 }
 
 .balance-widget {
