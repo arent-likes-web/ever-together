@@ -74,7 +74,7 @@ function openModal(imgElement) {
   const modal = document.getElementById('imageModal');
   const modalImage = document.getElementById('modalImage');
   const imageInfo = document.getElementById('imageInfo');
-  
+  const deleteButton = document.getElementById('deleteButton');
 
   modal.style.display = 'block';
   modalImage.src = imgElement.src;
@@ -99,8 +99,12 @@ function openModal(imgElement) {
 
   imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${newViews}`;
 
-  closeModal.onclick = () => {
-    modal.style.display = 'none';
+  // Кнопка удаления изображения
+  deleteButton.onclick = () => {
+    remove(dbRef(database, `images/${imageId}`)).then(() => {
+      modal.style.display = 'none';
+      loadImagesFromFirebase();
+    });
   };
 }
 
