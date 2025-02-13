@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Arial', sans-serif;
-  background: linear-gradient(to right, #c084fc, #3b3b3b); /* Мягкий фиолетово-серый градиент */
+  background: linear-gradient(to right, #c084fc, #3b3b3b);
   color: #f0f0f0;
   min-height: 100vh;
   display: flex;
@@ -21,7 +21,7 @@ body {
 
 h2 {
   margin-bottom: 20px;
-  color: #ff9a9e; /* Яркий акцент */
+  color: #ff9a9e;
 }
 
 .login-form {
@@ -64,7 +64,7 @@ h2 {
 .btn {
   width: 100%;
   padding: 12px;
-  background-color: #ffa7c4; /* Пастельно-розовый */
+  background-color: #ffa7c4;
   color: #4a4a4a;
   border: none;
   border-radius: 15px;
@@ -74,7 +74,7 @@ h2 {
 }
 
 .btn:hover {
-  background-color: #ff8fa3; /* Нежно-розовый */
+  background-color: #ff8fa3;
   transform: translateY(-3px);
 }
 
@@ -110,26 +110,40 @@ h2 {
 .image-container {
   display: flex;
   flex-direction: row;
-  gap: 20px;
-  width: 90%;
+  gap: 10px;
+  width: 100%;
   max-width: 1200px;
   justify-content: center;
 }
 
 .image-column {
   background-color: rgba(192, 132, 252, 0.15);
-  padding: 15px;
+  padding: 10px;
   border-radius: 12px;
   min-height: 400px;
-  width: 30%;
+  width: 32%;
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(6px);
 }
 
+@media (max-width: 768px) {
+  .image-container {
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+  
+  .image-column {
+    width: 100%;
+    padding: 8px;
+    min-height: auto;
+  }
+}
+
 .thumbnail {
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   cursor: pointer;
   transition: transform 0.3s;
   border-radius: 10px;
@@ -161,16 +175,6 @@ h2 {
   border-radius: 15px;
 }
 
-.close {
-  position: absolute;
-  top: 20px;
-  right: 35px;
-  color: white;
-  font-size: 40px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
 #imageInfo {
   color: white;
   margin-top: 10px;
@@ -198,36 +202,3 @@ h2 {
   width: 100%;
   padding: 0 10px;
 }
-
-#balanceSlider {
-  width: 100%;
-  -webkit-appearance: none;
-  height: 10px;
-  background: linear-gradient(to right, #ff9a9e, #fad0c4, #c084fc);
-  border-radius: 5px;
-  outline: none;
-  opacity: 0.9;
-  transition: opacity 0.2s;
-}
-
-#balanceSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 30px;
-  height: 30px;
-  background: none;
-  background-size: contain; /* Подгонка изображения по размеру */
-  background-repeat: no-repeat;
-  background-position: center;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-#balanceSlider::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-}
-
-#balanceSlider:disabled::-webkit-slider-thumb {
-  background: none;
-} 
