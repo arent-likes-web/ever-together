@@ -69,7 +69,7 @@ function displayImage(imageData, imageId) {
   }
 }
 
-// Открытие модального окна
+// Открытие модального окна с обновлением счетчика просмотров
 function openModal(imgElement) {
   const modal = document.getElementById('imageModal');
   const modalImage = document.getElementById('modalImage');
@@ -79,9 +79,28 @@ function openModal(imgElement) {
   modal.style.display = 'block';
   modalImage.src = imgElement.src;
   modalImage.dataset.id = imgElement.dataset.id;
-  imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${imgElement.dataset.views}`;
 
-  // Обработчик закрытия окна при нажатии на крестик
+  const imageId = imgElement.dataset.id;
+  const column = imgElement.dataset.column;
+  let newViews = parseInt(imgElement.dataset.views);
+
+  // Условие для обновления просмотров
+  const shouldIncrementView =
+    (column === 'left' && window.currentUser === 'aretren@gmail.com') ||
+    (column === 'right' && window.currentUser === 'choisalery@gmail.com') ||
+    (column === 'center' && (window.currentUser === 'aretren@gmail.com' || window.currentUser === 'choisalery@gmail.com'));
+
+  if (shouldIncrementView) {
+    newViews += 1;
+    imgElement.dataset.views = newViews;
+
+    const imageRef = dbRef(database, `images/${imageId}`);
+    update(imageRef, { views: newViews });
+  }
+
+  imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${newViews}`;
+
+  // Обработчик закрытия окна
   closeModal.addEventListener('click', () => {
     modal.style.display = 'none';
   });
