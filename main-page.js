@@ -41,11 +41,9 @@ function loadImagesFromFirebase() {
       document.getElementById('leftColumn').innerHTML = '';
       document.getElementById('centerColumn').innerHTML = '';
       document.getElementById('rightColumn').innerHTML = '';
-
       Object.keys(data).forEach((key) => {
         displayImage(data[key], key);
       });
-
       updateBackgroundGradient();
     }
   });
@@ -60,9 +58,7 @@ function displayImage(imageData, imageId) {
   img.dataset.views = imageData.views;
   img.dataset.id = imageId;
   img.dataset.column = imageData.column;
-
   img.addEventListener('click', () => openModal(img));
-
   const targetColumn = document.getElementById(`${imageData.column}Column`);
   if (targetColumn) {
     targetColumn.prepend(img);
@@ -75,31 +71,23 @@ function openModal(imgElement) {
   const modalImage = document.getElementById('modalImage');
   const imageInfo = document.getElementById('imageInfo');
   const deleteButton = document.getElementById('deleteButton');
-
   modal.style.display = 'block';
   modalImage.src = imgElement.src;
   modalImage.dataset.id = imgElement.dataset.id;
-
   const imageId = imgElement.dataset.id;
   const column = imgElement.dataset.column;
   let newViews = parseInt(imgElement.dataset.views);
-
   const shouldIncrementView =
     (column === 'left' && window.currentUser === 'aretren@gmail.com') ||
     (column === 'right' && window.currentUser === 'choisalery@gmail.com') ||
     (column === 'center' && (window.currentUser === 'aretren@gmail.com' || window.currentUser === 'choisalery@gmail.com'));
-
   if (shouldIncrementView) {
     newViews += 1;
     imgElement.dataset.views = newViews;
-
     const imageRef = dbRef(database, `images/${imageId}`);
     update(imageRef, { views: newViews });
   }
-
   imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${newViews}`;
-
-  // Кнопка удаления изображения
   deleteButton.onclick = () => {
     remove(dbRef(database, `images/${imageId}`)).then(() => {
       modal.style.display = 'none';
@@ -108,7 +96,6 @@ function openModal(imgElement) {
   };
 }
 
-// Закрытие модального окна при клике вне изображения
 window.onclick = (event) => {
   const modal = document.getElementById('imageModal');
   if (event.target === modal) {
@@ -116,16 +103,13 @@ window.onclick = (event) => {
   }
 };
 
-// Глобальный input для загрузки файлов
 const fileInput = document.createElement('input');
 fileInput.type = 'file';
 fileInput.accept = 'image/*';
 fileInput.style.display = 'none';
 document.body.appendChild(fileInput);
 
-// Восстановление функциональности кнопки загрузки изображений
 const uploadButtons = document.querySelectorAll('.upload-buttons button');
-
 uploadButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const column = button.id.replace('upload', '').toLowerCase();
@@ -137,33 +121,34 @@ uploadButtons.forEach((button) => {
 fileInput.addEventListener('change', (event) => {
   const file = event.target.files[0];
   if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imageUrl = e.target.result;
-      const timestamp = new Date().toISOString();
-
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "ever_together_upload");
+    fetch("https://api.cloudinary.com/v1_1/dozbf3jis/image/upload", {
+      method: "POST",
+      body: formData
+    })
+    .then((response) => response.json())
+    .then((data) => {
       const newImageRef = push(dbRef(database, 'images'));
       set(newImageRef, {
-        url: imageUrl,
-        timestamp: timestamp,
+        url: data.secure_url,
+        timestamp: new Date().toISOString(),
         views: 0,
         column: fileInput.dataset.column
       });
-    };
-    reader.readAsDataURL(file);
+    })
+    .catch((error) => console.error("Ошибка при загрузке изображения:", error));
   }
 });
 
-// Перетекание цвета для градиента
 function updateBackgroundGradient() {
   const leftViews = getColumnViews('left');
   const centerViews = getColumnViews('center');
   const rightViews = getColumnViews('right');
-
   const totalViews = leftViews + centerViews + rightViews;
   const balance = totalViews ? (leftViews - rightViews) / totalViews : 0;
   const gradientPosition = 50 + (balance * 50);
-
   document.body.style.background = `linear-gradient(to right, #121212 ${gradientPosition}%, #2c3e50)`;
 }
 
