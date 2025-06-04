@@ -16,25 +16,12 @@
     <button id="uploadLeft">HIM PEACH</button>
     <button id="uploadCenter">OUR DREAM</button>
     <button id="uploadRight">HER CAT</button>
-    <input type="file" id="fileInput" style="display: none;" accept="image/*">
-  </div>
+      </div>
 
   <div class="image-container">
-    <div id="leftColumn" class="image-column">
-        <div class="skeleton-loader"></div>
-        <div class="skeleton-loader"></div>
-        <div class="skeleton-loader"></div>
-    </div>
-    <div id="centerColumn" class="image-column">
-        <div class="skeleton-loader"></div>
-        <div class="skeleton-loader"></div>
-        <div class="skeleton-loader"></div>
-    </div>
-    <div id="rightColumn" class="image-column">
-        <div class="skeleton-loader"></div>
-        <div class="skeleton-loader"></div>
-        <div class="skeleton-loader"></div>
-    </div>
+    <div id="leftColumn" class="image-column"></div>
+    <div id="centerColumn" class="image-column"></div>
+    <div id="rightColumn" class="image-column"></div>
   </div>
 
   <div id="imageModal" class="modal" style="display: none;">
@@ -51,7 +38,8 @@
             <a href="#" data-action="delete">Удалить изображение</a>
         </div>
     </div>
-    </div>
+    <span class="close-modal" aria-label="Закрыть">&times;</span>
+  </div>
 
   <script type="module" src="main-page.js"></script>
 </body>
