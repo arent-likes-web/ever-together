@@ -1,7 +1,7 @@
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Ошибка здесь, getAuth вместо getAuth
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Исправлено
 
 // Firebase Config
 const firebaseConfig = {
@@ -23,7 +23,8 @@ const auth = getAuth();
 const imageModalGlobalRef = document.getElementById('imageModal');
 const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
 const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
-// const closeModalButton = document.querySelector('.close-modal'); // Эту строку удаляем, т.к. крестика нет
+const modalImageElement = document.getElementById('modalImage'); // Новая ссылка на изображение в модальном окне
+const modalActionsContainer = document.querySelector('.modal-actions-container'); // Новая ссылка на контейнер кнопок
 
 // Проверка авторизации при загрузке страницы
 onAuthStateChanged(auth, (user) => {
@@ -78,10 +79,13 @@ function displayImage(imageData, imageId) {
     img.classList.add('loaded'); // Добавляем класс 'loaded' после загрузки изображения
   };
 
-  // Перехватываем клик на imageWrapper, а не на img,
-  // чтобы событие открытия модального окна срабатывало только при клике на обертку
-  // и не конфликтовало с логикой закрытия модального окна.
-  imageWrapper.addEventListener('click', () => openModal(img));
+  imageWrapper.addEventListener('click', (event) => { // Добавляем event параметр
+    // Останавливаем всплытие, чтобы клик по миниатюре не вызывал закрытие модального окна, если оно открыто
+    // Это важно, если вдруг каким-то образом клик проходит через модальное окно.
+    // Однако, основной фикс будет в модальном окне.
+    event.stopPropagation(); 
+    openModal(img);
+  });
 
   imageWrapper.appendChild(img); // Добавляем изображение внутрь обертки
   targetColumn.prepend(imageWrapper); // Добавляем обертку в колонку
@@ -118,10 +122,6 @@ function openModal(imgElement) {
 
   if (shouldIncrementView) {
     currentViews += 1;
-    // Обновляем dataset на элементе обертки, чтобы не терять данные при перерисовке
-    // Изображение внутри модального окна не является тем же элементом, что в колонке.
-    // Поэтому нужно обновить views на оригинальном элементе в колонке, если есть доступ,
-    // но Firebase сама обновит данные и перерисует. Здесь главное - отправить в базу.
     const imageRefDB = dbRef(database, `images/${imageId}`);
     update(imageRefDB, { views: currentViews });
   }
@@ -129,13 +129,13 @@ function openModal(imgElement) {
   imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️️ Просмотров: ${currentViews}`;
 
   moreOptionsBtn.onclick = function(event) {
-    event.stopPropagation();
+    event.stopPropagation(); // Останавливаем всплытие, чтобы клик по кнопке не закрывал модальное окно
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
   };
 
   dropdown.onclick = function(event) {
     event.preventDefault();
-    event.stopPropagation();
+    event.stopPropagation(); // Останавливаем всплытие, чтобы клик по пункту меню не закрывал модальное окно
 
     const targetActionElement = event.target.closest('a[data-action]');
     if (!targetActionElement) return;
@@ -170,6 +170,13 @@ function openModal(imgElement) {
 
     dropdown.style.display = 'none';
   };
+
+  // !!! Важное добавление !!!
+  // Останавливаем всплытие события клика от элементов внутри модального окна,
+  // чтобы они не передавали клик на фон модального окна, который должен его закрывать.
+  modalImage.addEventListener('click', (event) => event.stopPropagation());
+  modalActionsContainer.addEventListener('click', (event) => event.stopPropagation());
+  imageInfo.addEventListener('click', (event) => event.stopPropagation());
 }
 
 function handleCloseInteractions(event) {
@@ -193,6 +200,12 @@ function handleCloseInteractions(event) {
     document.getElementById('modalImage').dataset.id = '';
     document.getElementById('imageInfo').innerHTML = '';
   }
+  // Дополнительная проверка: если клик был на модальном окне, и оно должно быть закрыто,
+  // то не допускаем дальнейшую обработку этого события (например, для открытия другого фото)
+  // Это критично.
+  if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'none' && event.target === imageModalGlobalRef) {
+      event.stopPropagation();
+  }
 }
 
 window.addEventListener('click', handleCloseInteractions);
@@ -209,7 +222,8 @@ document.body.appendChild(fileInput);
 
 const uploadButtons = document.querySelectorAll('.upload-buttons button');
 uploadButtons.forEach((button) => {
-  button.addEventListener('click', () => {
+  button.addEventListener('click', (event) => { // Добавляем event параметр
+    event.stopPropagation(); // Останавливаем всплытие, чтобы клик по кнопке не взаимодействовал с модальным окном
     const column = button.id.replace('upload', '').toLowerCase();
     fileInput.dataset.column = column;
     fileInput.click();
