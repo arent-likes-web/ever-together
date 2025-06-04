@@ -88,7 +88,7 @@ h2 {
   margin: 20px 0;
   display: flex;
   gap: 10px;
-  flex-wrap: wrap; /* Добавлено для переноса кнопок на мобильных */
+  /* flex-wrap: wrap; <-- Убираем, т.к. на десктопе кнопки должны быть в одну линию */
   justify-content: center;
 }
 
@@ -103,8 +103,8 @@ h2 {
   background-color: #f1c40f;
   color: #2c3e50;
   transition: background 0.3s ease, transform 0.2s;
-  flex-grow: 1; /* Кнопки будут расширяться */
-  min-width: 120px; /* Минимальная ширина для кнопок */
+  /* flex-grow: 1; <-- Убираем, чтобы кнопки не расширялись до краев, а сохраняли свои размеры */
+  /* min-width: 120px; <-- Убираем, т.к. для десктопа лучше естественная ширина */
 }
 
 .upload-buttons button:hover {
@@ -114,7 +114,7 @@ h2 {
 
 .image-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: row; /* На десктопе колонки остаются горизонтальными */
   gap: 10px; /* Расстояние между колонками */
   width: 100%;
   max-width: 1200px;
@@ -130,7 +130,6 @@ h2 {
   overflow-y: auto;
   border: 1px solid #fffbe6;
   backdrop-filter: blur(6px);
-  /* Добавим display: flex и flex-direction: column для правильного расположения изображений */
   display: flex;
   flex-direction: column;
   align-items: center; /* Центрируем изображения внутри колонки */
@@ -140,7 +139,6 @@ h2 {
 .image-wrapper {
   position: relative;
   width: 100%;
-  /* padding-bottom: 75%; <-- УДАЛЯЕМ ЭТО СВОЙСТВО, чтобы высота регулировалась контентом */
   background-color: #3d5166; /* Цвет фона для скелета */
   border-radius: 15px;
   margin-bottom: 8px;
@@ -239,22 +237,9 @@ h2 {
   font-size: 1em;
 }
 
+/* Убираем кнопку закрытия "крестик" */
 .close-modal {
-  position: absolute;
-  top: 15px;
-  right: 35px;
-  color: #f1c40f;
-  font-size: 40px;
-  font-weight: bold;
-  transition: 0.3s;
-  cursor: pointer;
-}
-
-.close-modal:hover,
-.close-modal:focus {
-  color: #d4ac0d;
-  text-decoration: none;
-  cursor: pointer;
+  display: none; /* Полностью скрываем крестик */
 }
 
 
@@ -336,43 +321,46 @@ h2 {
 /* --- Медиазапросы для адаптивности --- */
 @media (max-width: 768px) {
   body {
-    padding: 10px; /* Уменьшаем общий padding на мобильных */
+    padding: 10px;
   }
 
   .upload-buttons {
-    flex-direction: column; /* Кнопки будут располагаться вертикально */
-    gap: 8px; /* Немного уменьшаем расстояние между кнопками */
-    width: 100%; /* Занимают всю доступную ширину */
-    max-width: 300px; /* Ограничиваем ширину для лучшего вида */
+    flex-direction: column; /* Кнопки будут располагаться вертикально только на мобильных */
+    gap: 8px;
+    width: 100%;
+    max-width: 300px;
   }
 
   .upload-buttons button {
     font-size: 14px;
     padding: 8px 15px;
+    flex-grow: 1; /* Возвращаем flex-grow для кнопок на мобильных */
+    min-width: unset; /* Сбрасываем min-width, если было установлено */
   }
 
   .image-container {
-    flex-direction: column; /* Колонки располагаются одна под другой */
-    gap: 15px; /* Увеличиваем расстояние между колонками, когда они вертикальны */
+    flex-direction: column; /* Колонки располагаются одна под другой только на мобильных */
+    gap: 15px;
   }
 
   .image-column {
     width: 95%; /* Каждая колонка занимает почти всю ширину */
-    max-width: none; /* Убираем ограничение max-width */
-    margin: 0 auto; /* Центрируем колонки */
-    min-height: 250px; /* Уменьшаем минимальную высоту для мобильных */
+    max-width: none;
+    margin: 0 auto;
+    min-height: 250px;
   }
 
   .modal-content {
-    max-width: 95%; /* Увеличиваем размер модального окна на мобильных */
+    max-width: 95%;
     max-height: 90%;
   }
 
-  .close-modal {
+  /* Крестик уже скрыт глобально, эти стили не нужны */
+  /* .close-modal {
     top: 5px;
     right: 15px;
     font-size: 30px;
-  }
+  } */
 
   .modal-actions-container {
     top: 5px;
