@@ -1,3 +1,5 @@
+// main-page.js (Should be this version)
+
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
@@ -25,7 +27,7 @@ const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
 const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
 const modalImageElement = document.getElementById('modalImage');
 const modalActionsContainer = document.querySelector('.modal-actions-container');
-const imageContainerGlobalRef = document.querySelector('.image-container'); // <-- Эта ссылка была добавлена, она полезна
+const imageContainerGlobalRef = document.querySelector('.image-container');
 
 // Проверка авторизации при загрузке страницы
 onAuthStateChanged(auth, (user) => {
@@ -49,7 +51,6 @@ function loadImagesFromFirebase() {
     document.getElementById('centerColumn').innerHTML = '';
     document.getElementById('rightColumn').innerHTML = '';
     if (data) {
-      // Сортировка по timestamp для порядка (добавлена ранее)
       const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
       imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
@@ -74,16 +75,15 @@ function displayImage(imageData, imageId) {
   imageWrapper.dataset.column = imageData.column;
 
   const img = document.createElement('img');
-  img.src = imageData.url; // <-- Здесь мы просто используем исходный URL
+  img.src = imageData.url;
   img.classList.add('thumbnail');
-  img.alt = 'Gallery Image'; // Добавляем alt текст
+  img.alt = 'Gallery Image';
 
-  img.onload = () => { // <-- Этот onload остался
+  img.onload = () => {
     img.classList.add('loaded');
   };
 
   imageWrapper.addEventListener('click', (event) => {
-    // event.stopPropagation(); // <-- Этот stopPropagation закомментировал, но он не был причиной "ничего не грузит"
     openModal(img);
   });
 
@@ -101,13 +101,11 @@ function openModal(imgElement) {
 
   modal.style.display = 'block';
   dropdown.style.display = 'none';
-  modalImage.src = imgElement.src; // <-- Используем src прямо из миниатюры
+  modalImage.src = imgElement.src;
   modalImage.dataset.id = imgElement.dataset.id;
 
-  // --- Убираем информацию о просмотрах и загрузке ---
-  imageInfo.innerHTML = ''; // Очищаем содержимое
+  imageInfo.innerHTML = ''; // Clear content for "Просмотров" and "Загружено"
 
-  // Логика увеличения просмотров (оставляем, если нужна для статистики)
   const imageId = imgElement.dataset.id;
   const column = imgElement.dataset.column;
   let currentViews = parseInt(imgElement.dataset.views) || 0;
@@ -133,9 +131,7 @@ function openModal(imgElement) {
         wrapperElement.dataset.views = currentViews;
     }
   }
-  // --- Конец секции по удалению информации ---
 
-  // Блокируем клики на элементах под модальным окном
   if (imageContainerGlobalRef) {
     imageContainerGlobalRef.style.pointerEvents = 'none';
   }
@@ -175,13 +171,11 @@ function openModal(imgElement) {
     dropdown.style.display = 'none';
   };
 
-  // Останавливаем всплытие события клика от элементов внутри модального окна
   modalImageElement.onclick = (event) => event.stopPropagation();
   modalActionsContainer.onclick = (event) => event.stopPropagation();
   imageInfo.onclick = (event) => event.stopPropagation();
 }
 
-// Новая функция для закрытия модального окна и сброса pointer-events
 function closeModal() {
   imageModalGlobalRef.style.display = 'none';
   if (optionsDropdownGlobalRef) {
@@ -191,15 +185,12 @@ function closeModal() {
   document.getElementById('modalImage').dataset.id = '';
   document.getElementById('imageInfo').innerHTML = '';
 
-  // Сбрасываем pointer-events, чтобы клики снова работали
   if (imageContainerGlobalRef) {
     imageContainerGlobalRef.style.pointerEvents = 'auto';
   }
 }
 
-// Обработчик закрытия модального окна при клике на фон (для мыши)
 function handleCloseInteractions(event) {
-  // Закрытие дропдауна, если клик вне его и кнопки
   if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
     if (moreOptionsButtonGlobalRef &&
         !moreOptionsButtonGlobalRef.contains(event.target) &&
@@ -208,29 +199,23 @@ function handleCloseInteractions(event) {
     }
   }
 
-  // Закрытие модального окна при клике на подложку (пустое место)
   if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'block' && event.target === imageModalGlobalRef) {
     closeModal();
   }
-  // Дополнительная остановка всплытия (для мыши)
   if (imageModalGlobalRef && event.target === imageModalGlobalRef) {
     event.stopPropagation();
   }
 }
 
-// Добавляем обработчик для touchend на сам фон модального окна (для мобильных)
 imageModalGlobalRef.addEventListener('touchend', (event) => {
-  // Убеждаемся, что касание закончилось на самом фоне модального окна
   if (event.target === imageModalGlobalRef) {
     closeModal();
   }
-  event.stopPropagation(); // Важно остановить всплытие и для touch-событий
+  event.stopPropagation();
 });
 
 window.addEventListener('click', handleCloseInteractions);
-// Глобальный touchend обработчик убран, т.к. есть на imageModalGlobalRef
 
-// ----- НАЧАЛО ИЗМЕНЕНИЙ ДЛЯ ПАКЕТНОЙ ЗАГРУЗКИ -----
 const fileInput = document.createElement('input');
 fileInput.type = 'file';
 fileInput.accept = 'image/*';
@@ -306,8 +291,6 @@ fileInput.addEventListener('change', async (event) => {
     console.log("Пакетная загрузка завершена (или предприняты все попытки).");
   }
 });
-// ----- КОНЕЦ ИЗМЕНЕНИЙ ДЛЯ ПАКЕТНОЙ ЗАГРУЗКИ -----
-
 
 function updateBackgroundGradient() {
   const leftViews = getColumnViews('left');
