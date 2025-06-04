@@ -25,7 +25,7 @@ const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
 const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
 const modalImageElement = document.getElementById('modalImage');
 const modalActionsContainer = document.querySelector('.modal-actions-container');
-const imageContainerGlobalRef = document.querySelector('.image-container');
+const imageContainerGlobalRef = document.querySelector('.image-container'); // <-- Эта ссылка была добавлена, она полезна
 
 // Проверка авторизации при загрузке страницы
 onAuthStateChanged(auth, (user) => {
@@ -40,24 +40,6 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// Инициализация Intersection Observer для ленивой загрузки
-const imageObserver = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const img = entry.target;
-      // Восстанавливаем src из data-src для начала загрузки
-      // Проверяем, что img.dataset.src существует перед присвоением
-      if (img.dataset.src) {
-        img.src = img.dataset.src;
-      }
-      img.classList.add('loaded'); // Добавляем класс loaded после начала загрузки
-      observer.unobserve(img); // Перестаем наблюдать за изображением после его загрузки
-    }
-  });
-}, {
-  rootMargin: '100px 0px' // Загружаем изображения, когда они находятся в 100px от видимой области
-});
-
 // Загрузка изображений из Firebase
 function loadImagesFromFirebase() {
   const imagesRef = dbRef(database, 'images');
@@ -67,9 +49,9 @@ function loadImagesFromFirebase() {
     document.getElementById('centerColumn').innerHTML = '';
     document.getElementById('rightColumn').innerHTML = '';
     if (data) {
-      // Преобразуем объект в массив и сортируем по timestamp для вывода в правильном порядке
+      // Сортировка по timestamp для порядка (добавлена ранее)
       const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-      imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Сортируем по убыванию даты
+      imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
       imageArray.forEach((imgData) => {
         displayImage(imgData, imgData.id);
@@ -92,33 +74,21 @@ function displayImage(imageData, imageId) {
   imageWrapper.dataset.column = imageData.column;
 
   const img = document.createElement('img');
+  img.src = imageData.url; // <-- Здесь мы просто используем исходный URL
   img.classList.add('thumbnail');
-  img.alt = 'Gallery Image'; // Добавляем alt текст для доступности
+  img.alt = 'Gallery Image'; // Добавляем alt текст
 
-  // --- ЛЕНИВАЯ ЗАГРУЗКА И ОПТИМИЗАЦИЯ CLOUDINARY ---
-  // Используем data-src для ленивой загрузки и src для placeholder'а
-  // Применяем трансформации Cloudinary для оптимизации:
-  // f_auto: автоматический формат (webp, avif и т.д.)
-  // q_auto: автоматическое качество
-  // w_auto: автоматическая ширина (лучше использовать конкретные ширины, но для примера можно auto)
-  // dpr_auto: автоматическое определение плотности пикселей устройства
-  const optimizedUrl = imageData.url.replace('/upload/', '/upload/f_auto,q_auto,w_400,dpr_auto,c_fill/'); // w_400 как пример для миниатюр
-  img.dataset.src = optimizedUrl; // Основной URL для загрузки
-  img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1 1"%3E%3C/svg%3E'; // Прозрачный placeholder
-  // img.src = 'path/to/small-placeholder.png'; // Можно использовать маленький реальный placeholder
-
-  // img.onload теперь не нужен, так как Intersection Observer управляет загрузкой
-  // img.onload = () => { img.classList.add('loaded'); };
+  img.onload = () => { // <-- Этот onload остался
+    img.classList.add('loaded');
+  };
 
   imageWrapper.addEventListener('click', (event) => {
+    // event.stopPropagation(); // <-- Этот stopPropagation закомментировал, но он не был причиной "ничего не грузит"
     openModal(img);
   });
 
   imageWrapper.appendChild(img);
   targetColumn.prepend(imageWrapper);
-
-  // Начинаем наблюдать за изображением для ленивой загрузки
-  imageObserver.observe(img);
 }
 
 // Открытие модального окна
@@ -131,20 +101,16 @@ function openModal(imgElement) {
 
   modal.style.display = 'block';
   dropdown.style.display = 'none';
-  // Для модального окна используем более крупное или оригинальное изображение
-  // Убираем c_fill, чтобы не обрезать, если это полноразмерное изображение
-  // Можно также указать w_auto,h_auto или max-width/height, если оригинал очень большой.
-  const modalOptimizedUrl = imgElement.dataset.src.replace(',c_fill', ''); // Убираем c_fill
-  modalImage.src = modalOptimizedUrl;
+  modalImage.src = imgElement.src; // <-- Используем src прямо из миниатюры
   modalImage.dataset.id = imgElement.dataset.id;
 
   // --- Убираем информацию о просмотрах и загрузке ---
   imageInfo.innerHTML = ''; // Очищаем содержимое
 
-  // Логика увеличения просмотров (если нужна для статистики, даже если не отображается)
+  // Логика увеличения просмотров (оставляем, если нужна для статистики)
   const imageId = imgElement.dataset.id;
   const column = imgElement.dataset.column;
-  let currentViews = parseInt(imgElement.dataset.views) || 0; // Получаем текущее значение из DOM
+  let currentViews = parseInt(imgElement.dataset.views) || 0;
 
   const userIsAretren = window.currentUser === 'aretren@gmail.com';
   const userIsChoisalery = window.currentUser === 'choisalery@gmail.com';
@@ -162,7 +128,6 @@ function openModal(imgElement) {
     currentViews += 1;
     const imageRefDB = dbRef(database, `images/${imageId}`);
     update(imageRefDB, { views: currentViews });
-    // Обновляем dataset.views в DOM, чтобы последующие открытия использовали актуальное значение
     const wrapperElement = document.querySelector(`.image-wrapper[data-id="${imageId}"]`);
     if (wrapperElement) {
         wrapperElement.dataset.views = currentViews;
@@ -210,8 +175,7 @@ function openModal(imgElement) {
     dropdown.style.display = 'none';
   };
 
-  // Останавливаем всплытие события клика от элементов внутри модального окна,
-  // чтобы они не передавали клик на фон модального окна
+  // Останавливаем всплытие события клика от элементов внутри модального окна
   modalImageElement.onclick = (event) => event.stopPropagation();
   modalActionsContainer.onclick = (event) => event.stopPropagation();
   imageInfo.onclick = (event) => event.stopPropagation();
@@ -223,7 +187,6 @@ function closeModal() {
   if (optionsDropdownGlobalRef) {
     optionsDropdownGlobalRef.style.display = 'none';
   }
-  // Очищаем src и data-id для безопасности, чтобы не хранить ссылку на предыдущее изображение
   document.getElementById('modalImage').src = '';
   document.getElementById('modalImage').dataset.id = '';
   document.getElementById('imageInfo').innerHTML = '';
@@ -234,7 +197,7 @@ function closeModal() {
   }
 }
 
-// Обработчик закрытия модального окна при клике на фон
+// Обработчик закрытия модального окна при клике на фон (для мыши)
 function handleCloseInteractions(event) {
   // Закрытие дропдауна, если клик вне его и кнопки
   if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
@@ -245,32 +208,27 @@ function handleCloseInteractions(event) {
     }
   }
 
-  // --- ИСПРАВЛЕНИЕ ДЛЯ МОБИЛЬНОГО ЗАКРЫТИЯ ---
-  // Проверяем, что клик был по самому модальному окну, а не по его содержимому
+  // Закрытие модального окна при клике на подложку (пустое место)
   if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'block' && event.target === imageModalGlobalRef) {
-    closeModal(); // Закрываем модальное окно
+    closeModal();
   }
-  // Дополнительная остановка всплытия, чтобы клик по модальному окну (даже если оно уже закрылось)
-  // не обрабатывался элементами под ним.
+  // Дополнительная остановка всплытия (для мыши)
   if (imageModalGlobalRef && event.target === imageModalGlobalRef) {
     event.stopPropagation();
   }
 }
 
-// Добавляем обработчик для touchend на сам фон модального окна
-// Это может быть более надежно для мобильных устройств
+// Добавляем обработчик для touchend на сам фон модального окна (для мобильных)
 imageModalGlobalRef.addEventListener('touchend', (event) => {
+  // Убеждаемся, что касание закончилось на самом фоне модального окна
   if (event.target === imageModalGlobalRef) {
     closeModal();
   }
   event.stopPropagation(); // Важно остановить всплытие и для touch-событий
 });
 
-
 window.addEventListener('click', handleCloseInteractions);
-// Удаляем глобальный touchend обработчик, чтобы избежать дублирования или конфликтов
-// window.addEventListener('touchend', handleCloseInteractions);
-
+// Глобальный touchend обработчик убран, т.к. есть на imageModalGlobalRef
 
 // ----- НАЧАЛО ИЗМЕНЕНИЙ ДЛЯ ПАКЕТНОЙ ЗАГРУЗКИ -----
 const fileInput = document.createElement('input');
