@@ -19,6 +19,12 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth();
 
+// --- Глобальные ссылки на элементы модального окна для обработчиков закрытия ---
+const imageModalGlobalRef = document.getElementById('imageModal');
+const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
+const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
+
+
 // Проверка авторизации при загрузке страницы
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -37,7 +43,7 @@ function loadImagesFromFirebase() {
   const imagesRef = dbRef(database, 'images');
   onValue(imagesRef, (snapshot) => {
     const data = snapshot.val();
-    document.getElementById('leftColumn').innerHTML = ''; // Очистка перед загрузкой
+    document.getElementById('leftColumn').innerHTML = '';
     document.getElementById('centerColumn').innerHTML = '';
     document.getElementById('rightColumn').innerHTML = '';
     if (data) {
@@ -45,7 +51,7 @@ function loadImagesFromFirebase() {
         displayImage(data[key], key);
       });
     }
-    updateBackgroundGradient(); // Обновляем градиент после загрузки/обновления всех изображений
+    updateBackgroundGradient();
   });
 }
 
@@ -55,98 +61,113 @@ function displayImage(imageData, imageId) {
   img.src = imageData.url;
   img.classList.add('thumbnail');
   img.dataset.timestamp = imageData.timestamp;
-  img.dataset.views = imageData.views || 0; // Убедимся, что views имеет значение по умолчанию
+  img.dataset.views = imageData.views || 0;
   img.dataset.id = imageId;
   img.dataset.column = imageData.column;
   img.addEventListener('click', () => openModal(img));
   const targetColumn = document.getElementById(`${imageData.column}Column`);
   if (targetColumn) {
-    targetColumn.prepend(img); // Добавляем новые изображения в начало колонки
+    targetColumn.prepend(img);
   }
 }
 
-// Открытие модального окна с обновлением счетчика просмотров
+// Открытие модального окна
 function openModal(imgElement) {
-  const modal = document.getElementById('imageModal');
+  const modal = document.getElementById('imageModal'); // imageModalGlobalRef
   const modalImage = document.getElementById('modalImage');
   const imageInfo = document.getElementById('imageInfo');
-  const deleteButton = document.getElementById('deleteButton');
+  const moreOptionsBtn = document.getElementById('moreOptionsButton'); // moreOptionsButtonGlobalRef
+  const dropdown = document.getElementById('optionsDropdown'); // optionsDropdownGlobalRef
 
   modal.style.display = 'block';
+  dropdown.style.display = 'none'; // Убедимся, что дропдаун скрыт при открытии модалки
   modalImage.src = imgElement.src;
-  modalImage.dataset.id = imgElement.dataset.id; // Сохраняем id для удаления
+  modalImage.dataset.id = imgElement.dataset.id; // Важно для действий
 
   const imageId = imgElement.dataset.id;
   const column = imgElement.dataset.column;
   let currentViews = parseInt(imgElement.dataset.views) || 0;
 
-  // Логика инкремента просмотров
   const userIsAretren = window.currentUser === 'aretren@gmail.com';
   const userIsChoisalery = window.currentUser === 'choisalery@gmail.com';
   let shouldIncrementView = false;
 
-  if (column === 'left' && userIsAretren) { // HIM PEACH can be viewed by aretren
+  if (column === 'left' && userIsAretren) { 
     shouldIncrementView = true;
-  } else if (column === 'right' && userIsChoisalery) { // HER CAT can be viewed by choisalery
+  } else if (column === 'right' && userIsChoisalery) { 
     shouldIncrementView = true;
-  } else if (column === 'center' && (userIsAretren || userIsChoisalery)) { // OUR DREAM by both
+  } else if (column === 'center' && (userIsAretren || userIsChoisalery)) { 
     shouldIncrementView = true;
   }
-  // Примечание: Эта логика означает, что просмотр засчитывается только если "свой" пользователь открывает фото
-  // или если это общая колонка. Если это поведение нежелательно, логику нужно скорректировать.
-
-
-  // Если текущий пользователь не тот, кто "должен" просматривать (для левой/правой колонки),
-  // просмотр не увеличиваем. Для центральной - увеличиваем для обоих.
-  // Эта проверка была немного запутанной, упростим:
-  // Просмотр увеличивается если:
-  // 1. Фото в левой колонке И текущий пользователь - 'aretren@gmail.com'
-  // 2. Фото в правой колонке И текущий пользователь - 'choisalery@gmail.com'
-  // 3. Фото в центральной колонке (любой из двух пользователей)
-
-  // Чтобы избежать двойного увеличения при открытии своего же фото несколько раз подряд без перезагрузки данных из Firebase,
-  // можно добавить проверку, не просматривал ли пользователь это фото в текущей сессии.
-  // Но для простоты пока оставим так, как Firebase обновит счетчик.
 
   if (shouldIncrementView) {
     currentViews += 1;
-    imgElement.dataset.views = currentViews; // Обновляем на клиенте для немедленного отображения
-    const imageRef = dbRef(database, `images/${imageId}`);
-    update(imageRef, { views: currentViews });
+    imgElement.dataset.views = currentViews;
+    const imageRefDB = dbRef(database, `images/${imageId}`);
+    update(imageRefDB, { views: currentViews });
   }
 
   imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${currentViews}`;
 
-  deleteButton.onclick = () => {
-    remove(dbRef(database, `images/${imageId}`)).then(() => {
-      modal.style.display = 'none';
-      // loadImagesFromFirebase(); // Это вызовет полную перезагрузку, что хорошо
-    }).catch(error => {
-        console.error("Ошибка при удалении изображения:", error);
-    });
+  // Обработчик для кнопки "..."
+  moreOptionsBtn.onclick = function(event) {
+    event.stopPropagation(); // Предотвращаем закрытие модалки или дропдауна из-за всплытия
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  };
+
+  // Обработчик для действий в выпадающем списке (делегирование)
+  dropdown.onclick = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const targetActionElement = event.target.closest('a[data-action]');
+    if (!targetActionElement) return;
+
+    const action = targetActionElement.dataset.action;
+    const currentImageId = modalImage.dataset.id; // Берем ID из открытого в модалке изображения
+
+    if (action === 'delete') {
+      remove(dbRef(database, `images/${currentImageId}`))
+        .then(() => console.log("Изображение удалено:", currentImageId))
+        .catch(error => console.error("Ошибка удаления:", error));
+    } else if (action === 'move') {
+      const newColumn = targetActionElement.dataset.column;
+      update(dbRef(database, `images/${currentImageId}`), { column: newColumn })
+        .then(() => console.log(`Изображение ${currentImageId} перемещено в ${newColumn}`))
+        .catch(error => console.error("Ошибка перемещения:", error));
+    }
+
+    dropdown.style.display = 'none';
+    modal.style.display = 'none'; // Закрываем модальное окно после действия
   };
 }
 
-// ----- НАЧАЛО ИЗМЕНЕНИЙ ДЛЯ ЗАКРЫТИЯ МОДАЛЬНОГО ОКНА -----
-// Получаем ссылку на модальное окно один раз
-const imageModalElement = document.getElementById('imageModal');
 
-// Функция для закрытия модального окна
-function closeModalHandler(event) {
-  // Проверяем, что модальное окно видимо и клик/тап был именно по фону модального окна
-  if (imageModalElement && imageModalElement.style.display === 'block' && event.target === imageModalElement) {
-    imageModalElement.style.display = 'none';
-  }
+// --- Обновленный обработчик закрытия модального окна и выпадающего списка ---
+function handleCloseInteractions(event) {
+    // Закрыть выпадающий список, если клик вне его и кнопки "..."
+    if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
+        if (moreOptionsButtonGlobalRef && 
+            !moreOptionsButtonGlobalRef.contains(event.target) && 
+            !optionsDropdownGlobalRef.contains(event.target)) {
+            optionsDropdownGlobalRef.style.display = 'none';
+        }
+    }
+
+    // Закрыть модальное окно, если клик по фону (backdrop)
+    if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'block' && event.target === imageModalGlobalRef) {
+        imageModalGlobalRef.style.display = 'none';
+        if (optionsDropdownGlobalRef) { // Также скрыть выпадающий список
+            optionsDropdownGlobalRef.style.display = 'none';
+        }
+    }
 }
 
-// Добавляем обработчик для события 'click'
-window.addEventListener('click', closeModalHandler);
-
-// Добавляем обработчик для события 'touchend' для лучшей совместимости с iOS
-window.addEventListener('touchend', closeModalHandler);
-// ----- КОНЕЦ ИЗМЕНЕНИЙ ДЛЯ ЗАКРЫТИЯ МОДАЛЬНОГО ОКНА -----
+window.addEventListener('click', handleCloseInteractions);
+window.addEventListener('touchend', handleCloseInteractions); // Также для сенсорных устройств
 
 
+// Логика загрузки файлов (остается без изменений)
 const fileInput = document.createElement('input');
 fileInput.type = 'file';
 fileInput.accept = 'image/*';
@@ -157,7 +178,7 @@ const uploadButtons = document.querySelectorAll('.upload-buttons button');
 uploadButtons.forEach((button) => {
   button.addEventListener('click', () => {
     const column = button.id.replace('upload', '').toLowerCase();
-    fileInput.dataset.column = column; // Сохраняем колонку для загрузчика
+    fileInput.dataset.column = column;
     fileInput.click();
   });
 });
@@ -167,7 +188,7 @@ fileInput.addEventListener('change', (event) => {
   if (file) {
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "ever_together_upload"); // Убедитесь, что этот preset существует в Cloudinary
+    formData.append("upload_preset", "ever_together_upload");
 
     fetch("https://api.cloudinary.com/v1_1/dozbf3jis/image/upload", {
       method: "POST",
@@ -181,10 +202,8 @@ fileInput.addEventListener('change', (event) => {
           url: data.secure_url,
           timestamp: new Date().toISOString(),
           views: 0,
-          column: fileInput.dataset.column // Используем сохраненную колонку
+          column: fileInput.dataset.column
         });
-        // Не нужно вызывать loadImagesFromFirebase() здесь,
-        // onValue автоматически обновит интерфейс при изменении данных в Firebase.
       } else {
         console.error("Ошибка при загрузке изображения в Cloudinary:", data);
       }
@@ -197,25 +216,14 @@ function updateBackgroundGradient() {
   const leftViews = getColumnViews('left');
   const centerViews = getColumnViews('center');
   const rightViews = getColumnViews('right');
-
   const totalViews = leftViews + centerViews + rightViews;
-
   let balance = 0;
   if (totalViews > 0) {
-    // Баланс смещается в сторону того, у кого больше просмотров
-    // Если leftViews > rightViews, balance будет > 0 (сдвиг вправо, цвет #121212 занимает больше места)
-    // Если rightViews > leftViews, balance будет < 0 (сдвиг влево, цвет #2c3e50 занимает больше места)
     balance = (leftViews - rightViews) / totalViews;
   }
-  
-  // gradientPosition определяет, где заканчивается первый цвет (#121212)
-  // 50% - это центр. balance * 50 смещает эту точку.
-  // Максимальный сдвиг - 50% в одну или другую сторону (от 0% до 100%)
-  const gradientPosition = 50 + (balance * 50); 
-
+  const gradientPosition = 50 + (balance * 50);
   document.body.style.background = `linear-gradient(to right, #121212 ${gradientPosition}%, #2c3e50)`;
 }
-
 
 function getColumnViews(columnName) {
   const images = document.querySelectorAll(`.image-column#${columnName}Column .thumbnail`);
