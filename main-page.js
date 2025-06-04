@@ -73,16 +73,16 @@ function displayImage(imageData, imageId) {
 
 // Открытие модального окна
 function openModal(imgElement) {
-  const modal = document.getElementById('imageModal'); // imageModalGlobalRef
+  const modal = document.getElementById('imageModal');
   const modalImage = document.getElementById('modalImage');
   const imageInfo = document.getElementById('imageInfo');
-  const moreOptionsBtn = document.getElementById('moreOptionsButton'); // moreOptionsButtonGlobalRef
-  const dropdown = document.getElementById('optionsDropdown'); // optionsDropdownGlobalRef
+  const moreOptionsBtn = document.getElementById('moreOptionsButton');
+  const dropdown = document.getElementById('optionsDropdown');
 
   modal.style.display = 'block';
-  dropdown.style.display = 'none'; // Убедимся, что дропдаун скрыт при открытии модалки
+  dropdown.style.display = 'none'; 
   modalImage.src = imgElement.src;
-  modalImage.dataset.id = imgElement.dataset.id; // Важно для действий
+  modalImage.dataset.id = imgElement.dataset.id;
 
   const imageId = imgElement.dataset.id;
   const column = imgElement.dataset.column;
@@ -109,13 +109,11 @@ function openModal(imgElement) {
 
   imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${currentViews}`;
 
-  // Обработчик для кнопки "..."
   moreOptionsBtn.onclick = function(event) {
-    event.stopPropagation(); // Предотвращаем закрытие модалки или дропдауна из-за всплытия
+    event.stopPropagation(); 
     dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
   };
 
-  // Обработчик для действий в выпадающем списке (делегирование)
   dropdown.onclick = function(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -124,7 +122,7 @@ function openModal(imgElement) {
     if (!targetActionElement) return;
 
     const action = targetActionElement.dataset.action;
-    const currentImageId = modalImage.dataset.id; // Берем ID из открытого в модалке изображения
+    const currentImageId = modalImage.dataset.id;
 
     if (action === 'delete') {
       remove(dbRef(database, `images/${currentImageId}`))
@@ -138,14 +136,11 @@ function openModal(imgElement) {
     }
 
     dropdown.style.display = 'none';
-    modal.style.display = 'none'; // Закрываем модальное окно после действия
+    modal.style.display = 'none'; 
   };
 }
 
-
-// --- Обновленный обработчик закрытия модального окна и выпадающего списка ---
 function handleCloseInteractions(event) {
-    // Закрыть выпадающий список, если клик вне его и кнопки "..."
     if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
         if (moreOptionsButtonGlobalRef && 
             !moreOptionsButtonGlobalRef.contains(event.target) && 
@@ -154,23 +149,23 @@ function handleCloseInteractions(event) {
         }
     }
 
-    // Закрыть модальное окно, если клик по фону (backdrop)
     if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'block' && event.target === imageModalGlobalRef) {
         imageModalGlobalRef.style.display = 'none';
-        if (optionsDropdownGlobalRef) { // Также скрыть выпадающий список
+        if (optionsDropdownGlobalRef) { 
             optionsDropdownGlobalRef.style.display = 'none';
         }
     }
 }
 
 window.addEventListener('click', handleCloseInteractions);
-window.addEventListener('touchend', handleCloseInteractions); // Также для сенсорных устройств
+window.addEventListener('touchend', handleCloseInteractions);
 
 
-// Логика загрузки файлов (остается без изменений)
+// ----- НАЧАЛО ИЗМЕНЕНИЙ ДЛЯ ПАКЕТНОЙ ЗАГРУЗКИ -----
 const fileInput = document.createElement('input');
 fileInput.type = 'file';
 fileInput.accept = 'image/*';
+fileInput.multiple = true; // Разрешаем выбор нескольких файлов
 fileInput.style.display = 'none';
 document.body.appendChild(fileInput);
 
@@ -183,34 +178,70 @@ uploadButtons.forEach((button) => {
   });
 });
 
-fileInput.addEventListener('change', (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", "ever_together_upload");
+fileInput.addEventListener('change', async (event) => { // Делаем обработчик асинхронным
+  const files = event.target.files; // Получаем список всех выбранных файлов
+  if (files.length > 0) {
+    const selectedColumn = fileInput.dataset.column; // Колонка для всей пачки файлов
+    console.log(`Начало пакетной загрузки ${files.length} файлов в колонку ${selectedColumn}`);
+    // Можно добавить какой-то индикатор загрузки для пользователя здесь
 
-    fetch("https://api.cloudinary.com/v1_1/dozbf3jis/image/upload", {
-      method: "POST",
-      body: formData
-    })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.secure_url) {
-        const newImageRef = push(dbRef(database, 'images'));
-        set(newImageRef, {
-          url: data.secure_url,
-          timestamp: new Date().toISOString(),
-          views: 0,
-          column: fileInput.dataset.column
+    for (const file of files) { // Последовательно обрабатываем каждый файл
+      console.log(`Загрузка файла: ${file.name}`);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "ever_together_upload");
+
+        const cloudinaryResponse = await fetch("https://api.cloudinary.com/v1_1/dozbf3jis/image/upload", {
+          method: "POST",
+          body: formData
         });
-      } else {
-        console.error("Ошибка при загрузке изображения в Cloudinary:", data);
+
+        if (!cloudinaryResponse.ok) {
+          let errorDetails = `HTTP ошибка ${cloudinaryResponse.status}: ${cloudinaryResponse.statusText}`;
+          try {
+            // Пытаемся получить детали ошибки от Cloudinary
+            const errorData = await cloudinaryResponse.json();
+            if (errorData.error && errorData.error.message) {
+              errorDetails += ` - ${errorData.error.message}`;
+            }
+          } catch (e) {
+            // Не удалось распарсить JSON ошибки
+          }
+          console.error(`Ошибка Cloudinary при загрузке ${file.name}: ${errorDetails}`);
+          alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorDetails}. Смотрите консоль для деталей.`);
+          continue; // Переходим к следующему файлу
+        }
+
+        const cloudinaryData = await cloudinaryResponse.json();
+
+        if (cloudinaryData.secure_url) {
+          const newImageRef = push(dbRef(database, 'images'));
+          await set(newImageRef, {
+            url: cloudinaryData.secure_url,
+            timestamp: new Date().toISOString(),
+            views: 0,
+            column: selectedColumn
+          });
+          console.log(`Файл ${file.name} успешно загружен и сохранен.`);
+        } else {
+          const errorMsg = cloudinaryData.error && cloudinaryData.error.message ? cloudinaryData.error.message : "URL не получен от Cloudinary.";
+          console.error(`Ошибка при загрузке ${file.name} в Cloudinary: ${errorMsg}`, cloudinaryData);
+          alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorMsg}.`);
+        }
+      } catch (error) { // Ловим сетевые ошибки или другие сбои в процессе
+        console.error(`Критическая ошибка при загрузке файла ${file.name}:`, error);
+        alert(`Произошла ошибка при загрузке файла ${file.name}: ${error.message}.`);
       }
-    })
-    .catch((error) => console.error("Ошибка при загрузке изображения:", error));
+    }
+    // Очищаем значение инпута, чтобы можно было выбрать те же файлы снова
+    event.target.value = null; 
+    console.log("Пакетная загрузка завершена (или предприняты все попытки).");
+    // Можно убрать индикатор загрузки для пользователя здесь
   }
 });
+// ----- КОНЕЦ ИЗМЕНЕНИЙ ДЛЯ ПАКЕТНОЙ ЗАГРУЗКИ -----
+
 
 function updateBackgroundGradient() {
   const leftViews = getColumnViews('left');
