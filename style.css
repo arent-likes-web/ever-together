@@ -1,7 +1,17 @@
 /* style.css */
 
+/* --- Font Import: Taler --- */
+@font-face {
+    font-family: 'Taler';
+    src: url('fonts/Taler.woff2') format('woff2'), /* Предпочтительный формат для современных браузеров */
+         url('fonts/Taler.woff') format('woff'); /* Более старый, но хорошо поддерживаемый формат */
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap; /* Позволяет тексту отображаться с запасным шрифтом, пока основной загружается */
+}
+
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: 'Taler', Arial, sans-serif; /* Теперь 'Taler' в приоритете */
     margin: 0;
     padding: 20px;
     background: linear-gradient(to right, #121212 50%, #2c3e50); /* Dark grey to dark blue */
@@ -110,36 +120,35 @@ h2 {
 
 .image-container {
     display: flex;
-    flex-wrap: nowrap; /* <-- Важно: предотвращаем перенос колонок на новую строку по умолчанию */
+    flex-wrap: nowrap; /* Важно: предотвращаем перенос колонок на новую строку по умолчанию */
     gap: 10px; /* Space between columns */
     width: 100%;
     max-width: 1200px; /* Max width for the whole container */
     margin-top: 20px;
-    box-sizing: border-box; /* Учитываем padding в ширине */
-    /* Добавляем padding по бокам, чтобы контент не прилипал к краям экрана */
+    box-sizing: border-box;
     padding: 0 10px;
 }
 
 .image-column {
     flex: 1; /* Each column takes equal space */
-    min-width: 0; /* <-- Важно: позволяет колонке сжиматься до 0, если не помещается, затем flex-basis/width даст ей размер */
+    min-width: 0; /* Важно: позволяет колонке сжиматься до 0 */
     display: flex;
     flex-direction: column;
     gap: 10px; /* Space between images in a column */
     background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent background for columns */
     padding: 10px;
     border-radius: 8px;
-    box-sizing: border-box; /* Include padding in column width */
-    width: 33.33%; /* <-- Явное задание ширины для 3 колонок, которое flex может переопределить */
+    box-sizing: border-box;
+    width: 33.33%; /* Явное задание ширины для 3 колонок */
 }
 
 .image-wrapper {
-    width: 100%; /* Image wrapper takes full width of its column */
-    height: 0; /* Initial height, will be set by padding-bottom for aspect ratio */
+    width: 100%;
+    height: 0;
     padding-bottom: 100%; /* For 1:1 aspect ratio. Adjust as needed. */
     position: relative;
     overflow: hidden;
-    border-radius: 8% 0px; /* Было 8%, теперь 8% 0px (возможно, опечатка была?) */
+    border-radius: 8px; /* Исправлено: если было 8% 0px, это может быть неверно, устанавливаем 8px */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     background-color: #34495e; /* Placeholder color before image loads */
@@ -151,46 +160,45 @@ h2 {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Ensures images cover the area without distortion */
-    opacity: 0; /* Hidden initially for fade-in effect */
+    object-fit: cover;
+    opacity: 0;
     transition: opacity 0.5s ease;
 }
 
 .image-wrapper img.thumbnail.loaded {
-    opacity: 1; /* Fade in when loaded */
+    opacity: 1;
 }
 
 /* Modal Styles */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.9); /* Black w/ opacity */
-    display: flex; /* Use flexbox for centering */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.9);
+    display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .modal-content {
     position: relative;
-    max-width: 80%; /* Max width of the image */
-    max-height: 80%; /* Max height of the image */
+    max-width: 80%;
+    max-height: 80%;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Optional: add some padding if you want space around the image */
 }
 
 .modal-content img {
     max-width: 100%;
     max-height: 100%;
-    display: block; /* Remove extra space below image */
-    object-fit: contain; /* Ensure the entire image is visible, no cropping */
+    display: block;
+    object-fit: contain;
     border-radius: 8px;
 }
 
@@ -200,7 +208,7 @@ h2 {
     right: 20px;
     display: flex;
     gap: 10px;
-    z-index: 1001; /* Ensure buttons are above the image */
+    z-index: 1001;
 }
 
 .options-button {
@@ -211,11 +219,11 @@ h2 {
     width: 40px;
     height: 40px;
     font-size: 20px;
-    line-height: 40px; /* Center text vertically */
+    line-height: 40px;
     text-align: center;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    display: flex; /* To center ellipsis vertically/horizontally */
+    display: flex;
     justify-content: center;
     align-items: center;
 }
@@ -227,14 +235,14 @@ h2 {
 .options-dropdown {
     display: none;
     position: absolute;
-    top: 50px; /* Position below the options button */
+    top: 50px;
     right: 0;
-    background-color: #34495e; /* Darker blue */
+    background-color: #34495e;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     min-width: 180px;
-    z-index: 100; /* Ensure dropdown is above other modal elements */
-    overflow: hidden; /* For rounded corners */
+    z-index: 100;
+    overflow: hidden;
 }
 
 .options-dropdown a {
@@ -246,15 +254,15 @@ h2 {
 }
 
 .options-dropdown a:hover {
-    background-color: #2c3e50; /* Slightly lighter blue on hover */
+    background-color: #2c3e50;
 }
 
 .options-dropdown a[data-action="delete"] {
-    color: #e74c3c; /* Red color for delete */
+    color: #e74c3c;
 }
 
 .options-dropdown a[data-action="delete"]:hover {
-    background-color: #c0392b; /* Darker red */
+    background-color: #c0392b;
     color: white;
 }
 
@@ -270,17 +278,16 @@ h2 {
     z-index: 1001;
 }
 
-
 /* Upload Buttons (Global Styles) */
 .upload-buttons {
     margin: 20px 0;
     display: flex;
-    gap: 10px; /* Space between buttons */
+    gap: 10px;
     justify-content: center;
-    flex-wrap: nowrap; /* Предотвращаем перенос кнопок */
-    width: 100%; /* Занимает всю доступную ширину */
-    padding: 0 10px; /* Небольшие отступы по бокам */
-    box-sizing: border-box; /* Учитывает padding в ширине */
+    flex-wrap: nowrap;
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
 }
 
 .upload-buttons button {
@@ -293,11 +300,11 @@ h2 {
     background-color: #f1c40f;
     color: #2c3e50;
     transition: background 0.3s ease, transform 0.2s;
-    white-space: nowrap; /* Предотвращаем перенос текста внутри кнопки */
-    flex-grow: 1; /* Позволяем кнопкам расти */
-    flex-shrink: 1; /* Позволяем кнопкам сжиматься */
-    min-width: 80px; /* Минимальная ширина для ПК */
-    max-width: 120px; /* Максимальная ширина для ПК */
+    white-space: nowrap;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 80px;
+    max-width: 120px;
     box-sizing: border-box;
 }
 
@@ -308,37 +315,36 @@ h2 {
 
 
 /* --- Медиазапросы для адаптивности --- */
-@media (max-width: 768px) { /* Для мобильных устройств и планшетов */
+@media (max-width: 768px) {
     body {
         padding: 10px;
     }
 
-    /* Upload buttons - сохраняем адаптивность, уже работающую */
     .upload-buttons {
-        gap: 5px; /* Уменьшаем отступ между кнопками на мобильных */
+        gap: 5px;
     }
 
     .upload-buttons button {
-        font-size: 0.8em; /* Уменьшаем размер шрифта */
-        padding: 8px 10px; /* Уменьшаем отступы */
-        min-width: unset; /* Позволяем кнопкам сжиматься сильнее */
-        max-width: unset; /* Убираем максимальную ширину */
+        font-size: 0.8em;
+        padding: 8px 10px;
+        min-width: unset;
+        max-width: unset;
     }
 
-    /* Изображения: ВОССТАНОВЛЕНИЕ 3-КОЛОНОЧНОГО МАКЕТА */
+    /* Изображения: ВОССТАНОВЛЕННЫЙ 3-КОЛОНОЧНЫЙ МАКЕТ */
     .image-container {
-        flex-wrap: nowrap; /* Убеждаемся, что колонки не переносятся */
-        gap: 5px; /* Уменьшаем отступы между колонками */
+        flex-wrap: nowrap;
+        gap: 5px;
         width: 100%;
-        padding: 0 5px; /* Отступы по бокам для контейнера */
+        padding: 0 5px;
     }
 
     .image-column {
-        flex: 1; /* Каждая колонка занимает равное пространство */
-        min-width: 0; /* Позволяет колонке сжиматься, если необходимо */
-        width: 33.33%; /* Явная ширина для 3 колонок ( flex:1 это уже делает, но для ясности) */
-        padding: 5px; /* Уменьшаем внутренние отступы в колонках */
-        min-height: 250px; /* Немного уменьшаем минимальную высоту колонки */
+        flex: 1;
+        min-width: 0;
+        width: 33.33%; /* <-- Явно задаем 33.33% для каждой из 3-х колонок */
+        padding: 5px;
+        min-height: 250px;
     }
 
     .modal-content {
@@ -368,20 +374,20 @@ h2 {
     }
 }
 
-/* Для очень маленьких экранов (опционально, если 3 колонки все еще слишком тесные) */
+/* Для очень маленьких экранов (опционально) */
 @media (max-width: 480px) {
     .image-container {
-        gap: 3px; /* Еще меньший зазор для очень маленьких экранов */
+        gap: 3px;
     }
     .image-column {
         padding: 3px;
-        min-height: 200px; /* Ещё уменьшаем минимальную высоту */
+        min-height: 200px;
     }
     .upload-buttons {
         gap: 3px;
     }
     .upload-buttons button {
-        font-size: 0.75em; /* Еще меньше шрифт */
-        padding: 6px 8px; /* Еще меньше отступы */
+        font-size: 0.75em;
+        padding: 6px 8px;
     }
 }
