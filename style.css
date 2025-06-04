@@ -1,248 +1,270 @@
 /* Современная обновленная цветовая палитра для галереи фото */
 
 @font-face {
-  font-family: 'Taler';
-  src: url('Taler.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
+  font-family: 'Taler';
+  src: url('Taler.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
 }
 
 /* Global Styles */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  font-family: 'Taler', sans-serif;
-  background: linear-gradient(to right, #121212, #2c3e50);
-  color: #f5f5f5;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  text-align: center;
+  font-family: 'Taler', sans-serif;
+  background: linear-gradient(to right, #121212, #2c3e50);
+  color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  text-align: center;
 }
 
 h2 {
-  margin-bottom: 20px;
-  color: #f1c40f;
+  margin-bottom: 20px;
+  color: #f1c40f;
 }
 
 .login-form {
-  background-color: rgba(44, 62, 80, 0.9);
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
-  border: 1px solid #f1c40f;
-  max-width: 400px;
-  width: 100%;
-  margin-bottom: 20px;
+  background-color: rgba(44, 62, 80, 0.9);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid #f1c40f;
+  max-width: 400px;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  color: #f1c40f;
+  display: block;
+  margin-bottom: 5px;
+  color: #f1c40f;
 }
 
 .form-group input {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background-color: #ffffff;
-  outline: none;
-  transition: all 0.3s ease;
-  color: #000000;
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background-color: #ffffff;
+  outline: none;
+  transition: all 0.3s ease;
+  color: #000000;
 }
 
 .form-group input:focus {
-  background-color: #fff;
-  box-shadow: 0 0 12px rgba(241, 196, 15, 0.8);
+  background-color: #fff;
+  box-shadow: 0 0 12px rgba(241, 196, 15, 0.8);
 }
 
 .btn { /* Этот класс использовался для старой кнопки удаления, можно оставить для других кнопок если есть */
-  color: #000000;
-  font-family: 'Taler', sans-serif;
-  width: 100%;
-  padding: 12px;
-  background-color: #f1c40f;
-  color: #2c3e50;
-  border: none;
-  border-radius: 15px;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s;
-  font-weight: bold;
+  color: #000000;
+  font-family: 'Taler', sans-serif;
+  width: 100%;
+  padding: 12px;
+  background-color: #f1c40f;
+  color: #2c3e50;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s;
+  font-weight: bold;
 }
 
 .btn:hover {
-  background-color: #d4ac0d;
-  transform: translateY(-3px);
+  background-color: #d4ac0d;
+  transform: translateY(-3px);
 }
 
 .upload-buttons {
-  margin: 20px 0;
-  display: flex;
-  gap: 10px;
+  margin: 20px 0;
+  display: flex;
+  gap: 10px;
 }
 
 .upload-buttons button {
-  color: #000000;
-  font-family: 'Taler', sans-serif;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
-  border-radius: 12px;
-  background-color: #f1c40f;
-  color: #2c3e50;
-  transition: background 0.3s ease, transform 0.2s;
+  color: #000000;
+  font-family: 'Taler', sans-serif;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 12px;
+  background-color: #f1c40f;
+  color: #2c3e50;
+  transition: background 0.3s ease, transform 0.2s;
 }
 
 .upload-buttons button:hover {
-  background-color: #d4ac0d;
-  transform: translateY(-3px);
+  background-color: #d4ac0d;
+  transform: translateY(-3px);
 }
 
 .image-container {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  width: 100%;
-  max-width: 1200px;
-  justify-content: center;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  width: 100%;
+  max-width: 1200px;
+  justify-content: center;
 }
 
 .image-column {
-  background-color: rgba(44, 62, 80, 0.8);
-  padding: 10px;
-  border-radius: 12px;
-  min-height: 400px;
-  width: 32%;
-  overflow-y: auto;
-  border: 1px solid #fffbe6;
-  backdrop-filter: blur(6px);
+  background-color: rgba(44, 62, 80, 0.8);
+  padding: 10px;
+  border-radius: 12px;
+  min-height: 400px;
+  width: 32%;
+  overflow-y: auto;
+  border: 1px solid #fffbe6;
+  backdrop-filter: blur(6px);
+}
+
+/* Стили для скелетного загрузчика */
+.skeleton-loader {
+    width: 100%;
+    height: 150px; /* Примерная высота, чтобы имитировать изображение */
+    background: linear-gradient(90deg, #555 25%, #777 50%, #555 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    margin-bottom: 8px;
+    border-radius: 15px;
+}
+
+@keyframes loading {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
 .thumbnail {
-  width: 100%;
-  margin-bottom: 8px;
-  cursor: pointer;
-  transition: transform 0.3s;
-  border-radius: 15px;
-  border: 2px solid #fcefc5;
+  width: 100%;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: transform 0.3s, opacity 0.5s ease-in-out; /* Добавляем opacity для плавной загрузки */
+  border-radius: 15px;
+  border: 2px solid #fcefc5;
+  opacity: 0; /* Изначально скрываем */
 }
 
+.thumbnail.loaded {
+    opacity: 1; /* Показываем, когда загружено */
+}
+
+
 .thumbnail:hover {
-  transform: scale(1.05);
-  border-color: #fcefc5;
+  transform: scale(1.05);
+  border-color: #fcefc5;
 }
 
 .modal {
-  display: none;
-  position: fixed;
-  z-index: 1000; /* z-index для модального окна */
-  padding-top: 60px;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  cursor: pointer;
+  display: none;
+  position: fixed;
+  z-index: 1000; /* z-index для модального окна */
+  padding-top: 60px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  cursor: pointer;
 }
 
 .modal-content {
-  margin: auto;
-  display: block;
-  max-width: 80%;
-  max-height: 80%;
-  border-radius: 15px;
-  position: relative; /* Для возможного позиционирования дочерних элементов */
+  margin: auto;
+  display: block;
+  max-width: 80%;
+  max-height: 80%;
+  border-radius: 15px;
+  position: relative; /* Для возможного позиционирования дочерних элементов */
 }
 
 #imageInfo {
-  color: #f5f5f5;
-  text-align: center;
-  margin-top: 15px;
-  font-size: 1em;
+  color: #f5f5f5;
+  text-align: center;
+  margin-top: 15px;
+  font-size: 1em;
 }
 
 /* Стили для нового меню действий */
 .modal-actions-container {
-  position: absolute;
-  top: 20px; /* Отступ сверху от края модального окна */
-  right: 20px; /* Отступ справа от края модального окна */
-  z-index: 1010; /* Выше контента модального окна */
+  position: absolute;
+  top: 20px; /* Отступ сверху от края модального окна */
+  right: 20px; /* Отступ справа от края модального окна */
+  z-index: 1010; /* Выше контента модального окна */
 }
 
 .options-button {
-  font-family: 'Taler', sans-serif;
-  background-color: rgba(40, 40, 40, 0.6);
-  color: #f1c40f;
-  border: 1px solid rgba(241, 196, 15, 0.5);
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  font-size: 22px;
-  line-height: 42px; /* Выровнять точки по центру */
-  text-align: center;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  font-family: 'Taler', sans-serif;
+  background-color: rgba(40, 40, 40, 0.6);
+  color: #f1c40f;
+  border: 1px solid rgba(241, 196, 15, 0.5);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+  line-height: 42px; /* Выровнять точки по центру */
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .options-button:hover {
-  background-color: rgba(60, 60, 60, 0.8);
+  background-color: rgba(60, 60, 60, 0.8);
 }
 
 .options-dropdown {
-  display: none; /* Скрыт по умолчанию */
-  position: absolute;
-  top: 100%; /* Под кнопкой "..." */
-  right: 0; /* Выравнивание по правому краю кнопки */
-  background-color: rgba(44, 62, 80, 0.95); /* Темный фон с прозрачностью */
-  border: 1px solid #f1c40f;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-  min-width: 200px;
-  z-index: 100; /* Выше кнопки, если она в том же контейнере */
-  backdrop-filter: blur(5px);
-  overflow: hidden; /* Чтобы border-radius работал для дочерних элементов */
+  display: none; /* Скрыт по умолчанию */
+  position: absolute;
+  top: 100%; /* Под кнопкой "..." */
+  right: 0; /* Выравнивание по правому краю кнопки */
+  background-color: rgba(44, 62, 80, 0.95); /* Темный фон с прозрачностью */
+  border: 1px solid #f1c40f;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  min-width: 200px;
+  z-index: 100; /* Выше кнопки, если она в том же контейнере */
+  backdrop-filter: blur(5px);
+  overflow: hidden; /* Чтобы border-radius работал для дочерних элементов */
 }
 
 .options-dropdown a {
-  font-family: 'Taler', sans-serif;
-  display: block;
-  padding: 12px 18px;
-  color: #f5f5f5;
-  text-decoration: none;
-  font-size: 1em;
-  transition: background-color 0.2s ease;
+  font-family: 'Taler', sans-serif;
+  display: block;
+  padding: 12px 18px;
+  color: #f5f5f5;
+  text-decoration: none;
+  font-size: 1em;
+  transition: background-color 0.2s ease;
 }
 
 .options-dropdown a:hover {
-  background-color: rgba(241, 196, 15, 0.2); /* Подсветка при наведении */
-  color: #f1c40f;
+  background-color: rgba(241, 196, 15, 0.2); /* Подсветка при наведении */
+  color: #f1c40f;
 }
 
 .dropdown-divider {
-  height: 1px;
-  background-color: rgba(241, 196, 15, 0.3);
-  margin: 5px 0;
+  height: 1px;
+  background-color: rgba(241, 196, 15, 0.3);
+  margin: 5px 0;
 }
 
 /* Удаляем старую кнопку, если она еще где-то используется с этим ID */
-#deleteButton { 
-  display: none; /* Скрываем, если вдруг где-то остался этот ID */
+#deleteButton { 
+  display: none; /* Скрываем, если вдруг где-то остался этот ID */
 }
 
 .balance-widget {
-  margin: 20px 0;
-  text-align: center;
-  width: 100%;
-  padding: 0 10px;
+  margin: 20px 0;
+  text-align: center;
+  width: 100%;
+  padding: 0 10px;
 }
