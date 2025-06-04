@@ -1,46 +1,58 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>U&ME</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U&ME</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <h1>U&ME</h1>
-  </header>
+  <header>
+    <h1>U&ME</h1>
+  </header>
 
-  <div class="upload-buttons">
-    <button id="uploadLeft">HIM PEACH</button>
-    <button id="uploadCenter">OUR DREAM</button>
-    <button id="uploadRight">HER CAT</button>
-    <input type="file" id="fileInput" style="display: none;" accept="image/*">
-  </div>
+  <div class="upload-buttons">
+    <button id="uploadLeft">HIM PEACH</button>
+    <button id="uploadCenter">OUR DREAM</button>
+    <button id="uploadRight">HER CAT</button>
+    <input type="file" id="fileInput" style="display: none;" accept="image/*">
+  </div>
 
-  <div class="image-container">
-    <div id="leftColumn" class="image-column"></div>
-    <div id="centerColumn" class="image-column"></div>
-    <div id="rightColumn" class="image-column"></div>
-  </div>
-
-  <div id="imageModal" class="modal" style="display: none;">
-    <img class="modal-content" id="modalImage">
-    <div id="imageInfo"></div>
-    
-    <div id="modalActionsContainer" class="modal-actions-container">
-        <button id="moreOptionsButton" class="options-button">•••</button>
-        <div id="optionsDropdown" class="options-dropdown" style="display: none;">
-            <a href="#" data-action="move" data-column="left">HIM PEACH</a>
-            <a href="#" data-action="move" data-column="center">OUR DREAM</a>
-            <a href="#" data-action="move" data-column="right">HER CAT</a>
-            <div class="dropdown-divider"></div>
-            <a href="#" data-action="delete">Удалить изображение</a>
-        </div>
+  <div class="image-container">
+    <div id="leftColumn" class="image-column">
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
     </div>
+    <div id="centerColumn" class="image-column">
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
     </div>
+    <div id="rightColumn" class="image-column">
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
+        <div class="skeleton-loader"></div>
+    </div>
+  </div>
 
-  <script type="module" src="main-page.js"></script>
+  <div id="imageModal" class="modal" style="display: none;">
+    <img class="modal-content" id="modalImage">
+    <div id="imageInfo"></div>
+    
+    <div id="modalActionsContainer" class="modal-actions-container">
+        <button id="moreOptionsButton" class="options-button">•••</button>
+        <div id="optionsDropdown" class="options-dropdown" style="display: none;">
+            <a href="#" data-action="move" data-column="left">HIM PEACH</a>
+            <a href="#" data-action="move" data-column="center">OUR DREAM</a>
+            <a href="#" data-action="move" data-column="right">HER CAT</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" data-action="delete">Удалить изображение</a>
+        </div>
+    </div>
+    </div>
+
+  <script type="module" src="main-page.js"></script>
 </body>
 </html>
