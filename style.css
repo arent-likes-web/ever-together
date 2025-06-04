@@ -65,7 +65,7 @@ h2 {
   box-shadow: 0 0 12px rgba(241, 196, 15, 0.8);
 }
 
-.btn {
+.btn { /* Этот класс использовался для старой кнопки удаления, можно оставить для других кнопок если есть */
   color: #000000;
   font-family: 'Taler', sans-serif;
   width: 100%;
@@ -118,7 +118,7 @@ h2 {
 }
 
 .image-column {
-  background-color: rgba(44, 62, 80, 0.8); /* Убрал дублирующиеся background-color */
+  background-color: rgba(44, 62, 80, 0.8);
   padding: 10px;
   border-radius: 12px;
   min-height: 400px;
@@ -145,14 +145,14 @@ h2 {
 .modal {
   display: none;
   position: fixed;
-  z-index: 1000;
+  z-index: 1000; /* z-index для модального окна */
   padding-top: 60px;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.9);
-  cursor: pointer; /* Добавлено для улучшения интерактивности на iOS */
+  cursor: pointer;
 }
 
 .modal-content {
@@ -161,23 +161,83 @@ h2 {
   max-width: 80%;
   max-height: 80%;
   border-radius: 15px;
+  position: relative; /* Для возможного позиционирования дочерних элементов */
 }
 
-#deleteButton {
-  color: #000000;
-  font-family: 'Taler', sans-serif;
-  background-color: #f1c40f;
-  color: #2c3e50;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
+#imageInfo {
+  color: #f5f5f5;
+  text-align: center;
   margin-top: 15px;
-  transition: background 0.3s ease;
+  font-size: 1em;
 }
 
-#deleteButton:hover {
-  background-color: #d4ac0d;
+/* Стили для нового меню действий */
+.modal-actions-container {
+  position: absolute;
+  top: 20px; /* Отступ сверху от края модального окна */
+  right: 20px; /* Отступ справа от края модального окна */
+  z-index: 1010; /* Выше контента модального окна */
+}
+
+.options-button {
+  font-family: 'Taler', sans-serif;
+  background-color: rgba(40, 40, 40, 0.6);
+  color: #f1c40f;
+  border: 1px solid rgba(241, 196, 15, 0.5);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+  line-height: 42px; /* Выровнять точки по центру */
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.options-button:hover {
+  background-color: rgba(60, 60, 60, 0.8);
+}
+
+.options-dropdown {
+  display: none; /* Скрыт по умолчанию */
+  position: absolute;
+  top: 100%; /* Под кнопкой "..." */
+  right: 0; /* Выравнивание по правому краю кнопки */
+  background-color: rgba(44, 62, 80, 0.95); /* Темный фон с прозрачностью */
+  border: 1px solid #f1c40f;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  min-width: 200px;
+  z-index: 100; /* Выше кнопки, если она в том же контейнере */
+  backdrop-filter: blur(5px);
+  overflow: hidden; /* Чтобы border-radius работал для дочерних элементов */
+}
+
+.options-dropdown a {
+  font-family: 'Taler', sans-serif;
+  display: block;
+  padding: 12px 18px;
+  color: #f5f5f5;
+  text-decoration: none;
+  font-size: 1em;
+  transition: background-color 0.2s ease;
+}
+
+.options-dropdown a:hover {
+  background-color: rgba(241, 196, 15, 0.2); /* Подсветка при наведении */
+  color: #f1c40f;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: rgba(241, 196, 15, 0.3);
+  margin: 5px 0;
+}
+
+/* Удаляем старую кнопку, если она еще где-то используется с этим ID */
+#deleteButton { 
+  display: none; /* Скрываем, если вдруг где-то остался этот ID */
 }
 
 .balance-widget {
