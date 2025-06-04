@@ -23,7 +23,7 @@ const auth = getAuth();
 const imageModalGlobalRef = document.getElementById('imageModal');
 const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
 const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
-const closeModalButton = document.querySelector('.close-modal'); // Ссылка на крестик закрытия
+// const closeModalButton = document.querySelector('.close-modal'); // Эту строку удаляем, т.к. крестика нет
 
 // Проверка авторизации при загрузке страницы
 onAuthStateChanged(auth, (user) => {
@@ -78,10 +78,10 @@ function displayImage(imageData, imageId) {
     img.classList.add('loaded'); // Добавляем класс 'loaded' после загрузки изображения
   };
 
-  img.addEventListener('click', (event) => {
-    event.stopPropagation(); // Предотвращаем закрытие модального окна при клике на изображение
-    openModal(img);
-  });
+  // Перехватываем клик на imageWrapper, а не на img,
+  // чтобы событие открытия модального окна срабатывало только при клике на обертку
+  // и не конфликтовало с логикой закрытия модального окна.
+  imageWrapper.addEventListener('click', () => openModal(img));
 
   imageWrapper.appendChild(img); // Добавляем изображение внутрь обертки
   targetColumn.prepend(imageWrapper); // Добавляем обертку в колонку
@@ -119,12 +119,14 @@ function openModal(imgElement) {
   if (shouldIncrementView) {
     currentViews += 1;
     // Обновляем dataset на элементе обертки, чтобы не терять данные при перерисовке
-    imgElement.parentElement.dataset.views = currentViews;
+    // Изображение внутри модального окна не является тем же элементом, что в колонке.
+    // Поэтому нужно обновить views на оригинальном элементе в колонке, если есть доступ,
+    // но Firebase сама обновит данные и перерисует. Здесь главное - отправить в базу.
     const imageRefDB = dbRef(database, `images/${imageId}`);
     update(imageRefDB, { views: currentViews });
   }
 
-  imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${currentViews}`;
+  imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️️ Просмотров: ${currentViews}`;
 
   moreOptionsBtn.onclick = function(event) {
     event.stopPropagation();
@@ -180,18 +182,16 @@ function handleCloseInteractions(event) {
     }
   }
 
-  // Закрытие модального окна при клике на подложку или на крестик
-  if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'block') {
-    if (event.target === imageModalGlobalRef || event.target === closeModalButton) {
-      imageModalGlobalRef.style.display = 'none';
-      if (optionsDropdownGlobalRef) {
-        optionsDropdownGlobalRef.style.display = 'none';
-      }
-      // Очищаем данные из модального окна при закрытии
-      document.getElementById('modalImage').src = '';
-      document.getElementById('modalImage').dataset.id = '';
-      document.getElementById('imageInfo').innerHTML = '';
+  // Закрытие модального окна при клике на подложку (пустое место)
+  if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'block' && event.target === imageModalGlobalRef) {
+    imageModalGlobalRef.style.display = 'none';
+    if (optionsDropdownGlobalRef) {
+      optionsDropdownGlobalRef.style.display = 'none';
     }
+    // Очищаем данные из модального окна при закрытии
+    document.getElementById('modalImage').src = '';
+    document.getElementById('modalImage').dataset.id = '';
+    document.getElementById('imageInfo').innerHTML = '';
   }
 }
 
