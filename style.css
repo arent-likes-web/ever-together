@@ -109,8 +109,8 @@ h2 {
 /* Main Page Specific Styles */
 
 .image-container {
-    display: flex; /* <-- Убедитесь, что это flex-контейнер */
-    flex-wrap: wrap; /* <-- Разрешает элементам переноситься на новую строку */
+    display: flex;
+    flex-wrap: wrap; /* <-- Возвращаем, чтобы колонки могли переноситься на меньших экранах, если будет 1 или 2 колонки */
     gap: 10px; /* Пространство между колонками */
     width: 100%;
     max-width: 1200px; /* Максимальная ширина для всего контейнера */
@@ -118,30 +118,31 @@ h2 {
 }
 
 .image-column {
-    flex: 1 1 30%; /* <-- Указываем, как колонка себя ведет:
-                      flex-grow: 1 (может расти)
-                      flex-shrink: 1 (может сжиматься)
-                      flex-basis: 30% (базовая ширина, чтобы 3 колонки помещались) */
-    min-width: 280px; /* Минимальная ширина для каждой колонки, чтобы не становились слишком узкими */
+    flex: 1; /* Каждая колонка занимает равное пространство */
+    /* Важно: flex-basis обеспечивает желаемую ширину */
+    flex-basis: calc(33.333% - 20px / 3); /* Расчет для 3-х колонок с учетом gap */
+    /* 20px = 2 * gap, делим на 3 колонки */
+    min-width: 280px; /* Добавим минимальную ширину, чтобы избежать слишком сильного сжатия */
+
     display: flex;
     flex-direction: column;
     gap: 10px; /* Пространство между изображениями в колонке */
     background-color: rgba(0, 0, 0, 0.2); /* Полупрозрачный фон для колонок */
     padding: 10px;
     border-radius: 8px;
-    box-sizing: border-box; /* Включает padding в ширину элемента */
+    box-sizing: border-box; /* Учитывает padding в ширине колонки */
 }
 
 .image-wrapper {
     width: 100%; /* Обертка изображения занимает всю ширину своей колонки */
-    height: 0; /* Начальная высота, будет установлена padding-bottom для соотношения сторон */
-    padding-bottom: 100%; /* Для соотношения сторон 1:1. Настройте по необходимости. */
+    height: 0; /* Начальная высота, будет установлена через padding-bottom для сохранения пропорций */
+    padding-bottom: 100%; /* Для соотношения сторон 1:1. Отрегулируйте по необходимости. */
     position: relative;
     overflow: hidden;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    background-color: #34495e; /* Цвет-заполнитель до загрузки изображения */
+    background-color: #34495e; /* Цвет-заполнитель перед загрузкой изображения */
 }
 
 .image-wrapper img.thumbnail {
@@ -150,8 +151,8 @@ h2 {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Гарантирует, что изображения покрывают область без искажений */
-    opacity: 0; /* Изначально скрыто для эффекта появления */
+    object-fit: cover; /* Изображения заполняют область без искажений */
+    opacity: 0; /* Скрыто изначально для эффекта плавного появления */
     transition: opacity 0.5s ease;
 }
 
@@ -168,7 +169,7 @@ h2 {
     top: 0;
     width: 100%; /* Полная ширина */
     height: 100%; /* Полная высота */
-    overflow: auto; /* Включает прокрутку при необходимости */
+    overflow: auto; /* Включить прокрутку, если нужно */
     background-color: rgba(0, 0, 0, 0.9); /* Черный с прозрачностью */
     display: flex; /* Используем flexbox для центрирования */
     justify-content: center;
@@ -187,8 +188,8 @@ h2 {
 .modal-content img {
     max-width: 100%;
     max-height: 100%;
-    display: block; /* Убирает лишнее пространство под изображением */
-    object-fit: contain; /* Убедитесь, что все изображение видно, без обрезки */
+    display: block; /* Убрать лишний пробел под изображением */
+    object-fit: contain; /* Убедиться, что изображение видно полностью, без обрезки */
     border-radius: 8px;
 }
 
@@ -198,7 +199,7 @@ h2 {
     right: 20px;
     display: flex;
     gap: 10px;
-    z-index: 1001; /* Убедитесь, что кнопки над изображением */
+    z-index: 1001; /* Кнопки поверх изображения */
 }
 
 .options-button {
@@ -209,11 +210,11 @@ h2 {
     width: 40px;
     height: 40px;
     font-size: 20px;
-    line-height: 40px; /* Центрирует текст по вертикали */
+    line-height: 40px; /* Центрирование текста по вертикали */
     text-align: center;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    display: flex; /* Для центрирования многоточия по вертикали/горизонтали */
+    display: flex; /* Для центрирования многоточия */
     justify-content: center;
     align-items: center;
 }
@@ -225,13 +226,13 @@ h2 {
 .options-dropdown {
     display: none;
     position: absolute;
-    top: 50px; /* Позиционирование под кнопкой опций */
+    top: 50px; /* Расположение под кнопкой опций */
     right: 0;
     background-color: #34495e; /* Темно-синий */
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     min-width: 180px;
-    z-index: 100; /* Убедитесь, что выпадающий список над другими элементами модального окна */
+    z-index: 100; /* Выпадающий список поверх других элементов модального окна */
     overflow: hidden; /* Для скругленных углов */
 }
 
@@ -244,7 +245,7 @@ h2 {
 }
 
 .options-dropdown a:hover {
-    background-color: #2c3e50; /* Слегка светлее синий при наведении */
+    background-color: #2c3e50; /* Немного светлее синий при наведении */
 }
 
 .options-dropdown a[data-action="delete"] {
@@ -268,14 +269,13 @@ h2 {
     z-index: 1001;
 }
 
-
 /* Upload Buttons (Global Styles) */
 .upload-buttons {
     margin: 20px 0;
     display: flex;
     gap: 10px; /* Пространство между кнопками */
     justify-content: center;
-    flex-wrap: nowrap; /* Предотвращаем перенос кнопок */
+    flex-wrap: nowrap; /* Предотвращаем перенос */
     width: 100%; /* Занимает всю доступную ширину */
     padding: 0 10px; /* Небольшие отступы по бокам */
     box-sizing: border-box; /* Учитывает padding в ширине */
@@ -306,12 +306,13 @@ h2 {
 
 
 /* --- Медиазапросы для адаптивности --- */
-@media (max-width: 768px) { /* Для мобильных устройств и планшетов */
+
+/* Общие стили для мобильных и планшетов, сохраняющие 3 столбца */
+@media (max-width: 768px) {
     body {
         padding: 10px;
     }
 
-    /* Управление кнопками загрузки */
     .upload-buttons {
         gap: 5px; /* Уменьшаем отступ между кнопками на мобильных */
     }
@@ -323,36 +324,19 @@ h2 {
         max-width: unset; /* Убираем максимальную ширину */
     }
 
-    /* Управление колонками изображений */
     .image-container {
-        flex-wrap: wrap; /* <-- Важно: разрешаем колонкам переноситься */
-        gap: 5px; /* Уменьшаем отступ между колонками */
+        gap: 5px;
+        width: 100%;
         padding: 0 5px;
+        /* flex-wrap: wrap; остаётся, чтобы колонки могли переходить на 2 или 1, если понадобится */
     }
 
     .image-column {
-        /* При маленьких разрешениях, чтобы 3 колонки оставались в ряд */
-        /* flex-basis: calc(33.333% - (2 * 5px / 3)); */ /* Расчет для 3-х колонок с gap */
-        width: calc(33.333% - 10px/3*2); /* <-- Более точный расчет для 3 колонок с учетом gap 10px */
-        /* Или, более просто, если не нужно идеальное распределение: */
-        width: 33%; /* <-- Базовая ширина для 3-х колонок */
+        /* Пересчитываем flex-basis для 3-х колонок на мобильных, с меньшим gap */
+        flex-basis: calc(33.333% - 10px / 3); /* 10px = 2 * gap, делим на 3 колонки */
         min-height: 300px;
-        padding: 5px; /* Уменьшаем отступы внутри колонки */
+        padding: 5px;
     }
-
-    /* Для более маленьких экранов, если 3 колонки всё ещё слишком тесно */
-    @media (max-width: 600px) {
-        .image-column {
-            width: calc(50% - 5px); /* 2 колонки */
-        }
-    }
-
-    @media (max-width: 400px) {
-        .image-column {
-            width: 100%; /* 1 колонка */
-        }
-    }
-
 
     .modal-content {
         max-width: 95%;
@@ -378,5 +362,18 @@ h2 {
 
     .options-dropdown a {
         padding: 10px 15px;
+    }
+}
+
+/* Медиазапросы для перехода на 2 или 1 колонку на очень маленьких экранах */
+@media (max-width: 600px) {
+    .image-column {
+        flex-basis: calc(50% - 5px); /* 2 колонки на экране с gap 5px */
+    }
+}
+
+@media (max-width: 400px) {
+    .image-column {
+        flex-basis: 100%; /* 1 колонка на очень маленьких экранах */
     }
 }
