@@ -22,7 +22,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px;
+  padding: 20px; /* Отступ по краям для больших экранов */
   text-align: center;
 }
 
@@ -65,7 +65,7 @@ h2 {
   box-shadow: 0 0 12px rgba(241, 196, 15, 0.8);
 }
 
-.btn { /* Этот класс использовался для старой кнопки удаления, можно оставить для других кнопок если есть */
+.btn {
   color: #000000;
   font-family: 'Taler', sans-serif;
   width: 100%;
@@ -88,6 +88,9 @@ h2 {
   margin: 20px 0;
   display: flex;
   gap: 10px;
+  /* Добавляем обтекание кнопками на маленьких экранах */
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .upload-buttons button {
@@ -101,6 +104,8 @@ h2 {
   background-color: #f1c40f;
   color: #2c3e50;
   transition: background 0.3s ease, transform 0.2s;
+  /* Устанавливаем минимальную ширину для кнопок, чтобы они не были слишком узкими */
+  min-width: 120px;
 }
 
 .upload-buttons button:hover {
@@ -111,18 +116,19 @@ h2 {
 .image-container {
   display: flex;
   flex-direction: row;
-  gap: 10px;
+  gap: 1%; /* Уменьшаем расстояние между колонками */
   width: 100%;
-  max-width: 1200px;
+  max-width: 1200px; /* Максимальная ширина контейнера */
   justify-content: center;
+  padding: 0 10px; /* Небольшой отступ по бокам для мобильных устройств */
 }
 
 .image-column {
   background-color: rgba(44, 62, 80, 0.8);
   padding: 10px;
   border-radius: 12px;
-  min-height: 400px;
-  width: 32%;
+  /* min-height: 400px; */ /* Убираем фиксированную минимальную высоту */
+  width: 32%; /* Процентная ширина для гибкости */
   overflow-y: auto;
   border: 1px solid #fffbe6;
   backdrop-filter: blur(6px);
@@ -132,7 +138,7 @@ h2 {
 .image-wrapper {
   position: relative;
   width: 100%;
-  padding-bottom: 75%; /* Пример: 4:3 соотношение сторон. Можно настроить */
+  /* padding-bottom: 75%; */ /* Убираем фиксированное соотношение сторон */
   background-color: #3d5166; /* Цвет фона для скелета */
   border-radius: 15px;
   margin-bottom: 8px;
@@ -141,6 +147,9 @@ h2 {
   justify-content: center;
   align-items: center;
   border: 2px solid #fcefc5; /* Сохраняем рамку */
+
+  /* Добавляем минимальную высоту для placeholder'а, чтобы он не схлопывался совсем */
+  min-height: 100px; /* Можно настроить */
 }
 
 .image-wrapper::before {
@@ -153,6 +162,7 @@ h2 {
   background: linear-gradient(90deg, #3d5166 25%, #4a617c 50%, #3d5166 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
+  z-index: 1; /* Убедимся, что скелет поверх, если вдруг изображение уже начинает прогружаться */
 }
 
 @keyframes loading {
@@ -165,16 +175,16 @@ h2 {
 }
 
 .thumbnail {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Чтобы изображение полностью заполняло контейнер */
+  position: relative; /* Изменяем на relative, чтобы изображение влияло на высоту родителя */
+  width: 100%; /* Изображение занимает всю ширину контейнера */
+  height: auto; /* Высота подстраивается под изображение */
+  display: block; /* Убираем лишние отступы, если img - inline */
+  object-fit: contain; /* Изменяем на contain, чтобы изображение не обрезалось, а умещалось целиком */
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   border-radius: 13px; /* Меньше, чтобы рамка контейнера была видна */
   cursor: pointer;
+  z-index: 2; /* Изображение поверх скелета */
 }
 
 .thumbnail.loaded {
@@ -183,7 +193,7 @@ h2 {
 
 /* Эффект при наведении на обертку, а не на само изображение */
 .image-wrapper:hover {
-  transform: scale(1.05);
+  transform: scale(1.03); /* Уменьшаем масштаб, чтобы не было сильных сдвигов */
   transition: transform 0.3s ease;
 }
 
@@ -191,21 +201,20 @@ h2 {
 .modal {
   display: none;
   position: fixed;
-  z-index: 1000; /* z-index для модального окна */
+  z-index: 1000;
   padding-top: 60px;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.9);
-  /* cursor: pointer; */ /* Убрал, чтобы не мешало при взаимодействии с кнопками */
 }
 
 .modal-content {
   margin: auto;
   display: block;
-  max-width: 80%;
-  max-height: 80%;
+  max-width: 90%; /* Увеличиваем ширину на мобильных */
+  max-height: 90%; /* Увеличиваем высоту на мобильных */
   border-radius: 15px;
   position: relative;
 }
@@ -309,4 +318,76 @@ h2 {
   text-align: center;
   width: 100%;
   padding: 0 10px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  body {
+    padding: 10px; /* Уменьшаем общий отступ на мобильных */
+  }
+
+  .upload-buttons {
+    flex-direction: column; /* Кнопки располагаются вертикально */
+    gap: 8px; /* Немного уменьшаем зазор */
+    width: 90%; /* Ширина кнопок */
+  }
+
+  .upload-buttons button {
+    width: 100%; /* Кнопки занимают всю доступную ширину */
+    font-size: 14px; /* Уменьшаем размер шрифта */
+    padding: 10px 15px;
+  }
+
+  .image-container {
+    flex-direction: column; /* Столбцы располагаются вертикально */
+    gap: 15px; /* Увеличиваем зазор между бывшими столбцами */
+    padding: 0 10px; /* Отступы по бокам */
+  }
+
+  .image-column {
+    width: 100%; /* Столбцы занимают всю ширину */
+    min-height: auto; /* Сбрасываем минимальную высоту, чтобы она не мешала */
+    padding: 8px; /* Уменьшаем внутренний отступ */
+  }
+
+  .image-wrapper {
+    min-height: 80px; /* Уменьшаем минимальную высоту placeholder'а для мобильных */
+  }
+
+  .thumbnail {
+    border-radius: 10px; /* Немного уменьшаем радиус скругления */
+  }
+
+  .modal-content {
+    max-width: 95%; /* Ещё больше ширина на мобильных */
+    max-height: 95%; /* Ещё больше высота на мобильных */
+    padding-top: 20px; /* Чтобы не перекрывалось крестиком */
+  }
+
+  .close-modal {
+    top: 5px; /* Крестик выше */
+    right: 15px; /* Правее */
+    font-size: 30px; /* Меньше размер крестика */
+  }
+
+  .modal-actions-container {
+    top: 10px; /* Немного выше */
+    right: 10px; /* Немного правее */
+  }
+
+  .options-button {
+    width: 38px; /* Меньше кнопка */
+    height: 38px; /* Меньше кнопка */
+    font-size: 18px; /* Меньше шрифт */
+    line-height: 36px;
+  }
+
+  .options-dropdown {
+    min-width: 150px; /* Меньше ширина дропдауна */
+  }
+
+  .options-dropdown a {
+    padding: 10px 15px; /* Меньше отступы в дропдауне */
+    font-size: 0.9em;
+  }
 }
