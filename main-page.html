@@ -28,8 +28,18 @@
   <div id="imageModal" class="modal" style="display: none;">
     <img class="modal-content" id="modalImage">
     <div id="imageInfo"></div>
-    <button id="deleteButton" class="btn">Удалить изображение</button>
-  </div>
+    
+    <div id="modalActionsContainer" class="modal-actions-container">
+        <button id="moreOptionsButton" class="options-button">•••</button>
+        <div id="optionsDropdown" class="options-dropdown" style="display: none;">
+            <a href="#" data-action="move" data-column="left">HIM PEACH</a>
+            <a href="#" data-action="move" data-column="center">OUR DREAM</a>
+            <a href="#" data-action="move" data-column="right">HER CAT</a>
+            <div class="dropdown-divider"></div>
+            <a href="#" data-action="delete">Удалить изображение</a>
+        </div>
+    </div>
+    </div>
 
   <script type="module" src="main-page.js"></script>
 </body>
