@@ -5,13 +5,13 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 
 // Firebase Config
 const firebaseConfig = {
-  apiKey: "AIzaSyDIMvnTxfnpDr72fIIexWcO2Jl0_fqM7tw",
-  authDomain: "ever-together.firebaseapp.com",
-  databaseURL: "https://ever-together-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "ever-together",
-  storageBucket: "ever-together.appspot.com",
-  messagingSenderId: "333503123875",
-  appId: "1:333503123875:web:313a63c0d9f0093f05ca16"
+  apiKey: "AIzaSyDIMvnTxfnpDr72fIIexWcO2Jl0_fqM7tw",
+  authDomain: "ever-together.firebaseapp.com",
+  databaseURL: "https://ever-together-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "ever-together",
+  storageBucket: "ever-together.appspot.com",
+  messagingSenderId: "333503123875",
+  appId: "1:333503123875:web:313a63c0d9f0093f05ca16"
 };
 
 // Инициализация Firebase
@@ -24,137 +24,185 @@ const imageModalGlobalRef = document.getElementById('imageModal');
 const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
 const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
 
-
 // Проверка авторизации при загрузке страницы
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("Пользователь авторизован:", user.email);
-    window.currentUser = user.email;
-    loadImagesFromFirebase();
-    updateBackgroundGradient();
-  } else {
-    console.log("Пользователь не авторизован. Перенаправление на страницу входа.");
-    window.location.href = "entry.html";
-  }
+  if (user) {
+    console.log("Пользователь авторизован:", user.email);
+    window.currentUser = user.email;
+    loadImagesFromFirebase();
+    updateBackgroundGradient();
+  } else {
+    console.log("Пользователь не авторизован. Перенаправление на страницу входа.");
+    window.location.href = "entry.html";
+  }
 });
+
+// Добавим функцию для показа скелетных загрузчиков
+function showSkeletonLoaders() {
+    ['leftColumn', 'centerColumn', 'rightColumn'].forEach(columnId => {
+        const column = document.getElementById(columnId);
+        column.innerHTML = ''; // Очищаем колонку перед добавлением скелетов
+        for (let i = 0; i < 3; i++) { // Добавляем 3 скелета на каждую колонку
+            const skeleton = document.createElement('div');
+            skeleton.classList.add('skeleton-loader');
+            column.appendChild(skeleton);
+        }
+    });
+}
 
 // Загрузка изображений из Firebase
 function loadImagesFromFirebase() {
-  const imagesRef = dbRef(database, 'images');
-  onValue(imagesRef, (snapshot) => {
-    const data = snapshot.val();
-    document.getElementById('leftColumn').innerHTML = '';
-    document.getElementById('centerColumn').innerHTML = '';
-    document.getElementById('rightColumn').innerHTML = '';
-    if (data) {
-      Object.keys(data).forEach((key) => {
-        displayImage(data[key], key);
-      });
-    }
-    updateBackgroundGradient();
-  });
+    showSkeletonLoaders(); // Показываем скелеты перед загрузкой данных
+    const imagesRef = dbRef(database, 'images');
+    onValue(imagesRef, (snapshot) => {
+        const data = snapshot.val();
+        // Создаем временные контейнеры для каждой колонки
+        const tempLeftColumn = document.createElement('div');
+        const tempCenterColumn = document.createElement('div');
+        const tempRightColumn = document.createElement('div');
+
+        if (data) {
+            const imagePromises = [];
+            Object.keys(data).forEach((key) => {
+                const imageData = data[key];
+                const img = document.createElement('img');
+                img.src = imageData.url;
+                img.classList.add('thumbnail');
+                img.dataset.timestamp = imageData.timestamp;
+                img.dataset.views = imageData.views || 0;
+                img.dataset.id = key;
+                img.dataset.column = imageData.column;
+                img.addEventListener('click', () => openModal(img));
+                
+                // Добавляем Promise, который разрешится, когда изображение загрузится
+                const imgLoadPromise = new Promise(resolve => {
+                    img.onload = () => {
+                        img.classList.add('loaded'); // Добавляем класс для плавной анимации
+                        resolve();
+                    };
+                    img.onerror = () => { // На случай ошибки загрузки
+                        console.error(`Ошибка загрузки изображения: ${img.src}`);
+                        resolve(); 
+                    };
+                });
+                imagePromises.push(imgLoadPromise);
+
+                // Добавляем изображение во временный контейнер
+                if (imageData.column === 'left') {
+                    tempLeftColumn.prepend(img);
+                } else if (imageData.column === 'center') {
+                    tempCenterColumn.prepend(img);
+                } else if (imageData.column === 'right') {
+                    tempRightColumn.prepend(img);
+                }
+            });
+
+            // Ждем, пока все изображения загрузятся (или произойдет ошибка загрузки)
+            Promise.all(imagePromises).then(() => {
+                // Очищаем колонки и вставляем загруженные изображения
+                document.getElementById('leftColumn').innerHTML = '';
+                document.getElementById('centerColumn').innerHTML = '';
+                document.getElementById('rightColumn').innerHTML = '';
+
+                document.getElementById('leftColumn').appendChild(tempLeftColumn);
+                document.getElementById('centerColumn').appendChild(tempCenterColumn);
+                document.getElementById('rightColumn').appendChild(tempRightColumn);
+            });
+        } else {
+            // Если данных нет, просто очищаем колонки от скелетов
+            document.getElementById('leftColumn').innerHTML = '';
+            document.getElementById('centerColumn').innerHTML = '';
+            document.getElementById('rightColumn').innerHTML = '';
+        }
+        updateBackgroundGradient();
+    });
 }
 
-// Отображение изображения
-function displayImage(imageData, imageId) {
-  const img = document.createElement('img');
-  img.src = imageData.url;
-  img.classList.add('thumbnail');
-  img.dataset.timestamp = imageData.timestamp;
-  img.dataset.views = imageData.views || 0;
-  img.dataset.id = imageId;
-  img.dataset.column = imageData.column;
-  img.addEventListener('click', () => openModal(img));
-  const targetColumn = document.getElementById(`${imageData.column}Column`);
-  if (targetColumn) {
-    targetColumn.prepend(img);
-  }
-}
 
 // Открытие модального окна
 function openModal(imgElement) {
-  const modal = document.getElementById('imageModal');
-  const modalImage = document.getElementById('modalImage');
-  const imageInfo = document.getElementById('imageInfo');
-  const moreOptionsBtn = document.getElementById('moreOptionsButton');
-  const dropdown = document.getElementById('optionsDropdown');
+  const modal = document.getElementById('imageModal');
+  const modalImage = document.getElementById('modalImage');
+  const imageInfo = document.getElementById('imageInfo');
+  const moreOptionsBtn = document.getElementById('moreOptionsButton');
+  const dropdown = document.getElementById('optionsDropdown');
 
-  modal.style.display = 'block';
-  dropdown.style.display = 'none'; 
-  modalImage.src = imgElement.src;
-  modalImage.dataset.id = imgElement.dataset.id;
+  modal.style.display = 'block';
+  dropdown.style.display = 'none'; 
+  modalImage.src = imgElement.src;
+  modalImage.dataset.id = imgElement.dataset.id;
 
-  const imageId = imgElement.dataset.id;
-  const column = imgElement.dataset.column;
-  let currentViews = parseInt(imgElement.dataset.views) || 0;
+  const imageId = imgElement.dataset.id;
+  const column = imgElement.dataset.column;
+  let currentViews = parseInt(imgElement.dataset.views) || 0;
 
-  const userIsAretren = window.currentUser === 'aretren@gmail.com';
-  const userIsChoisalery = window.currentUser === 'choisalery@gmail.com';
-  let shouldIncrementView = false;
+  const userIsAretren = window.currentUser === 'aretren@gmail.com';
+  const userIsChoisalery = window.currentUser === 'choisalery@gmail.com';
+  let shouldIncrementView = false;
 
-  if (column === 'left' && userIsAretren) { 
-    shouldIncrementView = true;
-  } else if (column === 'right' && userIsChoisalery) { 
-    shouldIncrementView = true;
-  } else if (column === 'center' && (userIsAretren || userIsChoisalery)) { 
-    shouldIncrementView = true;
-  }
+  if (column === 'left' && userIsAretren) { 
+    shouldIncrementView = true;
+  } else if (column === 'right' && userIsChoisalery) { 
+    shouldIncrementView = true;
+  } else if (column === 'center' && (userIsAretren || userIsChoisalery)) { 
+    shouldIncrementView = true;
+  }
 
-  if (shouldIncrementView) {
-    currentViews += 1;
-    imgElement.dataset.views = currentViews;
-    const imageRefDB = dbRef(database, `images/${imageId}`);
-    update(imageRefDB, { views: currentViews });
-  }
+  if (shouldIncrementView) {
+    currentViews += 1;
+    imgElement.dataset.views = currentViews;
+    const imageRefDB = dbRef(database, `images/${imageId}`);
+    update(imageRefDB, { views: currentViews });
+  }
 
-  imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${currentViews}`;
+  imageInfo.innerHTML = `📅 Загружено: ${new Date(imgElement.dataset.timestamp).toLocaleString()}<br>👁️ Просмотров: ${currentViews}`;
 
-  moreOptionsBtn.onclick = function(event) {
-    event.stopPropagation(); 
-    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-  };
+  moreOptionsBtn.onclick = function(event) {
+    event.stopPropagation(); 
+    dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+  };
 
-  dropdown.onclick = function(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    const targetActionElement = event.target.closest('a[data-action]');
-    if (!targetActionElement) return;
+  dropdown.onclick = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    const targetActionElement = event.target.closest('a[data-action]');
+    if (!targetActionElement) return;
 
-    const action = targetActionElement.dataset.action;
-    const currentImageId = modalImage.dataset.id;
+    const action = targetActionElement.dataset.action;
+    const currentImageId = modalImage.dataset.id;
 
-    if (action === 'delete') {
-      remove(dbRef(database, `images/${currentImageId}`))
-        .then(() => console.log("Изображение удалено:", currentImageId))
-        .catch(error => console.error("Ошибка удаления:", error));
-    } else if (action === 'move') {
-      const newColumn = targetActionElement.dataset.column;
-      update(dbRef(database, `images/${currentImageId}`), { column: newColumn })
-        .then(() => console.log(`Изображение ${currentImageId} перемещено в ${newColumn}`))
-        .catch(error => console.error("Ошибка перемещения:", error));
-    }
+    if (action === 'delete') {
+      remove(dbRef(database, `images/${currentImageId}`))
+        .then(() => console.log("Изображение удалено:", currentImageId))
+        .catch(error => console.error("Ошибка удаления:", error));
+    } else if (action === 'move') {
+      const newColumn = targetActionElement.dataset.column;
+      update(dbRef(database, `images/${currentImageId}`), { column: newColumn })
+        .then(() => console.log(`Изображение ${currentImageId} перемещено в ${newColumn}`))
+        .catch(error => console.error("Ошибка перемещения:", error));
+    }
 
-    dropdown.style.display = 'none';
-    modal.style.display = 'none'; 
-  };
+    dropdown.style.display = 'none';
+    modal.style.display = 'none'; 
+  };
 }
 
 function handleCloseInteractions(event) {
-    if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
-        if (moreOptionsButtonGlobalRef && 
-            !moreOptionsButtonGlobalRef.contains(event.target) && 
-            !optionsDropdownGlobalRef.contains(event.target)) {
-            optionsDropdownGlobalRef.style.display = 'none';
-        }
-    }
+    if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
+        if (moreOptionsButtonGlobalRef && 
+            !moreOptionsButtonGlobalRef.contains(event.target) && 
+            !optionsDropdownGlobalRef.contains(event.target)) {
+            optionsDropdownGlobalRef.style.display = 'none';
+        }
+    }
 
-    if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'block' && event.target === imageModalGlobalRef) {
-        imageModalGlobalRef.style.display = 'none';
-        if (optionsDropdownGlobalRef) { 
-            optionsDropdownGlobalRef.style.display = 'none';
-        }
-    }
+    if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'block' && event.target === imageModalGlobalRef) {
+        imageModalGlobalRef.style.display = 'none';
+        if (optionsDropdownGlobalRef) { 
+            optionsDropdownGlobalRef.style.display = 'none';
+        }
+    }
 }
 
 window.addEventListener('click', handleCloseInteractions);
@@ -171,92 +219,92 @@ document.body.appendChild(fileInput);
 
 const uploadButtons = document.querySelectorAll('.upload-buttons button');
 uploadButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    const column = button.id.replace('upload', '').toLowerCase();
-    fileInput.dataset.column = column;
-    fileInput.click();
-  });
+  button.addEventListener('click', () => {
+    const column = button.id.replace('upload', '').toLowerCase();
+    fileInput.dataset.column = column;
+    fileInput.click();
+  });
 });
 
 fileInput.addEventListener('change', async (event) => { // Делаем обработчик асинхронным
-  const files = event.target.files; // Получаем список всех выбранных файлов
-  if (files.length > 0) {
-    const selectedColumn = fileInput.dataset.column; // Колонка для всей пачки файлов
-    console.log(`Начало пакетной загрузки ${files.length} файлов в колонку ${selectedColumn}`);
-    // Можно добавить какой-то индикатор загрузки для пользователя здесь
+  const files = event.target.files; // Получаем список всех выбранных файлов
+  if (files.length > 0) {
+    const selectedColumn = fileInput.dataset.column; // Колонка для всей пачки файлов
+    console.log(`Начало пакетной загрузки ${files.length} файлов в колонку ${selectedColumn}`);
+    // Можно добавить какой-то индикатор загрузки для пользователя здесь
 
-    for (const file of files) { // Последовательно обрабатываем каждый файл
-      console.log(`Загрузка файла: ${file.name}`);
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", "ever_together_upload");
+    for (const file of files) { // Последовательно обрабатываем каждый файл
+      console.log(`Загрузка файла: ${file.name}`);
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", "ever_together_upload");
 
-        const cloudinaryResponse = await fetch("https://api.cloudinary.com/v1_1/dozbf3jis/image/upload", {
-          method: "POST",
-          body: formData
-        });
+        const cloudinaryResponse = await fetch("https://api.cloudinary.com/v1_1/dozbf3jis/image/upload", {
+          method: "POST",
+          body: formData
+        });
 
-        if (!cloudinaryResponse.ok) {
-          let errorDetails = `HTTP ошибка ${cloudinaryResponse.status}: ${cloudinaryResponse.statusText}`;
-          try {
-            // Пытаемся получить детали ошибки от Cloudinary
-            const errorData = await cloudinaryResponse.json();
-            if (errorData.error && errorData.error.message) {
-              errorDetails += ` - ${errorData.error.message}`;
-            }
-          } catch (e) {
-            // Не удалось распарсить JSON ошибки
-          }
-          console.error(`Ошибка Cloudinary при загрузке ${file.name}: ${errorDetails}`);
-          alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorDetails}. Смотрите консоль для деталей.`);
-          continue; // Переходим к следующему файлу
-        }
+        if (!cloudinaryResponse.ok) {
+          let errorDetails = `HTTP ошибка ${cloudinaryResponse.status}: ${cloudinaryResponse.statusText}`;
+          try {
+            // Пытаемся получить детали ошибки от Cloudinary
+            const errorData = await cloudinaryResponse.json();
+            if (errorData.error && errorData.error.message) {
+              errorDetails += ` - ${errorData.error.message}`;
+            }
+          } catch (e) {
+            // Не удалось распарсить JSON ошибки
+          }
+          console.error(`Ошибка Cloudinary при загрузке ${file.name}: ${errorDetails}`);
+          alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorDetails}. Смотрите консоль для деталей.`);
+          continue; // Переходим к следующему файлу
+        }
 
-        const cloudinaryData = await cloudinaryResponse.json();
+        const cloudinaryData = await cloudinaryResponse.json();
 
-        if (cloudinaryData.secure_url) {
-          const newImageRef = push(dbRef(database, 'images'));
-          await set(newImageRef, {
-            url: cloudinaryData.secure_url,
-            timestamp: new Date().toISOString(),
-            views: 0,
-            column: selectedColumn
-          });
-          console.log(`Файл ${file.name} успешно загружен и сохранен.`);
-        } else {
-          const errorMsg = cloudinaryData.error && cloudinaryData.error.message ? cloudinaryData.error.message : "URL не получен от Cloudinary.";
-          console.error(`Ошибка при загрузке ${file.name} в Cloudinary: ${errorMsg}`, cloudinaryData);
-          alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorMsg}.`);
-        }
-      } catch (error) { // Ловим сетевые ошибки или другие сбои в процессе
-        console.error(`Критическая ошибка при загрузке файла ${file.name}:`, error);
-        alert(`Произошла ошибка при загрузке файла ${file.name}: ${error.message}.`);
-      }
-    }
-    // Очищаем значение инпута, чтобы можно было выбрать те же файлы снова
-    event.target.value = null; 
-    console.log("Пакетная загрузка завершена (или предприняты все попытки).");
-    // Можно убрать индикатор загрузки для пользователя здесь
-  }
+        if (cloudinaryData.secure_url) {
+          const newImageRef = push(dbRef(database, 'images'));
+          await set(newImageRef, {
+            url: cloudinaryData.secure_url,
+            timestamp: new Date().toISOString(),
+            views: 0,
+            column: selectedColumn
+          });
+          console.log(`Файл ${file.name} успешно загружен и сохранен.`);
+        } else {
+          const errorMsg = cloudinaryData.error && cloudinaryData.error.message ? cloudinaryData.error.message : "URL не получен от Cloudinary.";
+          console.error(`Ошибка при загрузке ${file.name} в Cloudinary: ${errorMsg}`, cloudinaryData);
+          alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorMsg}.`);
+        }
+      } catch (error) { // Ловим сетевые ошибки или другие сбои в процессе
+        console.error(`Критическая ошибка при загрузке файла ${file.name}:`, error);
+        alert(`Произошла ошибка при загрузке файла ${file.name}: ${error.message}.`);
+      }
+    }
+    // Очищаем значение инпута, чтобы можно было выбрать те же файлы снова
+    event.target.value = null; 
+    console.log("Пакетная загрузка завершена (или предприняты все попытки).");
+    // Можно убрать индикатор загрузки для пользователя здесь
+  }
 });
 // ----- КОНЕЦ ИЗМЕНЕНИЙ ДЛЯ ПАКЕТНОЙ ЗАГРУЗКИ -----
 
 
 function updateBackgroundGradient() {
-  const leftViews = getColumnViews('left');
-  const centerViews = getColumnViews('center');
-  const rightViews = getColumnViews('right');
-  const totalViews = leftViews + centerViews + rightViews;
-  let balance = 0;
-  if (totalViews > 0) {
-    balance = (leftViews - rightViews) / totalViews;
-  }
-  const gradientPosition = 50 + (balance * 50);
-  document.body.style.background = `linear-gradient(to right, #121212 ${gradientPosition}%, #2c3e50)`;
+  const leftViews = getColumnViews('left');
+  const centerViews = getColumnViews('center');
+  const rightViews = getColumnViews('right');
+  const totalViews = leftViews + centerViews + rightViews;
+  let balance = 0;
+  if (totalViews > 0) {
+    balance = (leftViews - rightViews) / totalViews;
+  }
+  const gradientPosition = 50 + (balance * 50);
+  document.body.style.background = `linear-gradient(to right, #121212 ${gradientPosition}%, #2c3e50)`;
 }
 
 function getColumnViews(columnName) {
-  const images = document.querySelectorAll(`.image-column#${columnName}Column .thumbnail`);
-  return Array.from(images).reduce((acc, img) => acc + (parseInt(img.dataset.views) || 0), 0);
+  const images = document.querySelectorAll(`.image-column#${columnName}Column .thumbnail`);
+  return Array.from(images).reduce((acc, img) => acc + (parseInt(img.dataset.views) || 0), 0);
 }
