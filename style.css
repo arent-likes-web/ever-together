@@ -65,7 +65,7 @@ h2 {
   box-shadow: 0 0 12px rgba(241, 196, 15, 0.8);
 }
 
-.btn { /* Этот класс использовался для старой кнопки удаления, можно оставить для других кнопок если есть */
+.btn {
   color: #000000;
   font-family: 'Taler', sans-serif;
   width: 100%;
@@ -88,8 +88,8 @@ h2 {
   margin: 20px 0;
   display: flex;
   gap: 10px;
-  /* flex-wrap: wrap; <-- Убираем, т.к. на десктопе кнопки должны быть в одну линию */
   justify-content: center;
+  /* На десктопе кнопки остаются в ряд */
 }
 
 .upload-buttons button {
@@ -103,8 +103,7 @@ h2 {
   background-color: #f1c40f;
   color: #2c3e50;
   transition: background 0.3s ease, transform 0.2s;
-  /* flex-grow: 1; <-- Убираем, чтобы кнопки не расширялись до краев, а сохраняли свои размеры */
-  /* min-width: 120px; <-- Убираем, т.к. для десктопа лучше естественная ширина */
+  white-space: nowrap; /* Предотвращает перенос текста в кнопках */
 }
 
 .upload-buttons button:hover {
@@ -114,7 +113,7 @@ h2 {
 
 .image-container {
   display: flex;
-  flex-direction: row; /* На десктопе колонки остаются горизонтальными */
+  flex-direction: row; /* Колонки всегда горизонтальные */
   gap: 10px; /* Расстояние между колонками */
   width: 100%;
   max-width: 1200px;
@@ -125,30 +124,30 @@ h2 {
   background-color: rgba(44, 62, 80, 0.8);
   padding: 10px;
   border-radius: 12px;
-  min-height: 400px; /* Сохраняем минимальную высоту для пустых колонок */
+  min-height: 400px;
   width: 32%; /* Сохраняем ширину для десктопа */
   overflow-y: auto;
   border: 1px solid #fffbe6;
   backdrop-filter: blur(6px);
   display: flex;
   flex-direction: column;
-  align-items: center; /* Центрируем изображения внутри колонки */
+  align-items: center;
 }
 
 /* Стили для скелетных лоадеров и плавной загрузки */
 .image-wrapper {
   position: relative;
   width: 100%;
-  background-color: #3d5166; /* Цвет фона для скелета */
+  background-color: #3d5166;
   border-radius: 15px;
   margin-bottom: 8px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 2px solid #fcefc5; /* Сохраняем рамку */
-  min-height: 100px; /* Минимальная высота для лоадера, чтобы избежать "схлопывания" */
-  transition: transform 0.3s ease; /* Добавил сюда переход для ховера */
+  border: 2px solid #fcefc5;
+  min-height: 100px;
+  transition: transform 0.3s ease;
 }
 
 /* Анимация скелетного лоадера */
@@ -162,17 +161,16 @@ h2 {
   background: linear-gradient(90deg, #3d5166 25%, #4a617c 50%, #3d5166 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
-  z-index: 1; /* Чтобы лоадер был поверх изображения до загрузки */
-  opacity: 1; /* По умолчанию лоадер видим */
-  transition: opacity 0.5s ease; /* Плавное исчезание лоадера */
+  z-index: 1;
+  opacity: 1;
+  transition: opacity 0.5s ease;
 }
 
 /* Когда изображение загружено, скрываем лоадер */
 .thumbnail.loaded + .image-wrapper::before {
-    opacity: 0;
-    pointer-events: none; /* Чтобы не мешал взаимодействию */
+  opacity: 0;
+  pointer-events: none;
 }
-
 
 @keyframes loading {
   0% {
@@ -184,16 +182,16 @@ h2 {
 }
 
 .thumbnail {
-  position: relative; /* Изменено с absolute на relative */
+  position: relative;
   width: 100%;
-  height: auto; /* Позволяем высоте подстраиваться под изображение */
-  display: block; /* Убираем лишние пробелы */
-  object-fit: contain; /* Изменено с 'cover' на 'contain' */
+  height: auto;
+  display: block;
+  object-fit: contain;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
-  border-radius: 13px; /* Меньше, чтобы рамка контейнера была видна */
+  border-radius: 13px;
   cursor: pointer;
-  z-index: 2; /* Чтобы изображение было поверх лоадера */
+  z-index: 2;
 }
 
 .thumbnail.loaded {
@@ -202,10 +200,8 @@ h2 {
 
 /* Эффект при наведении на обертку */
 .image-wrapper:hover {
-  transform: scale(1.03); /* Немного уменьшил масштаб для более тонкого эффекта */
-  /* transition уже добавлен выше */
+  transform: scale(1.03);
 }
-
 
 /* Модальное окно и его элементы */
 .modal {
@@ -227,7 +223,7 @@ h2 {
   max-height: 80%;
   border-radius: 15px;
   position: relative;
-  object-fit: contain; /* Чтобы изображение в модальном окне не обрезалось */
+  object-fit: contain;
 }
 
 #imageInfo {
@@ -241,7 +237,6 @@ h2 {
 .close-modal {
   display: none; /* Полностью скрываем крестик */
 }
-
 
 /* Стили для нового меню действий */
 .modal-actions-container {
@@ -319,48 +314,67 @@ h2 {
 }
 
 /* --- Медиазапросы для адаптивности --- */
-@media (max-width: 768px) {
-  body {
-    padding: 10px;
+/* Только для очень маленьких экранов, чтобы кнопки не налезали друг на друга */
+@media (max-width: 480px) {
+  .upload-buttons {
+    flex-wrap: wrap; /* Разрешаем перенос кнопок */
+    gap: 5px; /* Уменьшаем отступ между кнопками */
   }
 
+  .upload-buttons button {
+    font-size: 13px;
+    padding: 8px 10px;
+    flex-basis: auto; /* Позволяем ширине быть авто, но с min-width */
+    min-width: 80px; /* Минимальная ширина для кнопки */
+  }
+
+  .image-container {
+    gap: 5px; /* Уменьшаем отступ между колонками */
+  }
+
+  .image-column {
+    padding: 5px; /* Уменьшаем внутренний отступ колонки */
+    min-height: 200px; /* Возможное уменьшение минимальной высоты */
+  }
+}
+
+/* Общие стили для мобильных и планшетов, сохраняющие 3 столбца */
+@media (max-width: 768px) {
+  body {
+    padding: 10px; /* Уменьшаем общий padding на мобильных */
+  }
+
+  /* Для кнопок: сохраняем flex-direction: row, но позволяем перенос и уменьшаем отступы */
   .upload-buttons {
-    flex-direction: column; /* Кнопки будут располагаться вертикально только на мобильных */
-    gap: 8px;
+    gap: 8px; /* Отступ между кнопками */
     width: 100%;
-    max-width: 300px;
+    max-width: none; /* Убираем ограничение max-width */
   }
 
   .upload-buttons button {
     font-size: 14px;
     padding: 8px 15px;
-    flex-grow: 1; /* Возвращаем flex-grow для кнопок на мобильных */
-    min-width: unset; /* Сбрасываем min-width, если было установлено */
+    /* Убираем flex-grow, чтобы они занимали минимально необходимую ширину */
+    /* white-space: nowrap; уже глобально */
   }
 
+  /* Для контейнера изображений: сохраняем flex-direction: row, но уменьшаем отступы */
   .image-container {
-    flex-direction: column; /* Колонки располагаются одна под другой только на мобильных */
-    gap: 15px;
+    gap: 5px; /* Очень маленький отступ между колонками, чтобы уместились три */
+    width: 100%;
+    padding: 0 5px; /* Небольшой отступ по краям для красоты */
   }
 
   .image-column {
-    width: 95%; /* Каждая колонка занимает почти всю ширину */
-    max-width: none;
-    margin: 0 auto;
-    min-height: 250px;
+    width: 33%; /* Распределяем ширину между тремя колонками */
+    padding: 5px; /* Уменьшаем внутренний отступ колонки */
+    min-height: 300px; /* Корректируем минимальную высоту, если нужно */
   }
 
   .modal-content {
     max-width: 95%;
     max-height: 90%;
   }
-
-  /* Крестик уже скрыт глобально, эти стили не нужны */
-  /* .close-modal {
-    top: 5px;
-    right: 15px;
-    font-size: 30px;
-  } */
 
   .modal-actions-container {
     top: 5px;
