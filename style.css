@@ -118,8 +118,7 @@ h2 {
 }
 
 .image-column {
-  background-color: rgba(44, 62, 80, 0.5); rgba(44, 62, 80, 0.75); rgba(44, 62, 80, 0.75);
-  background-color: rgba(44, 62, 80, 0.8);
+  background-color: rgba(44, 62, 80, 0.8); /* Убрал дублирующиеся background-color */
   padding: 10px;
   border-radius: 12px;
   min-height: 400px;
@@ -153,6 +152,7 @@ h2 {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.9);
+  cursor: pointer; /* Добавлено для улучшения интерактивности на iOS */
 }
 
 .modal-content {
