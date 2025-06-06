@@ -1,4 +1,4 @@
-// main-page.js (Should be this version)
+// main-page.js
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
@@ -65,7 +65,10 @@ function loadImagesFromFirebase() {
 // Отображение изображения с плавным появлением
 function displayImage(imageData, imageId) {
   const targetColumn = document.getElementById(`${imageData.column}Column`);
-  if (!targetColumn) return;
+  if (!targetColumn) {
+      console.warn(`Target column for image ${imageId} (${imageData.column}Column) not found.`);
+      return;
+  }
 
   const imageWrapper = document.createElement('div');
   imageWrapper.classList.add('image-wrapper');
@@ -78,9 +81,17 @@ function displayImage(imageData, imageId) {
   img.src = imageData.url;
   img.classList.add('thumbnail');
   img.alt = 'Gallery Image';
+  img.loading = 'lazy'; // Добавляем атрибут loading="lazy" для нативной ленивой загрузки
+  img.setAttribute('crossorigin', 'anonymous'); // <-- ДОБАВЛЕНО: для CORS-совместимости
 
   img.onload = () => {
     img.classList.add('loaded');
+  };
+
+  img.onerror = () => { // <-- ДОБАВЛЕНО: Обработчик ошибок загрузки изображения
+      console.error(`Ошибка загрузки изображения: ${img.src}`);
+      // Можно добавить запасное изображение или удалить обертку, если нужно
+      imageWrapper.classList.add('image-load-error'); // Добавить класс для стилизации
   };
 
   imageWrapper.addEventListener('click', (event) => {
@@ -103,8 +114,9 @@ function openModal(imgElement) {
   dropdown.style.display = 'none';
   modalImage.src = imgElement.src;
   modalImage.dataset.id = imgElement.dataset.id;
+  modalImage.setAttribute('crossorigin', 'anonymous'); // <-- ДОБАВЛЕНО: и для модального изображения
 
-  imageInfo.innerHTML = ''; // Clear content for "Просмотров" and "Загружено"
+  imageInfo.innerHTML = '';
 
   const imageId = imgElement.dataset.id;
   const column = imgElement.dataset.column;
