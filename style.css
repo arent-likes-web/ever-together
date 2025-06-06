@@ -26,10 +26,9 @@ body {
 h2 {
     color: #f1c40f;
     margin-bottom: 20px;
-    /* Убедитесь, что заголовок U&ME также использует этот стиль */
-    font-size: 2.5em; /* Примерный размер, чтобы было видно */
-    text-align: center; /* Центрируем заголовок */
-    width: 100%; /* Занимает всю ширину */
+    font-size: 2.5em;
+    text-align: center;
+    width: 100%;
 }
 
 .login-form {
@@ -148,9 +147,8 @@ h2 {
 
 .image-wrapper {
     width: 100%;
-    /* Возвращаем масштабирование по высоте через padding-bottom */
     height: 0;
-    padding-bottom: 100%; /* Это делает обертку квадратной */
+    padding-bottom: 100%;
     position: relative;
     overflow: hidden;
     border-radius: 8px;
@@ -165,7 +163,7 @@ h2 {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Изображение будет покрывать всю обертку */
+    object-fit: cover;
     opacity: 0;
     transition: opacity 0.5s ease;
 }
@@ -186,8 +184,9 @@ h2 {
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.9);
     display: flex;
-    justify-content: center; /* <-- Центрирует по горизонтали */
-    align-items: center;   /* <-- Центрирует по вертикали */
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* Центрируем текст внутри модального окна */
 }
 
 .modal-content {
@@ -197,8 +196,9 @@ h2 {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Убрал фиксированные top/left/transform, flexbox займется центровкой */
-    /* background-color: transparent; /* Убедимся, что нет фонового цвета, мешающего центровке */
+    /* Убираем alt текст изображения, чтобы он не появлялся */
+    font-size: 0; /* Делаем текст невидимым, чтобы alt не отображался */
+    line-height: 0; /* Убираем высоту строки */
 }
 
 .modal-content img {
@@ -212,11 +212,11 @@ h2 {
 .modal-actions-container {
     position: absolute;
     top: 20px;
-    left: 20px; /* <-- ИЗМЕНЕНО на left: 20px для верхнего-левого угла */
+    left: 20px;
     display: flex;
     gap: 10px;
     z-index: 1001;
-    flex-direction: row; /* Если вдруг изменилось, явно укажем, что кнопки должны быть в ряд */
+    flex-direction: row;
 }
 
 .options-button {
@@ -234,6 +234,8 @@ h2 {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Убедимся, что кнопка находится в правильном слое */
+    z-index: 1002; /* Выше чем modal-actions-container */
 }
 
 .options-button:hover {
@@ -243,13 +245,13 @@ h2 {
 .options-dropdown {
     display: none;
     position: absolute;
-    top: 50px; /* Позиция под кнопкой опций */
-    left: 0; /* <-- ИЗМЕНЕНО на left: 0 для выравнивания по левому краю кнопки */
+    top: 50px;
+    left: 0;
     background-color: #34495e;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     min-width: 180px;
-    z-index: 100;
+    z-index: 1003; /* <-- Выше чем options-button и modal-actions-container */
     overflow: hidden;
 }
 
@@ -277,7 +279,7 @@ h2 {
 .image-info {
     position: absolute;
     bottom: 20px;
-    right: 20px; /* <-- ИЗМЕНЕНО на right: 20px, чтобы не пересекалось с новой позицией кнопки */
+    right: 20px;
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 10px 15px;
@@ -354,7 +356,6 @@ h2 {
         min-height: 250px;
     }
 
-    /* Модальное окно и элементы внутри на мобильных */
     .modal-content {
         max-width: 95%;
         max-height: 90%;
@@ -362,7 +363,7 @@ h2 {
 
     .modal-actions-container {
         top: 5px;
-        left: 5px; /* <-- ИЗМЕНЕНО на left: 5px для мобильных */
+        left: 5px;
     }
 
     .options-button {
@@ -375,7 +376,7 @@ h2 {
     .options-dropdown {
         min-width: 160px;
         font-size: 0.9em;
-        left: 0; /* <-- ИЗМЕНЕНО на left: 0 для мобильных */
+        left: 0;
     }
 
     .options-dropdown a {
@@ -383,8 +384,8 @@ h2 {
     }
 
     .image-info {
-        bottom: 10px; /* Смещаем вверх, чтобы не мешать кнопкам модального окна */
-        right: 10px; /* Отступ справа */
+        bottom: 10px;
+        right: 10px;
     }
 }
 
