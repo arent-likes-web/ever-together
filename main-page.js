@@ -81,17 +81,16 @@ function displayImage(imageData, imageId) {
   img.src = imageData.url;
   img.classList.add('thumbnail');
   img.alt = 'Gallery Image';
-  img.loading = 'lazy'; // Добавляем атрибут loading="lazy" для нативной ленивой загрузки
-  img.setAttribute('crossorigin', 'anonymous'); // <-- ДОБАВЛЕНО: для CORS-совместимости
+  img.loading = 'lazy';
+  img.setAttribute('crossorigin', 'anonymous');
 
   img.onload = () => {
     img.classList.add('loaded');
   };
 
-  img.onerror = () => { // <-- ДОБАВЛЕНО: Обработчик ошибок загрузки изображения
+  img.onerror = () => {
       console.error(`Ошибка загрузки изображения: ${img.src}`);
-      // Можно добавить запасное изображение или удалить обертку, если нужно
-      imageWrapper.classList.add('image-load-error'); // Добавить класс для стилизации
+      imageWrapper.classList.add('image-load-error');
   };
 
   imageWrapper.addEventListener('click', (event) => {
@@ -110,11 +109,13 @@ function openModal(imgElement) {
   const moreOptionsBtn = document.getElementById('moreOptionsButton');
   const dropdown = document.getElementById('optionsDropdown');
 
-  modal.style.display = 'block';
-  dropdown.style.display = 'none';
+  // Добавляем класс, чтобы показать модальное окно
+  modal.classList.add('show-modal'); // <-- ИЗМЕНЕНИЕ: используем класс CSS
+  dropdown.style.display = 'none'; // Убедимся, что дропдаун скрыт при открытии
+
   modalImage.src = imgElement.src;
   modalImage.dataset.id = imgElement.dataset.id;
-  modalImage.setAttribute('crossorigin', 'anonymous'); // <-- ДОБАВЛЕНО: и для модального изображения
+  modalImage.setAttribute('crossorigin', 'anonymous');
 
   imageInfo.innerHTML = '';
 
@@ -145,7 +146,7 @@ function openModal(imgElement) {
   }
 
   if (imageContainerGlobalRef) {
-    imageContainerGlobalRef.style.pointerEvents = 'none';
+    imageContainerGlobalRef.style.pointerEvents = 'none'; // Блокируем взаимодействие с фоном
   }
 
   moreOptionsBtn.onclick = function(event) {
@@ -183,13 +184,15 @@ function openModal(imgElement) {
     dropdown.style.display = 'none';
   };
 
+  // Обработчики для предотвращения закрытия при клике внутри модального окна
   modalImageElement.onclick = (event) => event.stopPropagation();
   modalActionsContainer.onclick = (event) => event.stopPropagation();
   imageInfo.onclick = (event) => event.stopPropagation();
 }
 
 function closeModal() {
-  imageModalGlobalRef.style.display = 'none';
+  // Удаляем класс, чтобы скрыть модальное окно
+  imageModalGlobalRef.classList.remove('show-modal'); // <-- ИЗМЕНЕНИЕ: используем класс CSS
   if (optionsDropdownGlobalRef) {
     optionsDropdownGlobalRef.style.display = 'none';
   }
@@ -198,35 +201,35 @@ function closeModal() {
   document.getElementById('imageInfo').innerHTML = '';
 
   if (imageContainerGlobalRef) {
-    imageContainerGlobalRef.style.pointerEvents = 'auto';
+    imageContainerGlobalRef.style.pointerEvents = 'auto'; // Разблокируем взаимодействие с фоном
   }
 }
 
+// Улучшенный обработчик закрытия модального окна по клику вне контента
 function handleCloseInteractions(event) {
-  if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
-    if (moreOptionsButtonGlobalRef &&
-        !moreOptionsButtonGlobalRef.contains(event.target) &&
-        !optionsDropdownGlobalRef.contains(event.target)) {
-      optionsDropdownGlobalRef.style.display = 'none';
+    // Закрыть дропдаун, если клик был вне его или кнопки
+    if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
+        if (!moreOptionsButtonGlobalRef.contains(event.target) && !optionsDropdownGlobalRef.contains(event.target)) {
+            optionsDropdownGlobalRef.style.display = 'none';
+        }
     }
-  }
 
-  if (imageModalGlobalRef && imageModalGlobalRef.style.display === 'block' && event.target === imageModalGlobalRef) {
-    closeModal();
-  }
-  if (imageModalGlobalRef && event.target === imageModalGlobalRef) {
-    event.stopPropagation();
-  }
+    // Закрыть модальное окно, если клик был по самому фону модального окна
+    if (imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal') && event.target === imageModalGlobalRef) {
+        closeModal();
+    }
 }
 
-imageModalGlobalRef.addEventListener('touchend', (event) => {
-  if (event.target === imageModalGlobalRef) {
-    closeModal();
-  }
-  event.stopPropagation();
+// Event listener для закрытия модального окна по клику вне контента
+window.addEventListener('click', handleCloseInteractions);
+
+// Обработчик для закрытия модального окна по нажатию ESC
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && imageModalGlobalRef.classList.contains('show-modal')) {
+        closeModal();
+    }
 });
 
-window.addEventListener('click', handleCloseInteractions);
 
 const fileInput = document.createElement('input');
 fileInput.type = 'file';
