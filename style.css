@@ -3,33 +3,37 @@
 /* --- Font Import: Taler --- */
 @font-face {
     font-family: 'Taler';
-    src: url('fonts/Taler.woff2') format('woff2'), /* Предпочтительный формат для современных браузеров */
-         url('fonts/Taler.woff') format('woff'); /* Более старый, но хорошо поддерживаемый формат */
+    src: url('fonts/Taler.woff2') format('woff2'),
+         url('fonts/Taler.woff') format('woff');
     font-weight: normal;
     font-style: normal;
-    font-display: swap; /* Позволяет тексту отображаться с запасным шрифтом, пока основной загружается */
+    font-display: swap;
 }
 
 body {
-    font-family: 'Taler', Arial, sans-serif; /* Теперь 'Taler' в приоритете */
+    font-family: 'Taler', Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    background: linear-gradient(to right, #121212 50%, #2c3e50); /* Dark grey to dark blue */
-    color: #ecf0f1; /* Light grey text */
-    min-height: 100vh; /* Full viewport height */
+    background: linear-gradient(to right, #121212 50%, #2c3e50);
+    color: #ecf0f1;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-sizing: border-box; /* Include padding in element's total width */
+    box-sizing: border-box;
 }
 
 h2 {
-    color: #f1c40f; /* Yellow */
+    color: #f1c40f;
     margin-bottom: 20px;
+    /* Убедитесь, что заголовок U&ME также использует этот стиль */
+    font-size: 2.5em; /* Примерный размер, чтобы было видно */
+    text-align: center; /* Центрируем заголовок */
+    width: 100%; /* Занимает всю ширину */
 }
 
 .login-form {
-    background-color: #34495e; /* Darker blue */
+    background-color: #34495e;
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -46,16 +50,16 @@ h2 {
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    color: #bdc3c7; /* Lighter grey */
+    color: #bdc3c7;
     font-size: 1.1em;
 }
 
 .form-group input {
     width: 100%;
     padding: 12px;
-    border: 1px solid #7f8c8d; /* Grey border */
+    border: 1px solid #7f8c8d;
     border-radius: 8px;
-    background-color: #2c3e50; /* Dark blue */
+    background-color: #2c3e50;
     color: #ecf0f1;
     font-size: 1em;
     box-sizing: border-box;
@@ -64,14 +68,14 @@ h2 {
 }
 
 .form-group input:focus {
-    border-color: #f1c40f; /* Yellow on focus */
+    border-color: #f1c40f;
 }
 
 .btn {
     width: 100%;
     padding: 12px 20px;
-    background-color: #f1c40f; /* Yellow */
-    color: #2c3e50; /* Dark blue */
+    background-color: #f1c40f;
+    color: #2c3e50;
     border: none;
     border-radius: 8px;
     font-size: 1.1em;
@@ -82,7 +86,7 @@ h2 {
 }
 
 .btn:hover {
-    background-color: #d4ac0d; /* Darker yellow on hover */
+    background-color: #d4ac0d;
     transform: translateY(-2px);
 }
 
@@ -90,7 +94,7 @@ h2 {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: #e74c3c; /* Red */
+    background-color: #e74c3c;
     color: white;
     padding: 10px 15px;
     border: none;
@@ -101,7 +105,7 @@ h2 {
 }
 
 .sign-out-btn:hover {
-    background-color: #c0392b; /* Darker red on hover */
+    background-color: #c0392b;
     transform: translateY(-2px);
 }
 
@@ -120,38 +124,39 @@ h2 {
 
 .image-container {
     display: flex;
-    flex-wrap: nowrap; /* Важно: предотвращаем перенос колонок на новую строку по умолчанию */
-    gap: 10px; /* Space between columns */
+    flex-wrap: nowrap;
+    gap: 10px;
     width: 100%;
-    max-width: 1200px; /* Max width for the whole container */
+    max-width: 1200px;
     margin-top: 20px;
     box-sizing: border-box;
     padding: 0 10px;
 }
 
 .image-column {
-    flex: 1; /* Each column takes equal space */
-    min-width: 0; /* Важно: позволяет колонке сжиматься до 0 */
+    flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Space between images in a column */
-    background-color: rgba(0, 0, 0, 0.2); /* Semi-transparent background for columns */
+    gap: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
     padding: 10px;
     border-radius: 8px;
     box-sizing: border-box;
-    width: 33.33%; /* Явное задание ширины для 3 колонок */
+    width: 33.33%;
 }
 
 .image-wrapper {
     width: 100%;
+    /* Возвращаем масштабирование по высоте через padding-bottom */
     height: 0;
-    padding-bottom: 100%; /* For 1:1 aspect ratio. Adjust as needed. */
+    padding-bottom: 100%; /* Это делает обертку квадратной */
     position: relative;
     overflow: hidden;
-    border-radius: 8px; /* Исправлено: если было 8% 0px, это может быть неверно, устанавливаем 8px */
+    border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    background-color: #34495e; /* Placeholder color before image loads */
+    background-color: #34495e;
 }
 
 .image-wrapper img.thumbnail {
@@ -160,7 +165,7 @@ h2 {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover; /* Изображение будет покрывать всю обертку */
     opacity: 0;
     transition: opacity 0.5s ease;
 }
@@ -181,8 +186,8 @@ h2 {
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.9);
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center; /* <-- Центрирует по горизонтали */
+    align-items: center;   /* <-- Центрирует по вертикали */
 }
 
 .modal-content {
@@ -192,6 +197,8 @@ h2 {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Убрал фиксированные top/left/transform, flexbox займется центровкой */
+    /* background-color: transparent; /* Убедимся, что нет фонового цвета, мешающего центровке */
 }
 
 .modal-content img {
@@ -205,10 +212,11 @@ h2 {
 .modal-actions-container {
     position: absolute;
     top: 20px;
-    right: 20px;
+    left: 20px; /* <-- ИЗМЕНЕНО на left: 20px для верхнего-левого угла */
     display: flex;
     gap: 10px;
     z-index: 1001;
+    flex-direction: row; /* Если вдруг изменилось, явно укажем, что кнопки должны быть в ряд */
 }
 
 .options-button {
@@ -235,8 +243,8 @@ h2 {
 .options-dropdown {
     display: none;
     position: absolute;
-    top: 50px;
-    right: 0;
+    top: 50px; /* Позиция под кнопкой опций */
+    left: 0; /* <-- ИЗМЕНЕНО на left: 0 для выравнивания по левому краю кнопки */
     background-color: #34495e;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
@@ -269,7 +277,7 @@ h2 {
 .image-info {
     position: absolute;
     bottom: 20px;
-    left: 20px;
+    right: 20px; /* <-- ИЗМЕНЕНО на right: 20px, чтобы не пересекалось с новой позицией кнопки */
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
     padding: 10px 15px;
@@ -331,7 +339,6 @@ h2 {
         max-width: unset;
     }
 
-    /* Изображения: ВОССТАНОВЛЕННЫЙ 3-КОЛОНОЧНЫЙ МАКЕТ */
     .image-container {
         flex-wrap: nowrap;
         gap: 5px;
@@ -342,11 +349,12 @@ h2 {
     .image-column {
         flex: 1;
         min-width: 0;
-        width: 33.33%; /* <-- Явно задаем 33.33% для каждой из 3-х колонок */
+        width: 33.33%;
         padding: 5px;
         min-height: 250px;
     }
 
+    /* Модальное окно и элементы внутри на мобильных */
     .modal-content {
         max-width: 95%;
         max-height: 90%;
@@ -354,7 +362,7 @@ h2 {
 
     .modal-actions-container {
         top: 5px;
-        right: 5px;
+        left: 5px; /* <-- ИЗМЕНЕНО на left: 5px для мобильных */
     }
 
     .options-button {
@@ -367,14 +375,19 @@ h2 {
     .options-dropdown {
         min-width: 160px;
         font-size: 0.9em;
+        left: 0; /* <-- ИЗМЕНЕНО на left: 0 для мобильных */
     }
 
     .options-dropdown a {
         padding: 10px 15px;
     }
+
+    .image-info {
+        bottom: 10px; /* Смещаем вверх, чтобы не мешать кнопкам модального окна */
+        right: 10px; /* Отступ справа */
+    }
 }
 
-/* Для очень маленьких экранов (опционально) */
 @media (max-width: 480px) {
     .image-container {
         gap: 3px;
