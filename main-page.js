@@ -74,7 +74,7 @@ function loadImagesFromFirebase() {
         console.log("[main-page.js] onValue: Получен snapshot данных из Firebase.");
         const data = snapshot.val();
         
-        // Очищаем ТОЛЬКО обертки изображений, оставляя кнопки загрузки
+        // Очищаем ТОЛЬКО обертки изображений
         console.log("[main-page.js] Очистка только оберток изображений перед загрузкой.");
         const columns = [leftColumn, centerColumn, rightColumn];
         columns.forEach(column => {
@@ -88,9 +88,9 @@ function loadImagesFromFirebase() {
             console.log("[main-page.js] Данные изображений из Firebase:", data);
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
-            // Сортируем по времени создания (новые сверху), если timestamp - это ISO строка
-            // Эта сортировка помещает НОВЕЙШИЕ элементы в НАЧАЛО массива.
-            imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
+            // ВОССТАНОВЛЕНО: Сортируем по времени создания (новые снизу), если timestamp - это ISO строка
+            // Это означает, что СТАРЫЕ элементы будут в НАЧАЛЕ массива, а НОВЫЕ - в КОНЦЕ.
+            imageArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
 
             console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
             imageArray.forEach((imgData) => {
@@ -167,18 +167,10 @@ function displayImage(imageData, imageId) {
 
     imageWrapper.appendChild(img);
     
-    // **ИСПРАВЛЕНО: Новый подход к добавлению элемента**
-    const columnTopActions = targetColumn.querySelector('.column-top-actions');
-    if (columnTopActions) {
-        // Вставляем imageWrapper сразу после columnTopActions
-        // Это гарантирует, что каждое новое изображение (которое в начале отсортированного массива)
-        // будет вставлено на "вершину" списка изображений, под кнопками.
-        columnTopActions.after(imageWrapper);
-    } else {
-        // Если columnTopActions почему-то не найден, просто добавляем в конец колонки.
-        // Это запасной вариант, но не должен срабатывать при правильном HTML.
-        targetColumn.appendChild(imageWrapper);
-    }
+    // ВОССТАНОВЛЕНО: Просто добавляем в конец колонки.
+    // Так как массив отсортирован от СТАРЫХ к НОВЫМ,
+    // новые фото будут добавляться в конец (снизу).
+    targetColumn.appendChild(imageWrapper);
 
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
 }
@@ -345,7 +337,7 @@ fileInput.multiple = true;
 fileInput.style.display = 'none'; // Скрываем элемент input, так как будем вызывать его через кнопку
 document.body.appendChild(fileInput);
 
-// Обновляем селектор кнопок загрузки
+// Обновляем селектор кнопок загрузки (он останется прежним, так как ID кнопок не меняются)
 const uploadButtons = document.querySelectorAll('.column-top-actions button[id^="upload"]'); // Селектор для кнопок внутри .column-top-actions
 uploadButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
