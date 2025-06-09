@@ -2,9 +2,7 @@
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-// ИСПРАВЛЕНО: ref, set, push, onValue, update, remove импортируются из firebase-database.js
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
-// ИСПРАВЛЕНО: getAuth, onAuthStateChanged, signOut импортируются из firebase-auth.js
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
 
@@ -91,7 +89,8 @@ function loadImagesFromFirebase() {
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
             // Сортируем по времени создания (новые сверху), если timestamp - это ISO строка
-            imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // ОСТАВЛЯЕМ СОРТИРОВКУ ОТ НОВЫХ К СТАРЫМ
+            // Эта сортировка помещает НОВЕЙШИЕ элементы в НАЧАЛО массива.
+            imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
 
             console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
             imageArray.forEach((imgData) => {
@@ -168,21 +167,36 @@ function displayImage(imageData, imageId) {
 
     imageWrapper.appendChild(img);
     
-    // НАХОДИМ ПЕРВЫЙ ЭЛЕМЕНТ .image-wrapper (если есть) или блок с кнопками
-    const firstImageWrapper = targetColumn.querySelector('.image-wrapper');
+    // НАХОДИМ БЛОК С КНОПКАМИ ВВЕРХУ
     const columnTopActions = targetColumn.querySelector('.column-top-actions');
 
-    if (firstImageWrapper) {
-        // Если есть уже изображения, вставляем НОВОЕ перед первым изображением
-        targetColumn.insertBefore(imageWrapper, firstImageWrapper);
-    } else if (columnTopActions) {
-        // Если изображений нет, но есть блок с кнопками, вставляем ПОСЛЕ блока с кнопками
-        columnTopActions.after(imageWrapper);
+    // Поскольку массив отсортирован от НОВЫХ к СТАРЫМ,
+    // мы хотим, чтобы каждое НОВОЕ изображение вставлялось после кнопок
+    // и перед ЛЮБЫМИ уже добавленными изображениями.
+    // Этого можно достичь, всегда вставляя новый imageWrapper
+    // сразу после columnTopActions.
+    if (columnTopActions) {
+        // Мы вставляем новый imageWrapper после columnTopActions.
+        // Поскольку forEach обходит массив от новых к старым,
+        // первое добавленное изображение будет самым новым,
+        // затем следующее будет добавлено после него, и так далее.
+        // Чтобы новые всегда были СВЕРХУ, мы используем prepend для изображений.
+        // НО: Поскольку кнопки сверху, и мы их не очищаем,
+        // мы должны добавлять элементы ПЕРЕД УЖЕ СУЩЕСТВУЮЩИМИ ОБЕРТКАМИ ИЗОБРАЖЕНИЙ,
+        // которые идут ПОСЛЕ кнопок.
+        const firstImageAfterButtons = targetColumn.querySelector('.column-top-actions + .image-wrapper');
+        if (firstImageAfterButtons) {
+            targetColumn.insertBefore(imageWrapper, firstImageAfterButtons);
+        } else {
+            // Если изображений ещё нет (только кнопки), добавляем после кнопок
+            columnTopActions.after(imageWrapper);
+        }
+        
     } else {
-        // Если ни кнопок, ни изображений нет (маловероятно), просто добавляем в конец
-        targetColumn.appendChild(imageWrapper);
+        // Если почему-то columnTopActions не найден (чего быть не должно),
+        // просто добавляем в начало колонки, чтобы новые были сверху
+        targetColumn.prepend(imageWrapper);
     }
-
 
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
 }
