@@ -74,13 +74,14 @@ function loadImagesFromFirebase() {
         console.log("[main-page.js] onValue: Получен snapshot данных из Firebase.");
         const data = snapshot.val();
         
-        // Очищаем ТОЛЬКО обертки изображений
+        // Очищаем ТОЛЬКО обертки изображений, оставляя кнопки загрузки
         console.log("[main-page.js] Очистка только оберток изображений перед загрузкой.");
         const columns = [leftColumn, centerColumn, rightColumn];
         columns.forEach(column => {
             if (column) {
+                // Удаляем только .image-wrapper, оставляя .column-top-actions
                 const imageWrappers = column.querySelectorAll('.image-wrapper');
-                imageWrappers.forEach(wrapper => wrapper.remove()); // Удаляем только обертки изображений
+                imageWrappers.forEach(wrapper => wrapper.remove()); 
             }
         });
 
@@ -88,9 +89,9 @@ function loadImagesFromFirebase() {
             console.log("[main-page.js] Данные изображений из Firebase:", data);
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
-            // ВОССТАНОВЛЕНО: Сортируем по времени создания (новые снизу), если timestamp - это ISO строка
-            // Это означает, что СТАРЫЕ элементы будут в НАЧАЛЕ массива, а НОВЫЕ - в КОНЦЕ.
-            imageArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
+            // ВОССТАНОВЛЕНО: Сортируем по времени создания (новые сверху), если timestamp - это ISO строка
+            // Это помещает НОВЕЙШИЕ элементы в НАЧАЛО массива.
+            imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
 
             console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
             imageArray.forEach((imgData) => {
@@ -167,10 +168,25 @@ function displayImage(imageData, imageId) {
 
     imageWrapper.appendChild(img);
     
-    // ВОССТАНОВЛЕНО: Просто добавляем в конец колонки.
-    // Так как массив отсортирован от СТАРЫХ к НОВЫМ,
-    // новые фото будут добавляться в конец (снизу).
-    targetColumn.appendChild(imageWrapper);
+    // НАХОДИМ БЛОК С КНОПКАМИ ВВЕРХУ КОЛОНКИ
+    const columnTopActions = targetColumn.querySelector('.column-top-actions');
+
+    // Вставляем imageWrapper ПОСЛЕ columnTopActions,
+    // но ПЕРЕД любыми другими image-wrapper, которые уже есть
+    if (columnTopActions) {
+        // Находим первый image-wrapper, который идет после column-top-actions
+        const firstImageAfterButtons = targetColumn.querySelector('.column-top-actions + .image-wrapper');
+        if (firstImageAfterButtons) {
+            targetColumn.insertBefore(imageWrapper, firstImageAfterButtons);
+        } else {
+            // Если изображений ещё нет (только кнопки), добавляем после кнопок
+            columnTopActions.after(imageWrapper);
+        }
+    } else {
+        // Если columnTopActions не найден (что не должно произойти при правильном HTML),
+        // просто добавляем в начало колонки, чтобы новые были сверху
+        targetColumn.prepend(imageWrapper);
+    }
 
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
 }
@@ -263,7 +279,7 @@ function openModal(imgElement) {
                     console.log(`[main-page.js] Изображение ${currentImageId} перемещено в ${newColumn}`);
                     closeModal();
                 })
-                .catch(error => console.error("[main-page.js] Ошибка перемещения:", error));
+                    .catch(error => console.error("[main-page.js] Ошибка перемещения:", error));
         }
 
         optionsDropdownGlobalRef.style.display = 'none';
@@ -337,7 +353,7 @@ fileInput.multiple = true;
 fileInput.style.display = 'none'; // Скрываем элемент input, так как будем вызывать его через кнопку
 document.body.appendChild(fileInput);
 
-// Обновляем селектор кнопок загрузки (он останется прежним, так как ID кнопок не меняются)
+// Обновляем селектор кнопок загрузки
 const uploadButtons = document.querySelectorAll('.column-top-actions button[id^="upload"]'); // Селектор для кнопок внутри .column-top-actions
 uploadButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
