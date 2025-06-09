@@ -3,7 +3,7 @@
 /* --- Font Import: Taler --- */
 @font-face {
     font-family: 'Taler';
-    src: url('Taler.otf') format('opentype'); /* ИСПРАВЛЕНО: Путь и формат для Taler.otf */
+    src: url('Taler.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -13,7 +13,7 @@ body {
     font-family: 'Taler', Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    background-color: #1a2a3a; /* Fixed dark blue background */
+    background-color: #1a2a3a;
     color: #ecf0f1;
     min-height: 100vh;
     display: flex;
@@ -178,7 +178,7 @@ h2 {
 
 /* Modal Styles */
 .modal {
-    display: none;
+    display: none; /* <-- ИСПРАВЛЕНО: Убедитесь, что это единственное свойство display здесь */
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -187,13 +187,13 @@ h2 {
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.9);
-    display: flex;
+    /* display: flex; <-- УДАЛЕНО: Эта строка переопределяла display: none; */
     justify-content: center;
     align-items: center;
 }
 
 .modal.show-modal {
-    display: flex;
+    display: flex; /* <-- Теперь модальное окно показывается только при наличии этого класса */
 }
 
 .modal-content {
