@@ -7,11 +7,18 @@
     <link rel="stylesheet" href="style.css">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
-        script-src 'self' https://www.gstatic.com https://ever-together.firebaseapp.com;
+        script-src 'self' https://www.gstatic.com https://www.googleapis.com https://ever-together.firebaseapp.com;
+        connect-src 'self' 
+                      https://www.googleapis.com 
+                      https://ever-together.firebaseapp.com 
+                      https://ever-together-default-rtdb.europe-west1.firebasedatabase.app 
+                      wss://ever-together-default-rtdb.europe-west1.firebasedatabase.app 
+                      https://securetoken.googleapis.com;
         img-src 'self' data: https://res.cloudinary.com;
         style-src 'self' 'unsafe-inline';
-        font-src 'self';
-        connect-src 'self' https://ever-together-default-rtdb.europe-west1.firebasedatabase.app wss://ever-together-default-rtdb.europe-west1.firebasedatabase.app;
+        font-src 'self' https://arent-likes-web.github.io; /* Добавил ваш домен для шрифтов */
+        object-src 'none';
+        frame-src 'none';
     ">
 </head>
 <body>
