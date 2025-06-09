@@ -227,6 +227,7 @@ header h1 {
     align-items: center;
     opacity: 0;
     transition: opacity 0.4s ease-out;
+    cursor: pointer; /* Добавлено для iOS, чтобы фон был кликабельным */
 }
 
 .modal.show-modal {
@@ -349,30 +350,87 @@ header h1 {
 
     .top-upload-buttons-container,
     .image-container {
-        flex-direction: column;
-        align-items: center;
-        padding: 15px;
-        gap: 20px;
+        /* УБРАНО: flex-direction: column; */
+        justify-content: space-around; /* Распределяем пространство */
+        padding: 10px; /* Уменьшим padding на мобильных */
+        gap: 10px; /* Уменьшим gap между колонками и кнопками */
+        flex-wrap: wrap; /* Позволяем переноситься, если не влезает */
+        align-items: flex-start; /* Выравниваем по верху, чтобы избежать центрирования, если одна колонка короче */
     }
 
-    .image-column, 
     .top-upload-buttons-container .column-top-actions {
-        width: 90%;
-        max-width: none; 
+        width: 30%; /* Позволяем кнопкам занимать примерно 1/3 ширины */
+        min-width: 100px; /* Минимальная ширина для кнопок */
+        max-width: 150px; /* Максимальная ширина для кнопок */
         margin: 0;
+    }
+
+    .top-upload-buttons-container .column-top-actions button {
+        padding: 10px 15px; /* Уменьшим padding кнопок */
+        font-size: 1em; /* Уменьшим шрифт кнопок */
+        white-space: nowrap; /* Не переносить текст внутри кнопки */
+        overflow: hidden; /* Обрезать, если не влезает */
+        text-overflow: ellipsis; /* Добавить многоточие */
+    }
+
+    .image-column {
+        flex: 1 1 30%; /* Разрешаем колонкам сжиматься и расти, но цель - 30% ширины */
+        min-width: 100px; /* Уменьшим min-width для колонок, чтобы они могли сжиматься */
+        max-width: 30%; /* Ограничиваем максимальную ширину для 3 колонок в ряд */
+        padding: 10px; /* Уменьшим padding колонок */
+        box-sizing: border-box; /* Важно для корректного расчёта ширины */
+        margin: 0; /* Убираем margin, так как gap уже есть */
+    }
+
+    /* Добавим стили для изображений в колонках, чтобы они могли хорошо отображаться при меньшей ширине */
+    .image-wrapper {
+        min-height: 80px; /* Минимальная высота для обертки изображения */
+    }
+
+    .image-wrapper img {
+        height: auto; /* Автоматическая высота */
+        min-height: 60px; /* Минимальная высота для самого изображения */
     }
 
     .modal-content {
         max-width: 95%;
         max-height: 95%;
-        padding: 20px;
+        padding: 15px; /* Уменьшим padding модального окна */
     }
 
+    .modal-content img {
+        max-height: 60vh; /* Ещё немного уменьшим высоту изображения в модальном окне */
+        margin-bottom: 15px;
+    }
+
+    /* Для мобильных, если дропдаун обрезается снизу, можно попробовать сделать его выпадающим вверх или просто контролировать его высоту */
     .options-dropdown {
-        bottom: unset;
-        top: calc(100% + 10px);
+        bottom: calc(100% + 5px); /* Привязываем к верху кнопки, чтобы он выпадал ВВЕРХ, немного уменьшим отступ */
+        max-height: 150px; /* Ограничить высоту для мобильных */
+        top: unset; /* Сбросить top */
         right: 0;
         left: unset;
-        max-height: 200px;
+    }
+}
+
+/* Дополнительный медиазапрос для ОЧЕНЬ маленьких экранов (например, < 480px) */
+@media (max-width: 480px) {
+    .top-upload-buttons-container {
+        flex-direction: column; /* На очень маленьких экранах кнопки снова могут идти друг за другом */
+        gap: 15px;
+    }
+    .top-upload-buttons-container .column-top-actions {
+        width: 80%; /* Кнопки занимают большую часть ширины */
+        max-width: 250px;
+    }
+
+    .image-container {
+        flex-direction: column; /* Колонки снова идут друг за другом на очень маленьких экранах */
+        gap: 15px;
+    }
+    .image-column {
+        width: 90%;
+        max-width: none;
+        min-width: unset; /* Сбросим min-width */
     }
 }
