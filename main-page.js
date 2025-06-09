@@ -89,7 +89,7 @@ function loadImagesFromFirebase() {
             console.log("[main-page.js] Данные изображений из Firebase:", data);
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
-            // ВОССТАНОВЛЕНО: Сортируем по времени создания (новые сверху), если timestamp - это ISO строка
+            // Сортируем по времени создания (новые сверху)
             // Это помещает НОВЕЙШИЕ элементы в НАЧАЛО массива.
             imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
 
@@ -171,19 +171,21 @@ function displayImage(imageData, imageId) {
     // НАХОДИМ БЛОК С КНОПКАМИ ВВЕРХУ КОЛОНКИ
     const columnTopActions = targetColumn.querySelector('.column-top-actions');
 
-    // Вставляем imageWrapper ПОСЛЕ columnTopActions,
-    // но ПЕРЕД любыми другими image-wrapper, которые уже есть
+    // Поскольку массив отсортирован от НОВЫХ к СТАРЫМ,
+    // мы хотим, чтобы каждое НОВОЕ изображение вставлялось после кнопок
+    // и перед ЛЮБЫМИ уже добавленными изображениями.
+    // Этого можно достичь, всегда вставляя новый imageWrapper
+    // сразу после columnTopActions, но перед первым изображением
     if (columnTopActions) {
-        // Находим первый image-wrapper, который идет после column-top-actions
-        const firstImageAfterButtons = targetColumn.querySelector('.column-top-actions + .image-wrapper');
-        if (firstImageAfterButtons) {
-            targetColumn.insertBefore(imageWrapper, firstImageAfterButtons);
+        const firstImageWrapper = columnTopActions.nextElementSibling; // Первый элемент после columnTopActions
+        if (firstImageWrapper && firstImageWrapper.classList.contains('image-wrapper')) {
+            targetColumn.insertBefore(imageWrapper, firstImageWrapper);
         } else {
-            // Если изображений ещё нет (только кнопки), добавляем после кнопок
+            // Если после кнопок нет изображений, добавляем imageWrapper сразу после кнопок
             columnTopActions.after(imageWrapper);
         }
     } else {
-        // Если columnTopActions не найден (что не должно произойти при правильном HTML),
+        // Если columnTopActions не найден (чего быть не должно),
         // просто добавляем в начало колонки, чтобы новые были сверху
         targetColumn.prepend(imageWrapper);
     }
@@ -279,7 +281,7 @@ function openModal(imgElement) {
                     console.log(`[main-page.js] Изображение ${currentImageId} перемещено в ${newColumn}`);
                     closeModal();
                 })
-                    .catch(error => console.error("[main-page.js] Ошибка перемещения:", error));
+                .catch(error => console.error("[main-page.js] Ошибка перемещения:", error));
         }
 
         optionsDropdownGlobalRef.style.display = 'none';
