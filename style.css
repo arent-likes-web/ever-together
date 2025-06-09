@@ -351,27 +351,28 @@ header h1 {
     /* Изменения для кнопок */
     .top-upload-buttons-container {
         flex-direction: row; /* Принудительно row-направление */
-        justify-content: space-around;
+        justify-content: center; /* Центрируем кнопки */
         padding: 10px;
         gap: 5px; /* Ещё уменьшим gap */
-        flex-wrap: wrap;
+        flex-wrap: wrap; /* Позволяем кнопкам переноситься */
         align-items: flex-start;
     }
 
     .top-upload-buttons-container .column-top-actions {
         flex: 1 1 30%; /* Сжиматься, расти, базовая ширина 30% */
         min-width: 90px; /* Уменьшим min-width */
-        max-width: 120px; /* Уменьшим max-width */
-        margin: 0;
+        max-width: 120px; /* Уменьшим max-width, чтобы избежать слишком широких кнопок */
+        margin: 0; /* Убираем лишние отступы */
     }
 
     .top-upload-buttons-container .column-top-actions button {
-        padding: 8px 12px; /* Ещё уменьшим padding кнопок */
-        font-size: 0.85em; /* Ещё уменьшим шрифт кнопок */
+        padding: 8px 10px; /* Ещё уменьшим padding кнопок */
+        font-size: 0.8em; /* Ещё уменьшим шрифт кнопок */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         width: 100%; /* Заставляем кнопку занимать всю доступную ширину своего flex-элемента */
+        box-sizing: border-box; /* Важно, чтобы padding не увеличивал ширину */
     }
 
     /* Изменения для колонок изображений */
@@ -380,14 +381,14 @@ header h1 {
         justify-content: center; /* Центрируем колонки */
         padding: 10px;
         gap: 5px; /* Ещё уменьшим gap */
-        flex-wrap: wrap;
+        flex-wrap: wrap; /* Позволяем колонкам переноситься */
         align-items: flex-start;
     }
 
     .image-column {
         flex: 1 1 30%; /* Разрешаем колонкам сжиматься и расти, но цель - 30% ширины */
         min-width: 90px; /* Уменьшим min-width для колонок, чтобы они могли сжиматься */
-        max-width: 30%; /* Ограничиваем максимальную ширину для 3 колонок в ряд */
+        /* max-width: 30%; Убрал max-width, чтобы flex-grow мог работать свободнее */
         padding: 8px; /* Уменьшим padding колонок */
         box-sizing: border-box;
         margin: 0;
