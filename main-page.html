@@ -7,7 +7,11 @@
     <link rel="stylesheet" href="style.css">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
-        script-src 'self' https://www.gstatic.com https://www.googleapis.com https://ever-together.firebaseapp.com;
+        script-src 'self' 
+                      https://www.gstatic.com 
+                      https://www.googleapis.com 
+                      https://ever-together.firebaseapp.com 
+                      https://ever-together-default-rtdb.europe-west1.firebasedatabase.app; /* ДОБАВЛЕНО для Firebase Realtime Database */
         connect-src 'self' 
                       https://www.googleapis.com 
                       https://ever-together.firebaseapp.com 
@@ -21,7 +25,7 @@
         object-src 'none';
         frame-src 'self' https://*.firebaseapp.com;
     ">
-    <link rel="icon" type="image/png" href="heart.png">
+    <link rel="icon" type="image/x-icon" href="heart.ico">
 </head>
 <body>
     <h2>U&ME</h2>
