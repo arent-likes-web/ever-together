@@ -353,30 +353,33 @@ header h1 {
     /* Изменения для кнопок */
     .top-upload-buttons-container {
         flex-direction: row; /* Принудительно row-направление */
-        justify-content: space-between; /* Равномерно распределяем кнопки */
+        justify-content: space-around; /* Распределяем кнопки равномерно */
         padding: 10px 5px; /* Уменьшим padding контейнера */
-        gap: 2px; /* Уменьшим gap до минимума */
+        gap: 5px; /* Небольшой зазор между кнопками */
         flex-wrap: wrap; 
         align-items: flex-start;
-        width: 100vw; /* Занимаем всю ширину viewport */
-        box-sizing: border-box; /* Важно */
+        width: 100%; /* Занимаем всю ширину родителя */
+        max-width: none; /* Убираем max-width, чтобы не ограничивать адаптивность */
+        margin: 0 auto;
+        box-sizing: border-box;
     }
 
     .top-upload-buttons-container .column-top-actions {
-        flex: 0 0 calc(33.33% - 4px); /* Задаем точную ширину для трех элементов в ряд с учетом gap */
-        min-width: 90px; /* Минимальная ширина для каждой кнопки */
-        /* max-width: unset; Убираем max-width, чтобы flex мог свободно сжиматься */
+        flex: 1 1 30%; /* Позволяем растягиваться и сжиматься, базовая ширина 30% */
+        min-width: 80px; /* Еще уменьшим минимальную ширину */
+        max-width: 120px; /* Ограничим максимальную ширину для каждого элемента flex */
         margin: 0;
     }
 
     .top-upload-buttons-container .column-top-actions button {
         padding: 8px 5px; /* Максимально уменьшим padding кнопок */
-        font-size: 0.75em; /* Ещё уменьшим шрифт кнопок */
+        font-size: 0.7em; /* Ещё уменьшим шрифт кнопок */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         width: 100%; /* Заставляем кнопку занимать всю доступную ширину своего flex-элемента */
         box-sizing: border-box;
+        display: block; /* Сделаем блочным элементом, чтобы гарантировать 100% ширины */
     }
 
     /* Изменения для колонок изображений */
@@ -384,17 +387,19 @@ header h1 {
         flex-direction: row; /* Принудительно row-направление */
         justify-content: center; /* Центрируем колонки */
         padding: 10px 5px; /* Уменьшим padding контейнера */
-        gap: 5px; /* Уменьшим gap */
+        gap: 5px; /* Небольшой зазор между колонками */
         flex-wrap: wrap;
         align-items: flex-start;
-        width: 100vw; /* Занимаем всю ширину viewport */
-        box-sizing: border-box; /* Важно */
+        width: 100%; /* Занимаем всю ширину родителя */
+        max-width: none; /* Убираем max-width, чтобы не ограничивать адаптивность */
+        margin: 0 auto;
+        box-sizing: border-box;
     }
 
     .image-column {
-        flex: 0 0 calc(33.33% - 10px); /* Задаем точную ширину для трех элементов в ряд с учетом gap */
-        min-width: 90px; /* Уменьшим min-width для колонок */
-        /* max-width: unset; Убираем max-width */
+        flex: 1 1 30%; /* Разрешаем колонкам сжиматься и расти, но цель - 30% ширины */
+        min-width: 80px; /* Еще уменьшим min-width для колонок */
+        max-width: 120px; /* Ограничим максимальную ширину, чтобы не было слишком широко */
         padding: 8px; /* Уменьшим padding колонок */
         box-sizing: border-box;
         margin: 0;
@@ -431,9 +436,9 @@ header h1 {
     }
 }
 
-/* Дополнительный медиазапрос для ОЧЕНЬ маленьких экранов (например, < 420px) */
+/* Дополнительный медиазапрос для ОЧЕНЬ маленьких экранов (например, < 400px) */
 /* На таких экранах 3 колонки могут быть нечитаемы, возвращаем вертикальное расположение */
-@media (max-width: 420px) { /* Изменил breakpoint с 480px на 420px */
+@media (max-width: 400px) { /* Изменил breakpoint с 420px на 400px */
     .top-upload-buttons-container {
         flex-direction: column; /* Снова вертикально */
         gap: 10px;
@@ -441,7 +446,7 @@ header h1 {
     }
     .top-upload-buttons-container .column-top-actions {
         width: 100%; /* Кнопки на всю ширину */
-        max-width: 300px; /* Ограничим, чтобы не были слишком широкими на больших телефонах в этом диапазоне */
+        max-width: 250px; /* Ограничим, чтобы не были слишком широкими на больших телефонах в этом диапазоне */
         margin: 0 auto; /* Центрируем */
     }
     .top-upload-buttons-container .column-top-actions button {
