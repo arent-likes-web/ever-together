@@ -74,22 +74,30 @@ function loadImagesFromFirebase() {
         console.log("[main-page.js] onValue: Получен snapshot данных из Firebase.");
         const data = snapshot.val();
         
-        // Очищаем колонки перед добавлением новых/обновленных изображений
-        console.log("[main-page.js] Очистка колонок перед загрузкой изображений.");
-        if (leftColumn) leftColumn.innerHTML = '';
-        if (centerColumn) centerColumn.innerHTML = '';
-        if (rightColumn) rightColumn.innerHTML = '';
+        // Очищаем ТОЛЬКО обертки изображений, оставляя кнопки загрузки
+        console.log("[main-page.js] Очистка только оберток изображений перед загрузкой.");
+        const columns = [leftColumn, centerColumn, rightColumn];
+        columns.forEach(column => {
+            if (column) {
+                const imageWrappers = column.querySelectorAll('.image-wrapper');
+                imageWrappers.forEach(wrapper => wrapper.remove()); // Удаляем только обертки изображений
+            }
+        });
 
         if (data) {
             console.log("[main-page.js] Данные изображений из Firebase:", data);
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
-            // Сортируем по времени создания (новые сверху)
+            // Сортируем по времени создания (новые сверху), если timestamp - это ISO строка
             imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
             console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
             imageArray.forEach((imgData) => {
-                displayImage(imgData, imgData.id);
+                // Убедимся, что изображение еще не добавлено
+                const targetColumn = document.getElementById(`${imgData.column}Column`);
+                if (targetColumn && !targetColumn.querySelector(`.image-wrapper[data-id="${imgData.id}"]`)) {
+                    displayImage(imgData, imgData.id);
+                }
             });
         } else {
             console.log("[main-page.js] В базе данных Firebase нет записей об изображениях.");
@@ -157,7 +165,16 @@ function displayImage(imageData, imageId) {
     });
 
     imageWrapper.appendChild(img);
-    targetColumn.prepend(imageWrapper); // Используем prepend для "новые сверху"
+    
+    // Вставляем imageWrapper ПЕРЕД элементом .column-bottom-actions
+    const columnBottomActions = targetColumn.querySelector('.column-bottom-actions');
+    if (columnBottomActions) {
+        targetColumn.insertBefore(imageWrapper, columnBottomActions);
+    } else {
+        // Если почему-то .column-bottom-actions не найден, добавляем в конец колонки
+        targetColumn.appendChild(imageWrapper);
+    }
+
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
 }
 
@@ -324,7 +341,7 @@ fileInput.style.display = 'none'; // Скрываем элемент input, та
 document.body.appendChild(fileInput);
 
 // Обновляем селектор кнопок загрузки
-const uploadButtons = document.querySelectorAll('.image-column button[id^="upload"]'); // Селектор для кнопок внутри колонок
+const uploadButtons = document.querySelectorAll('.column-bottom-actions button[id^="upload"]'); // Селектор для кнопок внутри .column-bottom-actions
 uploadButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
         event.stopPropagation();
