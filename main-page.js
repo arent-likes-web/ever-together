@@ -1,4 +1,4 @@
-// main-page.js
+// main-page.js (Остается практически без изменений, так как стилизация в CSS)
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
@@ -35,22 +35,6 @@ const imageInfo = document.getElementById('imageInfo');
 const leftColumn = document.getElementById('leftColumn');
 const centerColumn = document.getElementById('centerColumn');
 const rightColumn = document.getElementById('rightColumn');
-
-// 5. Кнопка "Выйти" убрана, поэтому этот блок кода больше не нужен
-// const signOutButton = document.getElementById('signOutButton');
-// if (signOutButton) {
-//     signOutButton.addEventListener('click', async () => {
-//         try {
-//             await signOut(auth);
-//             console.log("[main-page.js] Пользователь вышел.");
-//             window.location.href = "entry.html"; // Перенаправление на страницу входа
-//         } catch (error) {
-//             console.error("[main-page.js] Ошибка при выходе:", error);
-//             alert("Ошибка при выходе: " + error.message);
-//         }
-//     });
-// }
-
 
 // Проверка авторизации при загрузке страницы
 console.log("[main-page.js] Вызов onAuthStateChanged...");
@@ -89,8 +73,7 @@ function loadImagesFromFirebase() {
             console.log("[main-page.js] Данные изображений из Firebase:", data);
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
-            // 4. Сортируем по времени создания (новые сверху)
-            // Это помещает НОВЕЙШИЕ элементы в НАЧАЛО массива.
+            // Сортируем по времени создания (новые сверху)
             imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
 
             console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
@@ -168,9 +151,7 @@ function displayImage(imageData, imageId) {
 
     imageWrapper.appendChild(img);
     
-    // 4. Вставляем новое изображение в начало колонки
-    // Так как массив отсортирован от НОВЫХ к СТАРЫМ,
-    // новые фото будут добавляться в начало (сверху).
+    // Вставляем новое изображение в начало колонки
     targetColumn.prepend(imageWrapper);
 
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
@@ -270,8 +251,6 @@ function openModal(imgElement) {
         optionsDropdownGlobalRef.style.display = 'none';
     };
 
-    // 2. Убраны обработчики для .close-button, так как он удален из HTML
-    // Исключаем onclick для модального окна, чтобы оно закрывалось только по Esc или клику по фону
     modalImageElement.onclick = (event) => event.stopPropagation();
     modalActionsContainer.onclick = (event) => event.stopPropagation();
     imageInfo.onclick = (event) => event.stopPropagation();
@@ -340,7 +319,6 @@ fileInput.style.display = 'none'; // Скрываем элемент input, та
 document.body.appendChild(fileInput);
 
 // Обновляем селектор кнопок загрузки (они теперь в top-upload-buttons-container)
-// Они по-прежнему имеют ID, так что селектор можно оставить
 const uploadButtons = document.querySelectorAll('.top-upload-buttons-container button[id^="upload"]'); 
 uploadButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
