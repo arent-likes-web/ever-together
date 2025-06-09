@@ -167,35 +167,17 @@ function displayImage(imageData, imageId) {
 
     imageWrapper.appendChild(img);
     
-    // НАХОДИМ БЛОК С КНОПКАМИ ВВЕРХУ
+    // **ИСПРАВЛЕНО: Новый подход к добавлению элемента**
     const columnTopActions = targetColumn.querySelector('.column-top-actions');
-
-    // Поскольку массив отсортирован от НОВЫХ к СТАРЫМ,
-    // мы хотим, чтобы каждое НОВОЕ изображение вставлялось после кнопок
-    // и перед ЛЮБЫМИ уже добавленными изображениями.
-    // Этого можно достичь, всегда вставляя новый imageWrapper
-    // сразу после columnTopActions.
     if (columnTopActions) {
-        // Мы вставляем новый imageWrapper после columnTopActions.
-        // Поскольку forEach обходит массив от новых к старым,
-        // первое добавленное изображение будет самым новым,
-        // затем следующее будет добавлено после него, и так далее.
-        // Чтобы новые всегда были СВЕРХУ, мы используем prepend для изображений.
-        // НО: Поскольку кнопки сверху, и мы их не очищаем,
-        // мы должны добавлять элементы ПЕРЕД УЖЕ СУЩЕСТВУЮЩИМИ ОБЕРТКАМИ ИЗОБРАЖЕНИЙ,
-        // которые идут ПОСЛЕ кнопок.
-        const firstImageAfterButtons = targetColumn.querySelector('.column-top-actions + .image-wrapper');
-        if (firstImageAfterButtons) {
-            targetColumn.insertBefore(imageWrapper, firstImageAfterButtons);
-        } else {
-            // Если изображений ещё нет (только кнопки), добавляем после кнопок
-            columnTopActions.after(imageWrapper);
-        }
-        
+        // Вставляем imageWrapper сразу после columnTopActions
+        // Это гарантирует, что каждое новое изображение (которое в начале отсортированного массива)
+        // будет вставлено на "вершину" списка изображений, под кнопками.
+        columnTopActions.after(imageWrapper);
     } else {
-        // Если почему-то columnTopActions не найден (чего быть не должно),
-        // просто добавляем в начало колонки, чтобы новые были сверху
-        targetColumn.prepend(imageWrapper);
+        // Если columnTopActions почему-то не найден, просто добавляем в конец колонки.
+        // Это запасной вариант, но не должен срабатывать при правильном HTML.
+        targetColumn.appendChild(imageWrapper);
     }
 
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
