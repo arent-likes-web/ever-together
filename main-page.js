@@ -2,8 +2,11 @@
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Ошибка здесь, getDatabase, ref, set, push, onValue, update, remove должны быть из firebase-database.js
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+
+// Исправленная строка импорта Firebase Database
+import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
 
 // Firebase Config (Ваши данные)
@@ -58,34 +61,46 @@ function loadImagesFromFirebase() {
         console.log("[main-page.js] onValue: Получен snapshot данных из Firebase.");
         const data = snapshot.val();
         
-        // Очищаем ТОЛЬКО обертки изображений
-        console.log("[main-page.js] Очистка только оберток изображений перед загрузкой.");
-        const columns = [leftColumn, centerColumn, rightColumn];
-        columns.forEach(column => {
-            if (column) {
-                // Удаляем только .image-wrapper
-                const imageWrappers = column.querySelectorAll('.image-wrapper');
-                imageWrappers.forEach(wrapper => wrapper.remove()); 
-            }
-        });
+        // Очищаем ВСЕ колонки перед полной перерисовкой
+        console.log("[main-page.js] Полная очистка всех колонок перед обновлением.");
+        leftColumn.innerHTML = '';
+        centerColumn.innerHTML = '';
+        rightColumn.innerHTML = '';
 
         if (data) {
             console.log("[main-page.js] Данные изображений из Firebase:", data);
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
-            // **КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ЗДЕСЬ:** Сортируем по времени создания (новые сверху)
-            // Используем убывающую сортировку по timestamp
+            // Сортируем по времени создания (новые сверху)
+            // Это гарантирует, что imageArray будет отсортирован правильно.
             imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
 
             console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
+            
+            // Временные фрагменты для каждой колонки для эффективного DOM-манипулирования
+            const fragments = {
+                left: document.createDocumentFragment(),
+                center: document.createDocumentFragment(),
+                right: document.createDocumentFragment()
+            };
+
             imageArray.forEach((imgData) => {
-                // Убедимся, что изображение еще не добавлено
-                const targetColumn = document.getElementById(`${imgData.column}Column`);
-                if (targetColumn) { // Проверяем, что колонка существует
-                    // Добавляем изображение в начало колонки
-                    displayImage(imgData, imgData.id); 
+                const targetColumnName = imgData.column;
+                const imageWrapper = createImageElement(imgData, imgData.id);
+                if (fragments[targetColumnName]) {
+                    fragments[targetColumnName].appendChild(imageWrapper);
+                } else {
+                    console.warn(`[main-page.js] Предупреждение: Колонка "${targetColumnName}" не найдена для изображения ID: ${imgData.id}`);
                 }
             });
+
+            // Добавляем фрагменты в соответствующие колонки
+            leftColumn.appendChild(fragments.left);
+            centerColumn.appendChild(fragments.center);
+            rightColumn.appendChild(fragments.right);
+
+            console.log("[main-page.js] Все изображения обновлены в DOM.");
+
         } else {
             console.log("[main-page.js] В базе данных Firebase нет записей об изображениях.");
         }
@@ -95,22 +110,8 @@ function loadImagesFromFirebase() {
     });
 }
 
-// Отображение изображения с плавным появлением
-function displayImage(imageData, imageId) {
-    console.log(`[main-page.js] displayImage: Обработка изображения ID: ${imageId}, URL: ${imageData.url}, Колонка: ${imageData.column}`);
-
-    const targetColumn = document.getElementById(`${imageData.column}Column`);
-    if (!targetColumn) {
-        console.error(`[main-page.js] ОШИБКА: Целевая колонка для изображения ${imageId} (${imageData.column}Column) НЕ НАЙДЕНА в HTML.`);
-        return;
-    }
-    
-    // Проверяем, есть ли уже такое изображение, чтобы избежать дублирования
-    if (targetColumn.querySelector(`.image-wrapper[data-id="${imageId}"]`)) {
-        console.log(`[main-page.js] Изображение ${imageId} уже существует в колонке ${imageData.column}. Пропускаем добавление.`);
-        return; 
-    }
-
+// Изменена функция для создания элемента изображения
+function createImageElement(imageData, imageId) {
     const imageWrapper = document.createElement('div');
     imageWrapper.classList.add('image-wrapper');
     imageWrapper.dataset.timestamp = imageData.timestamp;
@@ -125,21 +126,18 @@ function displayImage(imageData, imageId) {
     img.loading = 'lazy';
     img.setAttribute('crossorigin', 'anonymous');
 
-    // Обработчики загрузки и ошибки изображения
     img.onload = () => {
         img.classList.add('loaded');
-        console.log(`[main-page.js] Изображение ${imageData.url} (ID: ${imageId}) успешно загружено.`);
+        // console.log(`[main-page.js] Изображение ${imageData.url} (ID: ${imageId}) успешно загружено.`);
     };
 
     img.onerror = (e) => {
         console.error(`[main-page.js] ОШИБКА ЗАГРУЗКИ ИЗОБРАЖЕНИЯ: ${img.src} (ID: ${imageId})`, e);
-        imageWrapper.classList.add('image-load-error'); // Добавляем класс для визуальной индикации ошибки
-        
-        // Добавляем замещающий текст или иконку ошибки
+        imageWrapper.classList.add('image-load-error');
         const errorText = document.createElement('p');
         errorText.textContent = 'Ошибка загрузки фото';
         errorText.style.color = 'red';
-        errorText.style.position = 'absolute'; // чтобы текст был в центре imageWrapper
+        errorText.style.position = 'absolute';
         errorText.style.top = '50%';
         errorText.style.left = '50%';
         errorText.style.transform = 'translate(-50%, -50%)';
@@ -152,12 +150,7 @@ function displayImage(imageData, imageId) {
     });
 
     imageWrapper.appendChild(img);
-    
-    // Вставляем новое изображение в начало колонки
-    // Это гарантирует, что новые изображения всегда будут наверху
-    targetColumn.prepend(imageWrapper);
-
-    console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
+    return imageWrapper;
 }
 
 // Открытие модального окна
