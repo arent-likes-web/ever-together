@@ -13,12 +13,14 @@
                       https://ever-together.firebaseapp.com 
                       https://ever-together-default-rtdb.europe-west1.firebasedatabase.app 
                       wss://ever-together-default-rtdb.europe-west1.firebasedatabase.app 
-                      https://securetoken.googleapis.com;
+                      https://securetoken.googleapis.com 
+                      https://identitytoolkit.googleapis.com;
         img-src 'self' data: https://res.cloudinary.com;
         style-src 'self' 'unsafe-inline';
-        font-src 'self' https://arent-likes-web.github.io;
+        font-src 'self'; /* Изменено, если Taler.otf находится в том же домене, что и страница */
         object-src 'none';
-        ">
+        frame-src 'self' https://*.firebaseapp.com; /* Добавил frame-src на случай, если Firebase использует фреймы */
+    ">
 </head>
 <body>
     <h2>U&ME</h2>
