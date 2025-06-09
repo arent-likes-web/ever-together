@@ -243,7 +243,7 @@ header h1 {
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
-    /* overflow: hidden; /* УДАЛЯЕМ overflow: hidden, чтобы дропдаун был виден */
+    /* Убедимся, что overflow: hidden здесь нет! */
     transform: scale(0.95); /* Начальный масштаб для анимации появления */
     transition: transform 0.4s ease-out; /* Анимация масштабирования */
 }
@@ -290,28 +290,31 @@ header h1 {
 }
 
 .options-dropdown {
-    /* 2. Исправление видимости дропдауна: */
-    /* Важно: z-index должен быть выше, чем у родительского .modal-content,
-       и overflow: hidden должен быть удален с .modal-content */
+    /* **КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ДЛЯ ДРОПДАУНА:** */
     display: none;
     position: absolute;
     background-color: #3A3A3A; /* Темный фон для дропдауна */
     min-width: 180px; /* Чуть шире */
     box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.4); /* Более выраженная тень */
-    z-index: 100; /* Увеличиваем z-index, чтобы быть поверх всего */
+    z-index: 10001; /* Увеличиваем z-index, чтобы быть поверх ВСЕГО (даже модала) */
     right: 0;
-    top: calc(100% + 10px); /* Отступ от кнопки */
+    /* top: calc(100% + 10px);  Убираем привязку к низу кнопки */
+    bottom: calc(100% + 10px); /* **Привязываем к верху кнопки, чтобы он выпадал ВВЕРХ** */
     border-radius: 6px;
     overflow: visible; /* Убедимся, что дропдаун не обрезается */
     opacity: 0;
     transform: translateY(-10px);
     animation: dropdownFadeIn 0.3s forwards ease-out; /* Анимация появления дропдауна */
-    /* Добавляем тонкую пастельную рамку */
     border: 1px solid #C899E0; /* Пурпурная рамка */
+
+    /* Дополнительные свойства для адаптации к размеру экрана */
+    max-height: calc(100vh - 100px); /* Ограничиваем высоту дропдауна, чтобы он не выходил за рамки экрана */
+    overflow-y: auto; /* Добавляем прокрутку, если содержимое не помещается */
+    transform-origin: bottom right; /* Точка трансформации для анимации появления вверх */
 }
 
 @keyframes dropdownFadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
+    from { opacity: 0; transform: translateY(10px); } /* Начальное положение для анимации вверх */
     to { opacity: 1; transform: translateY(0); }
 }
 
@@ -367,4 +370,21 @@ header h1 {
         max-height: 95%;
         padding: 20px;
     }
+
+    /* На мобильных дропдаун можно также сделать выпадающим вверх или просто контролировать его высоту */
+    .options-dropdown {
+        bottom: unset; /* Сбросить bottom */
+        top: calc(100% + 10px); /* Вернуть выпадание вниз на мобильных, если удобнее */
+        right: 0;
+        left: unset; /* Убедимся, что он прижат к правому краю */
+        max-height: 200px; /* Ограничить высоту для мобильных */
+    }
+
+    /* Для мобильных, если дропдаун обрезается снизу, можно попробовать сделать его выпадающим влево или вверх.
+       Однако, в модальном окне, обычно хватает места, если оно не слишком большое.
+       Если все равно обрезает, то можно применить:
+       bottom: auto;
+       top: auto;
+       transform: translateY(-100%); /* чтобы выпадал вверх от кнопки */
+    */
 }
