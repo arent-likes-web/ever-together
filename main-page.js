@@ -3,9 +3,10 @@
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebase/auth"; // Обновленный импорт для signOut, иногда может требовать другого пути
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Используем полный путь для auth
 
-// Firebase Config
+
+// Firebase Config (Ваши данные)
 const firebaseConfig = {
   apiKey: "AIzaSyDIMvnTxfnpDr72fIIexWcO2Jl0_fqM7tw",
   authDomain: "ever-together.firebaseapp.com",
@@ -21,13 +22,14 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth();
 
-// --- Глобальные ссылки на элементы модального окна для обработчиков закрытия ---
+// --- Глобальные ссылки на элементы DOM ---
 const imageModalGlobalRef = document.getElementById('imageModal');
 const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
 const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
 const modalImageElement = document.getElementById('modalImage');
 const modalActionsContainer = document.querySelector('.modal-actions-container');
 const imageContainerGlobalRef = document.querySelector('.image-container');
+const imageInfo = document.getElementById('imageInfo'); // Добавил явную ссылку
 
 // Ссылки на колонки для очистки и добавления
 const leftColumn = document.getElementById('leftColumn');
@@ -35,16 +37,15 @@ const centerColumn = document.getElementById('centerColumn');
 const rightColumn = document.getElementById('rightColumn');
 
 // Заглушка для кнопки выхода (она должна быть удалена из HTML основной страницы)
-// Этот код не будет выполняться, если элемента с id="signOutButton" нет на странице
 const signOutButton = document.getElementById('signOutButton');
 if (signOutButton) {
     signOutButton.addEventListener('click', async () => {
         try {
             await signOut(auth);
-            console.log("Пользователь вышел.");
+            console.log("[main-page.js] Пользователь вышел.");
             window.location.href = "entry.html"; // Перенаправление на страницу входа
         } catch (error) {
-            console.error("Ошибка при выходе:", error);
+            console.error("[main-page.js] Ошибка при выходе:", error);
             alert("Ошибка при выходе: " + error.message);
         }
     });
@@ -52,13 +53,13 @@ if (signOutButton) {
 
 
 // Проверка авторизации при загрузке страницы
-console.log("[main-page.js] Запуск onAuthStateChanged...");
+console.log("[main-page.js] Вызов onAuthStateChanged...");
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log(`[main-page.js] Пользователь авторизован: ${user.email}`);
+    console.log(`[main-page.js] Пользователь авторизован: ${user.email}. Загрузка изображений.`);
     window.currentUser = user.email; // Устанавливаем текущего пользователя
     loadImagesFromFirebase(); // Загружаем изображения
-    updateBackgroundGradient();
+    // updateBackgroundGradient(); // Удален вызов функции градиента
   } else {
     console.log("[main-page.js] Пользователь не авторизован. Перенаправление на страницу входа.");
     window.location.href = "entry.html"; // Перенаправляем, если нет авторизации
@@ -67,51 +68,53 @@ onAuthStateChanged(auth, (user) => {
 
 // Загрузка изображений из Firebase
 function loadImagesFromFirebase() {
-  console.log("[main-page.js] Вызов loadImagesFromFirebase...");
+  console.log("[main-page.js] Функция loadImagesFromFirebase запущена. Ожидание данных из Firebase...");
   const imagesRef = dbRef(database, 'images');
 
-  // onValue будет срабатывать каждый раз, когда данные в 'images' меняются
   onValue(imagesRef, (snapshot) => {
-    console.log("[main-page.js] Получены новые данные из Firebase.");
+    console.log("[main-page.js] onValue: Получен snapshot данных из Firebase.");
     const data = snapshot.val();
     
     // Очищаем колонки перед добавлением новых/обновленных изображений
+    console.log("[main-page.js] Очистка колонок перед загрузкой изображений.");
     if (leftColumn) leftColumn.innerHTML = '';
     if (centerColumn) centerColumn.innerHTML = '';
     if (rightColumn) rightColumn.innerHTML = '';
 
     if (data) {
-      console.log("[main-page.js] Данные изображений Firebase:", data);
+      console.log("[main-page.js] Данные изображений из Firebase:", data);
       const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
       
       // Сортируем по времени создания (новые сверху)
       imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
+      console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
       imageArray.forEach((imgData) => {
         displayImage(imgData, imgData.id);
       });
     } else {
-      console.log("[main-page.js] Нет изображений в базе данных Firebase.");
+      console.log("[main-page.js] В базе данных Firebase нет записей об изображениях.");
     }
-    updateBackgroundGradient();
+    // updateBackgroundGradient(); // Удален вызов функции градиента
   }, (error) => { // Обработчик ошибок для onValue
     console.error("[main-page.js] Ошибка при получении данных из Firebase Realtime Database:", error);
-    alert("Ошибка загрузки данных из базы данных. Проверьте консоль.");
+    alert("Ошибка загрузки данных из базы данных. Проверьте консоль разработчика.");
   });
 }
 
 // Отображение изображения с плавным появлением
 function displayImage(imageData, imageId) {
+  console.log(`[main-page.js] displayImage: Обработка изображения ID: ${imageId}, URL: ${imageData.url}, Колонка: ${imageData.column}`);
+
   const targetColumn = document.getElementById(`${imageData.column}Column`);
   if (!targetColumn) {
-      console.warn(`[main-page.js] Целевая колонка для изображения ${imageId} (${imageData.column}Column) не найдена.`);
+      console.error(`[main-page.js] ОШИБКА: Целевая колонка для изображения ${imageId} (${imageData.column}Column) НЕ НАЙДЕНА в HTML.`);
       return;
   }
   
   // Проверяем, есть ли уже такое изображение, чтобы избежать дублирования
-  // Это важно, если onValue срабатывает несколько раз (например, при изменениях в БД)
   if (targetColumn.querySelector(`.image-wrapper[data-id="${imageId}"]`)) {
-      // console.log(`[main-page.js] Изображение ${imageId} уже существует в колонке ${imageData.column}. Пропускаем добавление.`);
+      console.log(`[main-page.js] Изображение ${imageId} уже существует в колонке ${imageData.column}. Пропускаем добавление.`);
       return; 
   }
 
@@ -125,24 +128,25 @@ function displayImage(imageData, imageId) {
   const img = document.createElement('img');
   img.src = imageData.url;
   img.classList.add('thumbnail');
-  img.alt = 'Gallery Image'; // Alt-текст для доступности
-  img.loading = 'lazy'; // Оптимизация загрузки изображений
-  img.setAttribute('crossorigin', 'anonymous'); // Важно для CORS, если Cloudinary и домен разные
+  img.alt = 'Gallery Image';
+  img.loading = 'lazy';
+  img.setAttribute('crossorigin', 'anonymous');
 
   // Обработчики загрузки и ошибки изображения
   img.onload = () => {
     img.classList.add('loaded');
-    // console.log(`[main-page.js] Изображение ${imageData.url} успешно загружено.`);
+    console.log(`[main-page.js] Изображение ${imageData.url} (ID: ${imageId}) успешно загружено.`);
   };
 
   img.onerror = (e) => {
-      console.error(`[main-page.js] Ошибка загрузки изображения из Cloudinary: ${img.src}`, e);
+      console.error(`[main-page.js] ОШИБКА ЗАГРУЗКИ ИЗОБРАЖЕНИЯ: ${img.src} (ID: ${imageId})`, e);
       imageWrapper.classList.add('image-load-error'); // Добавляем класс для визуальной индикации ошибки
-      // Можно также добавить замещающий текст или иконку ошибки
+      
+      // Добавляем замещающий текст или иконку ошибки
       const errorText = document.createElement('p');
       errorText.textContent = 'Ошибка загрузки фото';
       errorText.style.color = 'red';
-      errorText.style.position = 'absolute';
+      errorText.style.position = 'absolute'; // чтобы текст был в центре imageWrapper
       errorText.style.top = '50%';
       errorText.style.left = '50%';
       errorText.style.transform = 'translate(-50%, -50%)';
@@ -156,13 +160,14 @@ function displayImage(imageData, imageId) {
 
   imageWrapper.appendChild(img);
   targetColumn.prepend(imageWrapper); // Добавляем в начало колонки (новые сверху)
+  console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
 }
 
 // Открытие модального окна
 function openModal(imgElement) {
   console.log("[main-page.js] Открытие модального окна для изображения:", imgElement.src);
   if (!imageModalGlobalRef || !modalImageElement || !moreOptionsButtonGlobalRef || !optionsDropdownGlobalRef || !imageInfo) {
-      console.error("[main-page.js] Не найдены элементы модального окна. Проверьте HTML ID.");
+      console.error("[main-page.js] ОШИБКА: Не найдены все необходимые элементы модального окна в HTML. Проверьте ID.");
       return;
   }
 
@@ -173,7 +178,7 @@ function openModal(imgElement) {
   modalImageElement.dataset.id = imgElement.dataset.id;
   modalImageElement.setAttribute('crossorigin', 'anonymous');
 
-  document.getElementById('imageInfo').innerHTML = ''; // Очищаем инфо
+  imageInfo.innerHTML = ''; // Очищаем инфо
 
   const imageId = imgElement.dataset.id;
   const column = imgElement.dataset.column;
@@ -226,7 +231,7 @@ function openModal(imgElement) {
     if (!targetActionElement) return;
 
     const action = targetActionElement.dataset.action;
-    const currentImageId = modalImageElement.dataset.id; // Используем глобальную ссылку
+    const currentImageId = modalImageElement.dataset.id;
 
     console.log(`[main-page.js] Действие: ${action} для изображения ${currentImageId}`);
 
@@ -255,7 +260,7 @@ function openModal(imgElement) {
   // Предотвращаем закрытие модального окна при клике внутри его контента
   modalImageElement.onclick = (event) => event.stopPropagation();
   modalActionsContainer.onclick = (event) => event.stopPropagation();
-  imageInfo.onclick = (event) => event.stopPropagation(); // Если imageInfo может быть кликабельным
+  imageInfo.onclick = (event) => event.stopPropagation();
 }
 
 // Функция закрытия модального окна
@@ -382,20 +387,8 @@ fileInput.addEventListener('change', async (event) => {
   }
 });
 
-// Функции для обновления градиента и подсчета просмотров (без изменений)
-function updateBackgroundGradient() {
-  const leftViews = getColumnViews('left');
-  const centerViews = getColumnViews('center');
-  const rightViews = getColumnViews('right');
-  const totalViews = leftViews + centerViews + rightViews;
-  let balance = 0;
-  if (totalViews > 0) {
-    balance = (leftViews - rightViews) / totalViews;
-  }
-  const gradientPosition = 50 + (balance * 50);
-  document.body.style.background = `linear-gradient(to right, #121212 ${gradientPosition}%, #2c3e50)`;
-}
-
+// Функции для обновления градиента и подсчета просмотров (удалены или упрощены)
+// Функция getColumnViews все еще нужна для подсчета просмотров
 function getColumnViews(columnName) {
   const images = document.querySelectorAll(`.image-column#${columnName}Column .image-wrapper`);
   return Array.from(images).reduce((acc, wrapper) => acc + (parseInt(wrapper.dataset.views) || 0), 0);
