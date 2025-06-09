@@ -1,125 +1,166 @@
+/* Переменные для цветовой палитры */
+:root {
+    --dark-bg: #1A1A1A; /* Очень темный фон */
+    --medium-dark-bg: #2B2B2B; /* Чуть светлее для блоков */
+    --light-text: #E0E0E0; /* Светлый текст */
+    --accent-blue: #00BFFF; /* Яркий акцентный синий (или другой цвет по вашему вкусу) */
+    --accent-blue-hover: #009ACD;
+    --border-color: #444444; /* Цвет границ */
+    --modal-bg: rgba(0, 0, 0, 0.9); /* Прозрачный фон модального окна */
+    --modal-content-bg: #1B1B1B;
+    --error-color: #FF6B6B; /* Красный для ошибок */
+}
+
 /* General styles */
 body {
-    font-family: 'YourCustomFont', Arial, sans-serif; /* ИСПОЛЬЗУЕМ ВАШ ШРИФТ (замените 'YourCustomFont' на название шрифта из fonts.css) */
+    font-family: 'YourCustomFont', 'Roboto Mono', monospace, Arial, sans-serif; /* ИСПОЛЬЗУЕМ ВАШ ШРИФТ. Если его нет, Roboto Mono или другой моноширинный/строгий шрифт */
     margin: 0;
-    background-color: #f0f2f5;
-    color: #333;
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    line-height: 1.6;
+    scroll-behavior: smooth; /* Плавный скролл */
 }
 
 header {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 20px;
+    background-color: var(--medium-dark-bg);
+    color: var(--light-text);
+    padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid var(--border-color);
 }
 
-header h1 { /* СТИЛИЗАЦИЯ ЗАГОЛОВКА */
+header h1 { 
     margin: 0;
-    font-size: 1.8em;
-    font-weight: bold;
-    color: white;
+    font-size: 2.2em; /* Чуть крупнее для акцента */
+    font-weight: 300; /* Более тонкое начертание для минимализма */
+    letter-spacing: 2px; /* Небольшой межбуквенный интервал для hi-tech */
+    color: var(--accent-blue); /* Акцентный цвет для заголовка */
+    text-shadow: 0 0 8px rgba(0, 191, 255, 0.5); /* Неоновый эффект */
+    transition: text-shadow 0.3s ease;
+}
+
+header h1:hover {
+    text-shadow: 0 0 15px var(--accent-blue);
 }
 
 .auth-status {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
 }
 
 .auth-status span {
-    font-weight: bold;
+    font-weight: normal;
+    font-size: 1.1em;
+    color: var(--light-text);
 }
 
 .sign-out-button {
-    background-color: #e0e0e0;
-    color: #333;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
+    background-color: var(--border-color);
+    color: var(--light-text);
+    border: 1px solid var(--border-color);
+    padding: 10px 20px;
+    border-radius: 4px; /* Меньше скруглений */
     cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.2s ease;
+    font-size: 1em;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .sign-out-button:hover {
-    background-color: #c7c7c7;
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: var(--dark-bg); /* Темный текст на яркой кнопке */
 }
 
 /* Image Grid Container */
 .image-container {
     display: flex;
-    justify-content: space-around;
-    padding: 20px;
-    gap: 20px; /* Пространство между колонками */
-    flex-wrap: wrap; /* Позволяет колонкам переноситься на новую строку на маленьких экранах */
+    justify-content: center; /* Центрируем колонки */
+    padding: 30px;
+    gap: 30px; /* Больше пространства между колонками */
+    flex-wrap: wrap; 
 }
 
 /* Column Styles */
 .image-column {
-    flex: 1; /* Каждая колонка занимает равное пространство */
-    min-width: 280px; /* Минимальная ширина для адаптивности */
-    max-width: 350px; /* Максимальная ширина, чтобы не растягивались слишком сильно */
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 15px;
+    flex: 1; 
+    min-width: 300px; /* Чуть шире минимальная ширина */
+    max-width: 380px; /* И максимальная */
+    background-color: var(--medium-dark-bg);
+    border-radius: 6px; /* Минимальные скругления */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4); /* Более выраженная, но мягкая тень */
+    padding: 20px;
     display: flex;
-    flex-direction: column; /* Элементы внутри колонки располагаются вертикально */
-    gap: 15px; /* Пространство между изображениями и кнопками */
-    box-sizing: border-box; /* Включаем padding в ширину */
+    flex-direction: column; 
+    gap: 20px; /* Больше пространства между элементами */
+    box-sizing: border-box; 
+    border: 1px solid var(--border-color); /* Строгая граница */
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
+
+.image-column:hover {
+    box-shadow: 0 8px 30px rgba(0, 191, 255, 0.2); /* Акцентная тень при наведении */
+    border-color: var(--accent-blue); /* Подсветка границы */
+}
+
 
 /* Column Top Actions (buttons) */
 .column-top-actions {
     width: 100%;
     display: flex;
-    justify-content: center; /* Центрируем кнопку загрузки */
-    padding: 10px 0; /* Отступ вокруг кнопки */
+    justify-content: center; 
+    padding: 15px 0; 
     box-sizing: border-box;
 }
 
 .column-top-actions button {
-    background-color: #007bff;
-    color: white;
+    background-color: var(--accent-blue);
+    color: var(--dark-bg); /* Темный текст на акцентной кнопке */
     border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    font-size: 1.1em;
+    padding: 15px 30px;
+    border-radius: 4px; 
+    font-size: 1.2em; /* Крупнее шрифт */
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease;
-    width: 90%; /* Кнопка занимает почти всю ширину блока */
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+    width: 90%; 
     box-sizing: border-box;
-    max-width: 250px; /* Ограничиваем ширину кнопки */
+    max-width: 280px; 
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.4); /* Неоновый эффект */
 }
 
 .column-top-actions button:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
+    background-color: var(--accent-blue-hover);
+    transform: translateY(-3px); /* Чуть больше подъем */
+    box-shadow: 0 0 15px var(--accent-blue);
 }
 
 .column-top-actions button:active {
     transform: translateY(0);
+    box-shadow: 0 0 5px var(--accent-blue);
 }
 
 /* Image Wrapper */
 .image-wrapper {
     position: relative;
     width: 100%;
-    background-color: #e9e9e9; /* Placeholder background */
-    border-radius: 6px;
+    background-color: #3A3A3A; /* Темный фон для загружаемого изображения */
+    border-radius: 4px;
     overflow: hidden;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease;
-    opacity: 0; /* Изначально скрыто для эффекта плавного появления */
-    animation: fadeIn 0.5s forwards; /* Анимация появления */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0; 
+    animation: fadeIn 0.6s forwards; /* Чуть медленнее появление */
+    border: 1px solid var(--border-color);
 }
 
 .image-wrapper:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px); /* Более выраженный подъем */
+    box-shadow: 0 5px 15px rgba(0, 191, 255, 0.3); /* Акцентная тень */
 }
 
 .image-wrapper img {
@@ -127,7 +168,7 @@ header h1 { /* СТИЛИЗАЦИЯ ЗАГОЛОВКА */
     width: 100%;
     height: auto;
     object-fit: cover;
-    border-radius: 6px;
+    border-radius: 3px; /* Меньше скруглений */
     transition: opacity 0.3s ease;
 }
 
@@ -143,21 +184,22 @@ header h1 { /* СТИЛИЗАЦИЯ ЗАГОЛОВКА */
 
 /* Keyframes for fade-in animation */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(20px); } /* Больше смещение */
     to { opacity: 1; transform: translateY(0); }
 }
 
 /* Error state for image loading */
 .image-wrapper.image-load-error {
-    background-color: #ffe0e0;
-    border: 1px dashed red;
+    background-color: var(--error-color);
+    border: 1px dashed var(--error-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 150px; /* Fixed height for error placeholder */
+    height: 180px; /* Больше высота для ошибки */
     text-align: center;
-    font-size: 0.9em;
-    color: red;
+    font-size: 1em;
+    color: var(--dark-bg); /* Темный текст на красном фоне */
+    font-weight: bold;
 }
 
 /* Modal styles */
@@ -170,55 +212,59 @@ header h1 { /* СТИЛИЗАЦИЯ ЗАГОЛОВКА */
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: var(--modal-bg); /* Темный, полупрозрачный фон */
     justify-content: center;
     align-items: center;
-    opacity: 0; /* Изначально скрыто */
-    transition: opacity 0.3s ease;
+    opacity: 0; 
+    transition: opacity 0.4s ease; /* Чуть медленнее появление */
 }
 
 .modal.show-modal {
     display: flex;
-    opacity: 1; /* Показываем с плавным появлением */
+    opacity: 1; 
 }
 
 .modal-content {
     position: relative;
-    background-color: #fefefe;
+    background-color: var(--modal-content-bg);
     margin: auto;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    max-width: 90%;
-    max-height: 90%;
+    padding: 30px;
+    border-radius: 8px; 
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6); /* Более выраженная тень */
+    max-width: 95%;
+    max-height: 95%;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Центрируем изображение по горизонтали */
+    align-items: center; 
     box-sizing: border-box;
+    border: 1px solid var(--border-color);
 }
 
 .modal-content img {
     max-width: 100%;
-    max-height: 70vh; /* Ограничиваем высоту изображения в модальном окне */
+    max-height: 75vh; /* Больше высота изображения в модальном окне */
     display: block;
-    object-fit: contain; /* Сохраняет пропорции, вмещаясь в контейнер */
-    margin-bottom: 15px;
+    object-fit: contain; 
+    margin-bottom: 20px;
+    border-radius: 4px;
 }
 
 .close-button {
-    color: #aaa;
+    color: var(--light-text);
     position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 35px;
-    font-weight: bold;
+    top: 15px;
+    right: 25px;
+    font-size: 40px; /* Крупнее крестик */
+    font-weight: normal; /* Не жирный */
     cursor: pointer;
-    transition: color 0.2s ease;
+    transition: color 0.2s ease, transform 0.2s ease;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3); /* Небольшая подсветка */
 }
 
 .close-button:hover,
 .close-button:focus {
-    color: #333;
+    color: var(--accent-blue);
+    transform: rotate(90deg); /* Эффект вращения */
     text-decoration: none;
 }
 
@@ -226,70 +272,97 @@ header h1 { /* СТИЛИЗАЦИЯ ЗАГОЛОВКА */
     position: relative;
     width: 100%;
     display: flex;
-    justify-content: flex-end; /* Перемещаем кнопку ... вправо */
-    padding: 10px 0;
+    justify-content: flex-end; 
+    padding: 15px 0;
     box-sizing: border-box;
+    border-top: 1px solid var(--border-color); /* Разделитель */
+    margin-top: 10px;
 }
 
 .more-options-button {
     background: none;
-    border: none;
-    font-size: 1.5em;
+    border: 1px solid var(--border-color);
+    font-size: 1.8em; /* Крупнее кнопка */
     cursor: pointer;
-    color: #555;
-    padding: 5px 10px;
-    border-radius: 5px;
-    transition: background-color 0.2s ease;
+    color: var(--light-text);
+    padding: 8px 15px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .more-options-button:hover {
-    background-color: #eee;
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: var(--dark-bg);
 }
 
 .options-dropdown {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    background-color: var(--medium-dark-bg);
+    min-width: 200px; /* Шире дропдаун */
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
     z-index: 1;
-    right: 0; /* Выравнивание по правой стороне кнопки */
-    top: 100%; /* Появляется под кнопкой */
-    border-radius: 5px;
+    right: 0; 
+    top: calc(100% + 5px); /* Отступ от кнопки */
+    border-radius: 4px;
     overflow: hidden;
+    border: 1px solid var(--border-color);
 }
 
 .options-dropdown a {
-    color: black;
-    padding: 12px 16px;
+    color: var(--light-text);
+    padding: 15px 20px; /* Больше отступов */
     text-decoration: none;
     display: block;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Тонкий разделитель */
+}
+
+.options-dropdown a:last-child {
+    border-bottom: none;
 }
 
 .options-dropdown a:hover {
-    background-color: #f1f1f1;
+    background-color: var(--accent-blue);
+    color: var(--dark-bg);
 }
 
 /* Image Info */
 #imageInfo {
     width: 100%;
-    padding: 10px 0;
+    padding: 15px 0;
     text-align: center;
-    font-size: 0.9em;
-    color: #666;
+    font-size: 1em;
+    color: var(--light-text);
+    border-top: 1px solid var(--border-color);
+    margin-top: 15px;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+    header h1 {
+        font-size: 1.8em;
+    }
+    .auth-status {
+        width: 100%;
+        justify-content: center;
+    }
     .image-container {
         flex-direction: column;
         align-items: center;
+        padding: 15px;
+        gap: 20px;
     }
 
     .image-column {
-        width: 95%; /* Почти полная ширина на мобильных */
-        max-width: none; /* Убираем ограничение max-width */
-        margin: 10px 0; /* Добавляем отступы сверху/снизу между колонками */
+        width: 98%; 
+        max-width: none; 
+        margin: 0;
     }
 }
