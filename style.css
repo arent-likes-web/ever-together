@@ -18,6 +18,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth; 
     overflow-x: hidden; /* Важно, чтобы избежать горизонтальной прокрутки, если что-то вылезет */
+    min-width: 320px; /* Добавим минимальную ширину для body, чтобы избежать слишком сильного сжатия */
 }
 
 /* Общие стили для элементов */
@@ -342,111 +343,121 @@ header h1 {
 /* Responsive adjustments */
 @media (max-width: 768px) {
     header {
-        padding: 15px 20px;
+        padding: 15px 10px; /* Уменьшим padding заголовка */
     }
     header h1 {
-        font-size: 1.6em;
+        font-size: 1.5em; /* Уменьшим размер заголовка */
+        letter-spacing: 1px;
     }
 
     /* Изменения для кнопок */
     .top-upload-buttons-container {
         flex-direction: row; /* Принудительно row-направление */
-        justify-content: center; /* Центрируем кнопки */
-        padding: 10px;
-        gap: 5px; /* Ещё уменьшим gap */
-        flex-wrap: wrap; /* Позволяем кнопкам переноситься */
+        justify-content: space-between; /* Равномерно распределяем кнопки */
+        padding: 10px 5px; /* Уменьшим padding контейнера */
+        gap: 2px; /* Уменьшим gap до минимума */
+        flex-wrap: wrap; 
         align-items: flex-start;
+        width: 100vw; /* Занимаем всю ширину viewport */
+        box-sizing: border-box; /* Важно */
     }
 
     .top-upload-buttons-container .column-top-actions {
-        flex: 1 1 30%; /* Сжиматься, расти, базовая ширина 30% */
-        min-width: 90px; /* Уменьшим min-width */
-        max-width: 120px; /* Уменьшим max-width, чтобы избежать слишком широких кнопок */
-        margin: 0; /* Убираем лишние отступы */
+        flex: 0 0 calc(33.33% - 4px); /* Задаем точную ширину для трех элементов в ряд с учетом gap */
+        min-width: 90px; /* Минимальная ширина для каждой кнопки */
+        /* max-width: unset; Убираем max-width, чтобы flex мог свободно сжиматься */
+        margin: 0;
     }
 
     .top-upload-buttons-container .column-top-actions button {
-        padding: 8px 10px; /* Ещё уменьшим padding кнопок */
-        font-size: 0.8em; /* Ещё уменьшим шрифт кнопок */
+        padding: 8px 5px; /* Максимально уменьшим padding кнопок */
+        font-size: 0.75em; /* Ещё уменьшим шрифт кнопок */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         width: 100%; /* Заставляем кнопку занимать всю доступную ширину своего flex-элемента */
-        box-sizing: border-box; /* Важно, чтобы padding не увеличивал ширину */
+        box-sizing: border-box;
     }
 
     /* Изменения для колонок изображений */
     .image-container {
         flex-direction: row; /* Принудительно row-направление */
         justify-content: center; /* Центрируем колонки */
-        padding: 10px;
-        gap: 5px; /* Ещё уменьшим gap */
-        flex-wrap: wrap; /* Позволяем колонкам переноситься */
+        padding: 10px 5px; /* Уменьшим padding контейнера */
+        gap: 5px; /* Уменьшим gap */
+        flex-wrap: wrap;
         align-items: flex-start;
+        width: 100vw; /* Занимаем всю ширину viewport */
+        box-sizing: border-box; /* Важно */
     }
 
     .image-column {
-        flex: 1 1 30%; /* Разрешаем колонкам сжиматься и расти, но цель - 30% ширины */
-        min-width: 90px; /* Уменьшим min-width для колонок, чтобы они могли сжиматься */
-        /* max-width: 30%; Убрал max-width, чтобы flex-grow мог работать свободнее */
+        flex: 0 0 calc(33.33% - 10px); /* Задаем точную ширину для трех элементов в ряд с учетом gap */
+        min-width: 90px; /* Уменьшим min-width для колонок */
+        /* max-width: unset; Убираем max-width */
         padding: 8px; /* Уменьшим padding колонок */
         box-sizing: border-box;
         margin: 0;
     }
 
     .image-wrapper {
-        min-height: 70px; /* Минимальная высота для обертки изображения */
+        min-height: 70px;
     }
 
     .image-wrapper img {
         height: auto;
-        min-height: 50px; /* Минимальная высота для самого изображения */
+        min-height: 50px;
     }
 
     .modal-content {
         max-width: 95%;
         max-height: 95%;
-        padding: 10px; /* Ещё уменьшим padding модального окна */
+        padding: 10px;
     }
 
     .modal-content img {
-        max-height: 55vh; /* Ещё немного уменьшим высоту изображения в модальном окне */
+        max-height: 55vh;
         margin-bottom: 10px;
     }
 
     .options-dropdown {
-        bottom: calc(100% + 5px); /* Привязываем к верху кнопки, чтобы он выпадал ВВЕРХ, немного уменьшим отступ */
-        max-height: 150px; /* Ограничить высоту для мобильных */
-        top: unset; /* Сбросить top */
-        right: 0;
-        left: unset;
-        min-width: 140px; /* Чуть уменьшим мин. ширину дропдауна */
+        bottom: calc(100% + 5px);
+        max-height: 120px; /* Ещё уменьшим высоту для очень маленьких экранов */
+        min-width: 120px; /* Ещё уменьшим мин. ширину дропдауна */
+        font-size: 0.8em; /* Уменьшим шрифт в дропдауне */
+    }
+    .options-dropdown a {
+        padding: 10px 12px;
     }
 }
 
-/* Дополнительный медиазапрос для ОЧЕНЬ маленьких экранов (например, < 480px) */
-@media (max-width: 480px) {
+/* Дополнительный медиазапрос для ОЧЕНЬ маленьких экранов (например, < 420px) */
+/* На таких экранах 3 колонки могут быть нечитаемы, возвращаем вертикальное расположение */
+@media (max-width: 420px) { /* Изменил breakpoint с 480px на 420px */
     .top-upload-buttons-container {
-        flex-direction: column; /* На очень маленьких экранах кнопки снова могут идти друг за другом */
-        gap: 10px; /* Уменьшим gap */
+        flex-direction: column; /* Снова вертикально */
+        gap: 10px;
+        padding: 10px 15px; /* Вернём больший padding */
     }
     .top-upload-buttons-container .column-top-actions {
-        width: 90%; /* Кнопки занимают большую часть ширины */
-        max-width: 300px; /* Увеличим max-width, чтобы они были более читаемы */
-        min-width: unset; /* Сбросим min-width */
+        width: 100%; /* Кнопки на всю ширину */
+        max-width: 300px; /* Ограничим, чтобы не были слишком широкими на больших телефонах в этом диапазоне */
+        margin: 0 auto; /* Центрируем */
     }
     .top-upload-buttons-container .column-top-actions button {
-        font-size: 1em; /* Вернём нормальный размер шрифта для вертикального списка */
-        padding: 10px 15px;
+        font-size: 1em; /* Вернём нормальный размер шрифта */
+        padding: 12px 20px;
     }
 
     .image-container {
-        flex-direction: column; /* Колонки снова идут друг за другом на очень маленьких экранах */
+        flex-direction: column; /* Снова вертикально */
         gap: 15px;
+        padding: 15px; /* Вернём больший padding */
     }
     .image-column {
-        width: 90%;
+        width: 100%; /* Колонки на всю ширину */
         max-width: none;
-        min-width: unset; /* Сбросим min-width */
+        min-width: unset;
+        margin: 0 auto; /* Центрируем */
     }
 }
