@@ -18,7 +18,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth; 
     overflow-x: hidden; /* Важно, чтобы избежать горизонтальной прокрутки, если что-то вылезет */
-    min-width: 320px; /* Добавим минимальную ширину для body, чтобы избежать слишком сильного сжатия */
+    min-width: 280px; /* Уменьшим минимальную ширину body для очень маленьких экранов */
 }
 
 /* Общие стили для элементов */
@@ -84,10 +84,10 @@ header h1 {
 /* Top Upload Buttons Container */
 .top-upload-buttons-container {
     display: flex;
-    justify-content: center; /* Центрируем кнопки, когда их три */
+    justify-content: center; 
     padding: 30px 20px 20px;
     gap: 30px;
-    flex-wrap: wrap; /* Позволяем кнопкам переноситься на новую строку */
+    flex-wrap: wrap; 
     box-sizing: border-box;
     width: 100%;
     max-width: 1200px;
@@ -95,7 +95,7 @@ header h1 {
 }
 
 .top-upload-buttons-container .column-top-actions {
-    flex: 1; /* Позволяем элементу растягиваться */
+    flex: 1; 
     min-width: 250px;
     max-width: 350px;
     display: flex;
@@ -128,10 +128,10 @@ header h1 {
 /* Image Grid Container */
 .image-container {
     display: flex;
-    justify-content: center; /* Центрируем колонки, когда их три */
+    justify-content: center; 
     padding: 30px 20px;
     gap: 30px;
-    flex-wrap: wrap; /* Позволяем колонкам переноситься на новую строку */
+    flex-wrap: wrap; 
     max-width: 1200px;
     margin: 0 auto 50px;
 }
@@ -341,7 +341,8 @@ header h1 {
 }
 
 /* Responsive adjustments */
-/* Медиазапрос для большинства мобильных устройств (от 768px до 400px) */
+/* Медиазапрос для БОЛЬШИНСТВА мобильных устройств (от 768px до ~450px) */
+/* Цель: три колонки */
 @media (max-width: 768px) {
     header {
         padding: 15px 10px; 
@@ -351,59 +352,46 @@ header h1 {
         letter-spacing: 1px;
     }
 
-    /* Изменения для кнопок */
-    .top-upload-buttons-container {
+    /* Общие стили для контейнеров кнопок и колонок изображений */
+    .top-upload-buttons-container,
+    .image-container {
+        display: flex;
         flex-direction: row; 
-        justify-content: space-around; 
+        justify-content: space-between; /* Распределяем элементы по краям с равномерным зазором */
         padding: 10px 5px; 
-        gap: 5px; /* Увеличим gap, чтобы было больше воздуха между кнопками */
-        flex-wrap: nowrap; /* Важно: Отключаем перенос строк, чтобы кнопки оставались в один ряд */
+        gap: 5px; /* Небольшой зазор между элементами */
+        flex-wrap: nowrap; /* Важно: Отключаем перенос строк, чтобы элементы оставались в один ряд */
         align-items: flex-start;
         width: 100%; 
-        max-width: none; 
+        max-width: none; /* Убираем max-width, чтобы не ограничивать адаптивность */
         margin: 0 auto;
         box-sizing: border-box;
     }
 
-    .top-upload-buttons-container .column-top-actions {
-        flex: 1 1 30%; /* Позволяем растягиваться и сжиматься, базовая ширина 30% */
-        min-width: 80px; /* Минимальная ширина, чтобы не схлопнулись совсем */
-        max-width: 120px; /* Ограничим максимальную ширину для каждой кнопки */
+    /* Стили для отдельных кнопок и колонок изображений */
+    .top-upload-buttons-container .column-top-actions,
+    .image-column {
+        flex: 1 1 31%; /* Базовая ширина около 31% для трех элементов, чтобы учесть gap */
+        min-width: 90px; /* Минимальная ширина для каждого элемента, чтобы они не схлопнулись слишком сильно */
+        /* max-width: 150px; Убираем max-width, чтобы flex мог более гибко распределяться */
         margin: 0;
+        box-sizing: border-box;
     }
 
+    /* Дополнительные стили для кнопок, чтобы они лучше сжимались */
     .top-upload-buttons-container .column-top-actions button {
-        padding: 8px 5px; 
-        font-size: 0.7em;
+        padding: 8px 3px; /* Максимально уменьшим padding кнопок */
+        font-size: 0.7em; /* Ещё уменьшим шрифт кнопок */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        width: 100%; 
-        box-sizing: border-box;
+        width: 100%; /* Заставляем кнопку занимать всю доступную ширину своего flex-элемента */
         display: block; 
     }
 
-    /* Изменения для колонок изображений */
-    .image-container {
-        flex-direction: row; 
-        justify-content: space-around; /* Распределяем колонки равномерно */
-        padding: 10px 5px; 
-        gap: 5px; /* Увеличим gap между колонками */
-        flex-wrap: nowrap; /* Важно: Отключаем перенос строк для колонок */
-        align-items: flex-start;
-        width: 100%; 
-        max-width: none; 
-        margin: 0 auto;
-        box-sizing: border-box;
-    }
-
+    /* Дополнительные стили для колонок изображений */
     .image-column {
-        flex: 1 1 30%; /* Разрешаем колонкам сжиматься и расти, но цель - 30% ширины */
-        min-width: 80px; /* Минимальная ширина, чтобы не схлопнулись */
-        max-width: 120px; /* Ограничим максимальную ширину */
-        padding: 8px; 
-        box-sizing: border-box;
-        margin: 0;
+        padding: 8px; /* Уменьшим padding колонок */
     }
 
     .image-wrapper {
@@ -437,55 +425,47 @@ header h1 {
     }
 }
 
-/* Специальный медиазапрос для очень маленьких экранов (смартфоны до ~400px ширины) */
-/* Здесь мы принудительно переключаемся на две колонки для кнопок и изображений */
-@media (max-width: 400px) { 
-    .top-upload-buttons-container {
-        flex-direction: row; /* Две кнопки в ряд */
+/* Медиазапрос для средних мобильных устройств (от ~450px до ~350px) */
+/* Цель: две колонки (если 3 не вмещаются, это будет более читабельно) */
+@media (max-width: 450px) { 
+    .top-upload-buttons-container,
+    .image-container {
+        flex-direction: row; 
         justify-content: space-around;
-        gap: 5px;
-        flex-wrap: wrap; /* Разрешаем перенос, если кнопок больше двух */
-        padding: 10px 5px;
-    }
-    .top-upload-buttons-container .column-top-actions {
-        flex: 1 1 45%; /* Базовая ширина около 45% для двух кнопок */
-        min-width: 100px; /* Увеличим минимальную ширину для лучшей читаемости */
-        max-width: 180px; /* Ограничим максимальную ширину */
-    }
-    .top-upload-buttons-container .column-top-actions button {
-        font-size: 0.9em; /* Увеличим шрифт */
+        gap: 8px; /* Увеличим gap для двух колонок */
+        flex-wrap: wrap; /* Разрешаем перенос, если элементов больше двух */
         padding: 10px 8px;
     }
-
-    .image-container {
-        flex-direction: row; /* Две колонки в ряд */
-        justify-content: space-around;
-        gap: 5px;
-        flex-wrap: wrap; /* Разрешаем перенос, если колонок больше двух */
-        padding: 10px 5px;
-    }
+    .top-upload-buttons-container .column-top-actions,
     .image-column {
-        flex: 1 1 45%; /* Базовая ширина около 45% для двух колонок */
-        min-width: 100px; /* Увеличим минимальную ширину */
-        max-width: 180px; /* Ограничим максимальную ширину */
-        padding: 8px;
+        flex: 1 1 45%; /* Базовая ширина около 45% для двух элементов */
+        min-width: 120px; /* Увеличим минимальную ширину для лучшей читаемости */
+        max-width: 200px; /* Ограничим максимальную ширину */
+    }
+    .top-upload-buttons-container .column-top-actions button {
+        font-size: 0.9em; 
+        padding: 10px 8px;
     }
     .image-wrapper {
-        min-height: 80px; /* Увеличим минимальную высоту */
+        min-height: 80px; 
     }
 }
 
-/* Медиазапрос для совсем крошечных экранов, если 2 колонки не помещаются */
-@media (max-width: 320px) {
-    .top-upload-buttons-container, .image-container {
+
+/* Медиазапрос для самых маленьких экранов (смартфоны до ~350px ширины) */
+/* Цель: одна колонка */
+@media (max-width: 350px) {
+    .top-upload-buttons-container, 
+    .image-container {
         flex-direction: column; /* Одна колонка */
         flex-wrap: nowrap;
         gap: 10px;
         padding: 10px 15px;
     }
-    .top-upload-buttons-container .column-top-actions, .image-column {
+    .top-upload-buttons-container .column-top-actions, 
+    .image-column {
         width: 100%;
-        max-width: 250px; /* Ограничение, чтобы не было слишком широко */
+        max-width: 280px; /* Ограничение, чтобы не было слишком широко */
         margin: 0 auto;
         min-width: unset; /* Сбрасываем min-width */
     }
