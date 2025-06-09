@@ -2,9 +2,7 @@
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-
+import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Обновление: добавлен getAuth
 
 // Firebase Config (Ваши данные)
 const firebaseConfig = {
@@ -89,7 +87,7 @@ function loadImagesFromFirebase() {
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
             // Сортируем по времени создания (новые сверху), если timestamp - это ISO строка
-            imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // ОСТАВЛЯЕМ СОРТИРОВКУ ОТ НОВЫХ К СТАРЫМ
 
             console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
             imageArray.forEach((imgData) => {
@@ -166,16 +164,21 @@ function displayImage(imageData, imageId) {
 
     imageWrapper.appendChild(img);
     
-    // Вставляем imageWrapper ПОСЛЕ элемента .column-top-actions
+    // НАХОДИМ ПЕРВЫЙ ЭЛЕМЕНТ .image-wrapper (если есть) или блок с кнопками
+    const firstImageWrapper = targetColumn.querySelector('.image-wrapper');
     const columnTopActions = targetColumn.querySelector('.column-top-actions');
-    if (columnTopActions) {
-        // Добавляем изображение сразу после блока с кнопками
+
+    if (firstImageWrapper) {
+        // Если есть уже изображения, вставляем НОВОЕ перед первым изображением
+        targetColumn.insertBefore(imageWrapper, firstImageWrapper);
+    } else if (columnTopActions) {
+        // Если изображений нет, но есть блок с кнопками, вставляем ПОСЛЕ блока с кнопками
         columnTopActions.after(imageWrapper);
     } else {
-        // Если почему-то .column-top-actions не найден, добавляем в конец колонки
-        // (хотя в этой конфигурации он всегда должен быть)
+        // Если ни кнопок, ни изображений нет (маловероятно), просто добавляем в конец
         targetColumn.appendChild(imageWrapper);
     }
+
 
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
 }
