@@ -2,7 +2,11 @@
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Обновление: добавлен getAuth
+// ИСПРАВЛЕНО: ref, set, push, onValue, update, remove импортируются из firebase-database.js
+import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+// ИСПРАВЛЕНО: getAuth, onAuthStateChanged, signOut импортируются из firebase-auth.js
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+
 
 // Firebase Config (Ваши данные)
 const firebaseConfig = {
