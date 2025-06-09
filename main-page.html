@@ -3,42 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ever Together</title>
+    <title>Ever Together - Your Gallery</title>
     <link rel="stylesheet" href="style.css">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://www.googleapis.com https://ever-together.firebaseapp.com https://*.firebasedatabase.app; connect-src 'self' https://www.googleapis.com https://ever-together.firebaseapp.com https://*.firebasedatabase.app wss://*.firebasedatabase.app https://securetoken.googleapis.com https://identitytoolkit.googleapis.com; img-src 'self' data: https://res.cloudinary.com; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; frame-src 'self' https://*.firebaseapp.com https://*.firebasedatabase.app;">
-    <link rel="icon" type="image/x-icon" href="heart.ico">
 </head>
 <body>
-    <h2>U&ME</h2>
+    <header>
+        <div class="auth-status">
+            <span id="userName"></span>
+            <button id="signOutButton" class="sign-out-button">Выйти</button>
+        </div>
+    </header>
 
     <div class="image-container">
+        <div class="column-actions-top-wrapper">
+            <div class="column-top-actions">
+                <button id="uploadLeft">Him peach</button>
+            </div>
+        </div>
         <div class="image-column" id="leftColumn">
-            <div class="column-top-actions"> <button id="uploadLeft">Him peach</button>
             </div>
+
+        <div class="column-actions-top-wrapper">
+            <div class="column-top-actions">
+                <button id="uploadCenter">Our dreams</button>
             </div>
+        </div>
         <div class="image-column" id="centerColumn">
-            <div class="column-top-actions"> <button id="uploadCenter">Our dreams</button>
             </div>
+
+        <div class="column-actions-top-wrapper">
+            <div class="column-top-actions">
+                <button id="uploadRight">Her cat</button>
             </div>
+        </div>
         <div class="image-column" id="rightColumn">
-            <div class="column-top-actions"> <button id="uploadRight">Her cat</button>
-            </div>
             </div>
     </div>
 
     <div id="imageModal" class="modal">
         <div class="modal-content">
-            <img class="modal-image" id="modalImage" src="" alt=""> 
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <img id="modalImage" src="" alt="Full size image">
             <div class="modal-actions-container">
-                <button class="options-button" id="moreOptionsButton">...</button>
-                <div class="options-dropdown" id="optionsDropdown">
+                <button id="moreOptionsButton" class="more-options-button">...</button>
+                <div id="optionsDropdown" class="options-dropdown">
                     <a href="#" data-action="delete">Удалить</a>
-                    <a href="#" data-action="move" data-column="left">Влево</a>
-                    <a href="#" data-action="move" data-column="center">В Центр</a>
-                    <a href="#" data-action="move" data-column="right">Вправо</a>
+                    <a href="#" data-action="move" data-column="left">В Him peach</a>
+                    <a href="#" data-action="move" data-column="center">В Our dreams</a>
+                    <a href="#" data-action="move" data-column="right">В Her cat</a>
                 </div>
             </div>
-            <div class="image-info" id="imageInfo"></div>
+            <div id="imageInfo"></div>
         </div>
     </div>
 
