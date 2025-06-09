@@ -3,8 +3,7 @@
 /* --- Font Import: Taler --- */
 @font-face {
     font-family: 'Taler';
-    src: url('fonts/Taler.woff2') format('woff2'),
-         url('fonts/Taler.woff') format('woff');
+    src: url('Taler.otf') format('opentype'); /* ИСПРАВЛЕНО: Путь и формат для Taler.otf */
     font-weight: normal;
     font-style: normal;
     font-display: swap;
