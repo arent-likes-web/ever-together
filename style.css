@@ -14,8 +14,7 @@ body {
     font-family: 'Taler', Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    /* Убран градиент, установлен фиксированный фон */
-    background-color: #1a2a3a; /* Темно-синий, подходящий к текущей палитре */
+    background-color: #1a2a3a; /* Fixed dark blue background */
     color: #ecf0f1;
     min-height: 100vh;
     display: flex;
