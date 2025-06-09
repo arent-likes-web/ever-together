@@ -50,27 +50,6 @@ header {
     flex-wrap: wrap; /* Позволяет колонкам переноситься на новую строку на маленьких экранах */
 }
 
-/* New: Wrapper for column actions */
-.column-actions-top-wrapper {
-    /* Чтобы кнопки выравнивались по ширине колонки ниже */
-    width: 30%; /* Пример, можно настроить */
-    min-width: 280px; /* Минимальная ширина для адаптивности */
-    box-sizing: border-box; /* Включаем padding в ширину */
-    padding-bottom: 10px; /* Отступ между кнопками и первой фотографией */
-    display: flex; /* Для выравнивания column-top-actions */
-    justify-content: center; /* Центрируем кнопку */
-    align-items: flex-end; /* Выравниваем по низу (если кнопки будут разной высоты) */
-    order: -1; /* Позволяет оберткам с кнопками быть выше соответствующих колонок, но Flexbox будет их переупорядочивать */
-}
-
-/* Adjust order of elements in flex container */
-.image-container > .column-actions-top-wrapper:nth-of-type(1),
-.image-container > .image-column:nth-of-type(2) { order: 1; }
-.image-container > .column-actions-top-wrapper:nth-of-type(3),
-.image-container > .image-column:nth-of-type(4) { order: 2; }
-.image-container > .column-actions-top-wrapper:nth-of-type(5),
-.image-container > .image-column:nth-of-type(6) { order: 3; }
-
 /* Column Styles */
 .image-column {
     flex: 1; /* Каждая колонка занимает равное пространство */
@@ -84,10 +63,9 @@ header {
     flex-direction: column; /* Элементы внутри колонки располагаются вертикально */
     gap: 15px; /* Пространство между изображениями и кнопками */
     box-sizing: border-box; /* Включаем padding в ширину */
-    margin-top: 0; /* Убираем margin-top, так как кнопки теперь сверху */
 }
 
-/* Column Top Actions (now for buttons only) */
+/* Column Top Actions (buttons) */
 .column-top-actions {
     width: 100%;
     display: flex;
@@ -302,19 +280,9 @@ header {
         align-items: center;
     }
 
-    .image-column, .column-actions-top-wrapper {
+    .image-column {
         width: 95%; /* Почти полная ширина на мобильных */
         max-width: none; /* Убираем ограничение max-width */
         margin: 10px 0; /* Добавляем отступы сверху/снизу между колонками */
-    }
-
-    /* Reset order for smaller screens */
-    .image-container > .column-actions-top-wrapper:nth-of-type(1),
-    .image-container > .image-column:nth-of-type(2),
-    .image-container > .column-actions-top-wrapper:nth-of-type(3),
-    .image-container > .image-column:nth-of-type(4),
-    .image-container > .column-actions-top-wrapper:nth-of-type(5),
-    .image-container > .image-column:nth-of-type(6) {
-        order: unset; /* Сбрасываем порядок на мобильных */
     }
 }
