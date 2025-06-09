@@ -1,4 +1,4 @@
-// main-page.js (Остается без изменений)
+// main-page.js
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
@@ -73,15 +73,17 @@ function loadImagesFromFirebase() {
             console.log("[main-page.js] Данные изображений из Firebase:", data);
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
-            // Сортируем по времени создания (новые сверху)
+            // **КЛЮЧЕВОЕ ИЗМЕНЕНИЕ ЗДЕСЬ:** Сортируем по времени создания (новые сверху)
+            // Используем убывающую сортировку по timestamp
             imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
 
             console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
             imageArray.forEach((imgData) => {
                 // Убедимся, что изображение еще не добавлено
                 const targetColumn = document.getElementById(`${imgData.column}Column`);
-                if (targetColumn && !targetColumn.querySelector(`.image-wrapper[data-id="${imgData.id}"]`)) {
-                    displayImage(imgData, imgData.id);
+                if (targetColumn) { // Проверяем, что колонка существует
+                    // Добавляем изображение в начало колонки
+                    displayImage(imgData, imgData.id); 
                 }
             });
         } else {
@@ -152,6 +154,7 @@ function displayImage(imageData, imageId) {
     imageWrapper.appendChild(img);
     
     // Вставляем новое изображение в начало колонки
+    // Это гарантирует, что новые изображения всегда будут наверху
     targetColumn.prepend(imageWrapper);
 
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
