@@ -166,12 +166,14 @@ function displayImage(imageData, imageId) {
 
     imageWrapper.appendChild(img);
     
-    // Вставляем imageWrapper ПЕРЕД элементом .column-bottom-actions
-    const columnBottomActions = targetColumn.querySelector('.column-bottom-actions');
-    if (columnBottomActions) {
-        targetColumn.insertBefore(imageWrapper, columnBottomActions);
+    // Вставляем imageWrapper ПОСЛЕ элемента .column-top-actions
+    const columnTopActions = targetColumn.querySelector('.column-top-actions');
+    if (columnTopActions) {
+        // Добавляем изображение сразу после блока с кнопками
+        columnTopActions.after(imageWrapper);
     } else {
-        // Если почему-то .column-bottom-actions не найден, добавляем в конец колонки
+        // Если почему-то .column-top-actions не найден, добавляем в конец колонки
+        // (хотя в этой конфигурации он всегда должен быть)
         targetColumn.appendChild(imageWrapper);
     }
 
@@ -341,7 +343,7 @@ fileInput.style.display = 'none'; // Скрываем элемент input, та
 document.body.appendChild(fileInput);
 
 // Обновляем селектор кнопок загрузки
-const uploadButtons = document.querySelectorAll('.column-bottom-actions button[id^="upload"]'); // Селектор для кнопок внутри .column-bottom-actions
+const uploadButtons = document.querySelectorAll('.column-top-actions button[id^="upload"]'); // Селектор для кнопок внутри .column-top-actions
 uploadButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
         event.stopPropagation();
