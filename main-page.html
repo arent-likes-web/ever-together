@@ -4,39 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ever Together - Your Gallery</title>
+    <link rel="icon" href="heart.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="fonts/fonts.css"> 
 </head>
 <body>
     <header>
-        <h1>Ever Together</h1> 
+        <h1>Ever Together</h1>
         <div class="auth-status">
             <span id="userName"></span>
-            <button id="signOutButton" class="sign-out-button">Выйти</button>
         </div>
     </header>
 
+    <div class="top-upload-buttons-container">
+        <div class="column-top-actions">
+            <button id="uploadLeft">Him peach</button>
+        </div>
+        <div class="column-top-actions">
+            <button id="uploadCenter">Our dreams</button>
+        </div>
+        <div class="column-top-actions">
+            <button id="uploadRight">Her cat</button>
+        </div>
+    </div>
+
     <div class="image-container">
         <div class="image-column" id="leftColumn">
-            <div class="column-top-actions">
-                <button id="uploadLeft">Him peach</button>
-            </div>
             </div>
         <div class="image-column" id="centerColumn">
-            <div class="column-top-actions">
-                <button id="uploadCenter">Our dreams</button>
-            </div>
             </div>
         <div class="image-column" id="rightColumn">
-            <div class="column-top-actions">
-                <button id="uploadRight">Her cat</button>
-            </div>
             </div>
     </div>
 
     <div id="imageModal" class="modal">
         <div class="modal-content">
-            <span class="close-button" onclick="closeModal()">&times;</span>
             <img id="modalImage" src="" alt="Full size image">
             <div class="modal-actions-container">
                 <button id="moreOptionsButton" class="more-options-button">...</button>
