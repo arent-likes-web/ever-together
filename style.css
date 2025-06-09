@@ -1,183 +1,183 @@
-/* style.css */
-
-/* --- Font Import: Taler --- */
-@font-face {
-    font-family: 'Taler';
-    src: url('Taler.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
+/* General styles */
 body {
-    font-family: 'Taler', Arial, sans-serif;
+    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 20px;
-    background-color: #1a2a3a;
-    color: #ecf0f1;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-sizing: border-box;
+    background-color: #f0f2f5;
+    color: #333;
 }
 
-h2 {
-    color: #f1c40f;
-    margin-bottom: 20px;
-    font-size: 2.5em;
-    text-align: center;
-    width: 100%;
-}
-
-.login-form {
-    background-color: #34495e;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    width: 100%;
-    max-width: 400px;
-    box-sizing: border-box;
-    animation: fadeIn 0.5s ease-out;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: #bdc3c7;
-    font-size: 1.1em;
-}
-
-.form-group input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #7f8c8d;
-    border-radius: 8px;
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    font-size: 1em;
-    box-sizing: border-box;
-    outline: none;
-    transition: border-color 0.3s ease;
-}
-
-.form-group input:focus {
-    border-color: #f1c40f;
-}
-
-.btn {
-    width: 100%;
-    padding: 12px 20px;
-    background-color: #f1c40f;
-    color: #2c3e50;
-    border: none;
-    border-radius: 8px;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-.btn:hover {
-    background-color: #d4ac0d;
-    transform: translateY(-2px);
-}
-
-.sign-out-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: #e74c3c;
+header {
+    background-color: #4CAF50;
     color: white;
-    padding: 10px 15px;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.auth-status {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.auth-status span {
+    font-weight: bold;
+}
+
+.sign-out-button {
+    background-color: #e0e0e0;
+    color: #333;
     border: none;
-    border-radius: 8px;
+    padding: 8px 15px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.3s ease, transform 0.2s;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
 }
 
-.sign-out-btn:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
+.sign-out-button:hover {
+    background-color: #c7c7c7;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Main Page Specific Styles */
-
+/* Image Grid Container */
 .image-container {
     display: flex;
-    flex-wrap: nowrap;
-    gap: 10px;
-    width: 100%;
-    max-width: 1200px;
-    margin-top: 20px;
-    box-sizing: border-box;
-    padding: 0 10px;
+    justify-content: space-around;
+    padding: 20px;
+    gap: 20px; /* Пространство между колонками */
+    flex-wrap: wrap; /* Позволяет колонкам переноситься на новую строку на маленьких экранах */
 }
 
+/* New: Wrapper for column actions */
+.column-actions-top-wrapper {
+    /* Чтобы кнопки выравнивались по ширине колонки ниже */
+    width: 30%; /* Пример, можно настроить */
+    min-width: 280px; /* Минимальная ширина для адаптивности */
+    box-sizing: border-box; /* Включаем padding в ширину */
+    padding-bottom: 10px; /* Отступ между кнопками и первой фотографией */
+    display: flex; /* Для выравнивания column-top-actions */
+    justify-content: center; /* Центрируем кнопку */
+    align-items: flex-end; /* Выравниваем по низу (если кнопки будут разной высоты) */
+    order: -1; /* Позволяет оберткам с кнопками быть выше соответствующих колонок, но Flexbox будет их переупорядочивать */
+}
+
+/* Adjust order of elements in flex container */
+.image-container > .column-actions-top-wrapper:nth-of-type(1),
+.image-container > .image-column:nth-of-type(2) { order: 1; }
+.image-container > .column-actions-top-wrapper:nth-of-type(3),
+.image-container > .image-column:nth-of-type(4) { order: 2; }
+.image-container > .column-actions-top-wrapper:nth-of-type(5),
+.image-container > .image-column:nth-of-type(6) { order: 3; }
+
+/* Column Styles */
 .image-column {
-    flex: 1;
-    min-width: 0;
+    flex: 1; /* Каждая колонка занимает равное пространство */
+    min-width: 280px; /* Минимальная ширина для адаптивности */
+    max-width: 350px; /* Максимальная ширина, чтобы не растягивались слишком сильно */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px;
     display: flex;
-    flex-direction: column; /* Важно для порядка элементов */
-    gap: 10px;
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 10px;
-    border-radius: 8px;
+    flex-direction: column; /* Элементы внутри колонки располагаются вертикально */
+    gap: 15px; /* Пространство между изображениями и кнопками */
+    box-sizing: border-box; /* Включаем padding в ширину */
+    margin-top: 0; /* Убираем margin-top, так как кнопки теперь сверху */
+}
+
+/* Column Top Actions (now for buttons only) */
+.column-top-actions {
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Центрируем кнопку загрузки */
+    padding: 10px 0; /* Отступ вокруг кнопки */
     box-sizing: border-box;
-    width: 33.33%;
 }
 
-.image-wrapper {
-    width: 100%;
-    position: relative;
-    overflow: hidden;
+.column-top-actions button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 12px 25px;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    font-size: 1.1em;
     cursor: pointer;
-    background-color: #34495e; /* Фон для предзагрузки/ошибки */
-    display: flex; /* Для центрирования текста ошибки */
-    justify-content: center;
-    align-items: center;
-    color: #fff; /* Цвет текста ошибки */
-    font-size: 0.9em;
-    height: auto; /* Автоматическая высота для сохранения пропорций */
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    width: 90%; /* Кнопка занимает почти всю ширину блока */
+    box-sizing: border-box;
+    max-width: 250px; /* Ограничиваем ширину кнопки */
 }
 
-.image-wrapper img.thumbnail {
-    position: relative; 
-    top: auto; 
-    left: auto; 
+.column-top-actions button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.column-top-actions button:active {
+    transform: translateY(0);
+}
+
+/* Image Wrapper */
+.image-wrapper {
+    position: relative;
     width: 100%;
-    height: auto; /* Высота подстраивается под пропорции */
-    object-fit: contain; /* Чтобы изображение полностью помещалось */
-    opacity: 0;
-    transition: opacity 0.5s ease;
+    background-color: #e9e9e9; /* Placeholder background */
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+    opacity: 0; /* Изначально скрыто для эффекта плавного появления */
+    animation: fadeIn 0.5s forwards; /* Анимация появления */
 }
 
-.image-wrapper img.thumbnail.loaded {
+.image-wrapper:hover {
+    transform: translateY(-3px);
+}
+
+.image-wrapper img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 6px;
+    transition: opacity 0.3s ease;
+}
+
+/* Initial state for image fade-in */
+.image-wrapper img:not(.loaded) {
+    opacity: 0;
+}
+
+/* Loaded state for image fade-in */
+.image-wrapper img.loaded {
     opacity: 1;
 }
 
-/* Modal Styles */
+/* Keyframes for fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Error state for image loading */
+.image-wrapper.image-load-error {
+    background-color: #ffe0e0;
+    border: 1px dashed red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 150px; /* Fixed height for error placeholder */
+    text-align: center;
+    font-size: 0.9em;
+    color: red;
+}
+
+/* Modal styles */
 .modal {
-    display: none; 
+    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -185,216 +185,136 @@ h2 {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, 0.8);
     justify-content: center;
     align-items: center;
+    opacity: 0; /* Изначально скрыто */
+    transition: opacity 0.3s ease;
 }
 
 .modal.show-modal {
-    display: flex; 
+    display: flex;
+    opacity: 1; /* Показываем с плавным появлением */
 }
 
 .modal-content {
     position: relative;
-    max-width: 80%;
-    max-height: 80%;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 90%;
+    max-height: 90%;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    align-items: center; /* Центрируем изображение по горизонтали */
+    box-sizing: border-box;
 }
 
 .modal-content img {
     max-width: 100%;
-    max-height: 100%;
+    max-height: 70vh; /* Ограничиваем высоту изображения в модальном окне */
     display: block;
-    object-fit: contain;
-    border-radius: 8px;
+    object-fit: contain; /* Сохраняет пропорции, вмещаясь в контейнер */
+    margin-bottom: 15px;
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+    text-decoration: none;
 }
 
 .modal-actions-container {
-    position: absolute;
-    top: 20px;
-    right: 20px; 
-    left: unset; 
+    position: relative;
+    width: 100%;
     display: flex;
-    gap: 10px;
-    z-index: 1001;
-    flex-direction: row;
+    justify-content: flex-end; /* Перемещаем кнопку ... вправо */
+    padding: 10px 0;
+    box-sizing: border-box;
 }
 
-.options-button {
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
+.more-options-button {
+    background: none;
     border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    line-height: 40px;
-    text-align: center;
+    font-size: 1.5em;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1002;
+    color: #555;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
 }
 
-.options-button:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+.more-options-button:hover {
+    background-color: #eee;
 }
 
 .options-dropdown {
     display: none;
     position: absolute;
-    top: 50px;
-    left: 0;
-    background-color: #34495e;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    min-width: 180px;
-    z-index: 1003;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 0; /* Выравнивание по правой стороне кнопки */
+    top: 100%; /* Появляется под кнопкой */
+    border-radius: 5px;
     overflow: hidden;
 }
 
 .options-dropdown a {
-    color: #ecf0f1;
-    padding: 12px 20px;
+    color: black;
+    padding: 12px 16px;
     text-decoration: none;
     display: block;
     transition: background-color 0.2s ease;
 }
 
 .options-dropdown a:hover {
-    background-color: #2c3e50;
+    background-color: #f1f1f1;
 }
 
-.options-dropdown a[data-action="delete"] {
-    color: #e74c3c;
-}
-
-.options-dropdown a[data-action="delete"]:hover {
-    background-color: #c0392b;
-    color: white;
-}
-
-.image-info {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 0.9em;
-    z-index: 1001;
-}
-
-/* Новые стили для контейнера кнопок вверху колонок */
-.column-top-actions { /* НОВОЕ ИМЯ КЛАССА */
-    padding-bottom: 10px; /* Отступ снизу от кнопки до первого изображения */
+/* Image Info */
+#imageInfo {
     width: 100%;
-    display: flex; 
-    justify-content: center; 
-    align-items: flex-start; /* Прижать к верху контейнера */
-    box-sizing: border-box;
-    margin-bottom: 0; /* Убираем margin-bottom, так как gap в image-column справится */
+    padding: 10px 0;
+    text-align: center;
+    font-size: 0.9em;
+    color: #666;
 }
 
-.column-top-actions button {
-    font-family: 'Taler', sans-serif;
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 12px;
-    background-color: #f1c40f;
-    color: #2c3e50;
-    transition: background 0.3s ease, transform 0.2s;
-    white-space: nowrap;
-    width: 100%; /* Кнопка заполняет всю ширину контейнера column-top-actions */
-    box-sizing: border-box;
-}
-
-.column-top-actions button:hover {
-    background-color: #d4ac0d;
-    transform: translateY(-3px);
-}
-
-
-/* --- Медиазапросы для адаптивности --- */
+/* Responsive adjustments */
 @media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
-
-    .column-top-actions button { /* Применяем новые стили для кнопок */
-        font-size: 0.8em;
-        padding: 8px 10px;
-        min-width: unset;
-        max-width: unset;
-    }
-
     .image-container {
-        flex-wrap: nowrap;
-        gap: 5px;
-        width: 100%;
-        padding: 0 5px;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .image-column {
-        flex: 1;
-        min-width: 0;
-        width: 33.33%;
-        padding: 5px;
-        min-height: 250px;
+    .image-column, .column-actions-top-wrapper {
+        width: 95%; /* Почти полная ширина на мобильных */
+        max-width: none; /* Убираем ограничение max-width */
+        margin: 10px 0; /* Добавляем отступы сверху/снизу между колонками */
     }
 
-    .modal-content {
-        max-width: 95%;
-        max-height: 90%;
-    }
-
-    .modal-actions-container {
-        top: 5px;
-        right: 5px; /* Обновлено для мобильных устройств */
-        left: unset;
-    }
-
-    .options-button {
-        width: 38px;
-        height: 38px;
-        font-size: 18px;
-        line-height: 36px;
-    }
-
-    .options-dropdown {
-        min-width: 160px;
-        font-size: 0.9em;
-        left: unset; /* Отменяем left, чтобы позиционирование было относительно кнопки */
-        right: 0; /* Прижимаем дропдаун к правому краю кнопки */
-    }
-
-    .options-dropdown a {
-        padding: 10px 15px;
-    }
-
-    .image-info {
-        bottom: 10px;
-        right: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .image-container {
-        gap: 3px;
-    }
-    .image-column {
-        padding: 3px;
-        min-height: 200px;
-    }
-    .column-top-actions button { /* Применяем новые стили для кнопок */
-        font-size: 0.75em;
-        padding: 6px 8px;
+    /* Reset order for smaller screens */
+    .image-container > .column-actions-top-wrapper:nth-of-type(1),
+    .image-container > .image-column:nth-of-type(2),
+    .image-container > .column-actions-top-wrapper:nth-of-type(3),
+    .image-container > .image-column:nth-of-type(4),
+    .image-container > .column-actions-top-wrapper:nth-of-type(5),
+    .image-container > .image-column:nth-of-type(6) {
+        order: unset; /* Сбрасываем порядок на мобильных */
     }
 }
