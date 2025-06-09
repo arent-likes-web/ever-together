@@ -135,7 +135,7 @@ h2 {
     flex: 1;
     min-width: 0;
     display: flex;
-    flex-direction: column; /* Важно для прижатия кнопки к низу */
+    flex-direction: column; /* Важно для порядка элементов */
     gap: 10px;
     background-color: rgba(0, 0, 0, 0.2);
     padding: 10px;
@@ -146,8 +146,6 @@ h2 {
 
 .image-wrapper {
     width: 100%;
-    /* height: 0; */ /* Удалено, чтобы разрешить авто-высоту */
-    /* padding-bottom: 100%; */ /* Удалено, чтобы разрешить авто-высоту */
     position: relative;
     overflow: hidden;
     border-radius: 8px;
@@ -159,16 +157,16 @@ h2 {
     align-items: center;
     color: #fff; /* Цвет текста ошибки */
     font-size: 0.9em;
-    height: auto; /* Добавлено: автоматическая высота */
+    height: auto; /* Автоматическая высота для сохранения пропорций */
 }
 
 .image-wrapper img.thumbnail {
-    position: relative; /* Изменено: теперь img является частью потока, а не абсолютно позиционируется */
-    top: auto; /* Отменяем top: 0 */
-    left: auto; /* Отменяем left: 0 */
+    position: relative; 
+    top: auto; 
+    left: auto; 
     width: 100%;
-    height: auto; /* Изменено: Высота подстраивается под пропорции */
-    object-fit: contain; /* Изменено: Вместо cover, чтобы изображение полностью помещалось */
+    height: auto; /* Высота подстраивается под пропорции */
+    object-fit: contain; /* Чтобы изображение полностью помещалось */
     opacity: 0;
     transition: opacity 0.5s ease;
 }
@@ -179,7 +177,7 @@ h2 {
 
 /* Modal Styles */
 .modal {
-    display: none; /* ИСПРАВЛЕНО: Убедитесь, что это единственное свойство display здесь */
+    display: none; 
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -188,13 +186,12 @@ h2 {
     height: 100%;
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.9);
-    /* display: flex; <-- УДАЛЕНО: Эта строка переопределяла display: none; */
     justify-content: center;
     align-items: center;
 }
 
 .modal.show-modal {
-    display: flex; /* Теперь модальное окно показывается только при наличии этого класса */
+    display: flex; 
 }
 
 .modal-content {
@@ -217,8 +214,8 @@ h2 {
 .modal-actions-container {
     position: absolute;
     top: 20px;
-    right: 20px; /* ИЗМЕНЕНО: Отступ справа вместо left */
-    left: unset; /* ДОБАВЛЕНО: Отменяем left, если он был установлен */
+    right: 20px; 
+    left: unset; 
     display: flex;
     gap: 10px;
     z-index: 1001;
@@ -293,20 +290,18 @@ h2 {
     z-index: 1001;
 }
 
-/* Удаляем старые стили для .upload-buttons */
-/*
-.upload-buttons {
-    margin: 20px 0;
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: nowrap;
+/* Новые стили для контейнера кнопок вверху колонок */
+.column-top-actions { /* НОВОЕ ИМЯ КЛАССА */
+    padding-bottom: 10px; /* Отступ снизу от кнопки до первого изображения */
     width: 100%;
-    padding: 0 10px;
+    display: flex; 
+    justify-content: center; 
+    align-items: flex-start; /* Прижать к верху контейнера */
     box-sizing: border-box;
+    margin-bottom: 0; /* Убираем margin-bottom, так как gap в image-column справится */
 }
 
-.upload-buttons button {
+.column-top-actions button {
     font-family: 'Taler', sans-serif;
     padding: 10px 15px;
     font-size: 16px;
@@ -317,46 +312,11 @@ h2 {
     color: #2c3e50;
     transition: background 0.3s ease, transform 0.2s;
     white-space: nowrap;
-    flex-grow: 1;
-    flex-shrink: 1;
-    min-width: 80px;
-    max-width: 120px;
+    width: 100%; /* Кнопка заполняет всю ширину контейнера column-top-actions */
     box-sizing: border-box;
 }
 
-.upload-buttons button:hover {
-    background-color: #d4ac0d;
-    transform: translateY(-3px);
-}
-*/
-
-/* Новые стили для контейнера кнопок внутри колонок */
-.column-bottom-actions {
-    margin-top: auto; /* Прижимает блок кнопок к низу flex-контейнера (колонки) */
-    padding-top: 10px; /* Отступ сверху от последнего изображения */
-    width: 100%;
-    display: flex; /* Чтобы кнопка занимала всю ширину и центрировалась, если нужно */
-    justify-content: center; /* Центрирование кнопки, если она не 100% ширины */
-    align-items: flex-end; /* Прижать к низу контейнера, если колонка flex */
-    box-sizing: border-box;
-}
-
-.column-bottom-actions button {
-    font-family: 'Taler', sans-serif;
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 12px;
-    background-color: #f1c40f;
-    color: #2c3e50;
-    transition: background 0.3s ease, transform 0.2s;
-    white-space: nowrap;
-    width: 100%; /* Кнопка заполняет всю ширину контейнера column-bottom-actions */
-    box-sizing: border-box;
-}
-
-.column-bottom-actions button:hover {
+.column-top-actions button:hover {
     background-color: #d4ac0d;
     transform: translateY(-3px);
 }
@@ -368,19 +328,7 @@ h2 {
         padding: 10px;
     }
 
-    /* Удаляем старые стили для кнопок загрузки в медиа-запросе */
-    /* .upload-buttons {
-        gap: 5px;
-    }
-
-    .upload-buttons button {
-        font-size: 0.8em;
-        padding: 8px 10px;
-        min-width: unset;
-        max-width: unset;
-    } */
-
-    .column-bottom-actions button { /* Применяем новые стили для кнопок */
+    .column-top-actions button { /* Применяем новые стили для кнопок */
         font-size: 0.8em;
         padding: 8px 10px;
         min-width: unset;
@@ -445,15 +393,7 @@ h2 {
         padding: 3px;
         min-height: 200px;
     }
-    /* Удаляем старые стили для кнопок загрузки в медиа-запросе */
-    /* .upload-buttons {
-        gap: 3px;
-    }
-    .upload-buttons button {
-        font-size: 0.75em;
-        padding: 6px 8px;
-    } */
-    .column-bottom-actions button { /* Применяем новые стили для кнопок */
+    .column-top-actions button { /* Применяем новые стили для кнопок */
         font-size: 0.75em;
         padding: 6px 8px;
     }
