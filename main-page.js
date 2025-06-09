@@ -3,7 +3,7 @@
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Добавляем signOut
 
 // Firebase Config
 const firebaseConfig = {
@@ -29,36 +29,61 @@ const modalImageElement = document.getElementById('modalImage');
 const modalActionsContainer = document.querySelector('.modal-actions-container');
 const imageContainerGlobalRef = document.querySelector('.image-container');
 
+// Ссылка на кнопку "Выйти" - если она все-таки есть (для entry.html), здесь она будет.
+// На main-page.html ее не должно быть, так что этот код не сработает, если кнопки нет.
+const signOutButton = document.getElementById('signOutButton');
+if (signOutButton) {
+    signOutButton.addEventListener('click', async () => {
+        try {
+            await signOut(auth);
+            console.log("Пользователь вышел.");
+            window.location.href = "entry.html"; // Перенаправление на страницу входа
+        } catch (error) {
+            console.error("Ошибка при выходе:", error);
+            alert("Ошибка при выходе: " + error.message);
+        }
+    });
+}
+
+
 // Проверка авторизации при загрузке страницы
+console.log("Запуск onAuthStateChanged...");
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("Пользователь авторизован:", user.email);
     window.currentUser = user.email;
-    loadImagesFromFirebase();
+    loadImagesFromFirebase(); // Загружаем изображения, если пользователь авторизован
     updateBackgroundGradient();
   } else {
     console.log("Пользователь не авторизован. Перенаправление на страницу входа.");
-    window.location.href = "entry.html";
+    window.location.href = "entry.html"; // Перенаправляем, если нет авторизации
   }
 });
 
 // Загрузка изображений из Firebase
 function loadImagesFromFirebase() {
+  console.log("Вызов loadImagesFromFirebase...");
   const imagesRef = dbRef(database, 'images');
   onValue(imagesRef, (snapshot) => {
+    console.log("Получены данные из Firebase.");
     const data = snapshot.val();
     document.getElementById('leftColumn').innerHTML = '';
     document.getElementById('centerColumn').innerHTML = '';
     document.getElementById('rightColumn').innerHTML = '';
     if (data) {
+      console.log("Данные изображений получены:", data);
       const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
       imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
       imageArray.forEach((imgData) => {
         displayImage(imgData, imgData.id);
       });
+    } else {
+      console.log("Нет изображений в базе данных.");
     }
     updateBackgroundGradient();
+  }, (error) => { // Добавляем обработчик ошибок для onValue
+    console.error("Ошибка при получении данных из Firebase:", error);
   });
 }
 
@@ -68,6 +93,12 @@ function displayImage(imageData, imageId) {
   if (!targetColumn) {
       console.warn(`Target column for image ${imageId} (${imageData.column}Column) not found.`);
       return;
+  }
+  
+  // Проверяем, есть ли уже такое изображение, чтобы избежать дублирования
+  if (document.querySelector(`.image-wrapper[data-id="${imageId}"]`)) {
+      // console.log(`Изображение ${imageId} уже существует. Пропускаем добавление.`);
+      return; 
   }
 
   const imageWrapper = document.createElement('div');
@@ -80,12 +111,13 @@ function displayImage(imageData, imageId) {
   const img = document.createElement('img');
   img.src = imageData.url;
   img.classList.add('thumbnail');
-  img.alt = 'Gallery Image';
+  img.alt = 'Gallery Image'; // Оставляем alt для доступности, но убираем из модального окна в HTML
   img.loading = 'lazy';
   img.setAttribute('crossorigin', 'anonymous');
 
   img.onload = () => {
     img.classList.add('loaded');
+    // console.log(`Изображение ${imageData.url} загружено.`);
   };
 
   img.onerror = () => {
@@ -109,9 +141,8 @@ function openModal(imgElement) {
   const moreOptionsBtn = document.getElementById('moreOptionsButton');
   const dropdown = document.getElementById('optionsDropdown');
 
-  // Добавляем класс, чтобы показать модальное окно
-  modal.classList.add('show-modal'); // <-- ИЗМЕНЕНИЕ: используем класс CSS
-  dropdown.style.display = 'none'; // Убедимся, что дропдаун скрыт при открытии
+  modal.classList.add('show-modal');
+  dropdown.style.display = 'none';
 
   modalImage.src = imgElement.src;
   modalImage.dataset.id = imgElement.dataset.id;
@@ -146,7 +177,7 @@ function openModal(imgElement) {
   }
 
   if (imageContainerGlobalRef) {
-    imageContainerGlobalRef.style.pointerEvents = 'none'; // Блокируем взаимодействие с фоном
+    imageContainerGlobalRef.style.pointerEvents = 'none';
   }
 
   moreOptionsBtn.onclick = function(event) {
@@ -184,15 +215,13 @@ function openModal(imgElement) {
     dropdown.style.display = 'none';
   };
 
-  // Обработчики для предотвращения закрытия при клике внутри модального окна
   modalImageElement.onclick = (event) => event.stopPropagation();
   modalActionsContainer.onclick = (event) => event.stopPropagation();
   imageInfo.onclick = (event) => event.stopPropagation();
 }
 
 function closeModal() {
-  // Удаляем класс, чтобы скрыть модальное окно
-  imageModalGlobalRef.classList.remove('show-modal'); // <-- ИЗМЕНЕНИЕ: используем класс CSS
+  imageModalGlobalRef.classList.remove('show-modal');
   if (optionsDropdownGlobalRef) {
     optionsDropdownGlobalRef.style.display = 'none';
   }
@@ -201,29 +230,26 @@ function closeModal() {
   document.getElementById('imageInfo').innerHTML = '';
 
   if (imageContainerGlobalRef) {
-    imageContainerGlobalRef.style.pointerEvents = 'auto'; // Разблокируем взаимодействие с фоном
+    imageContainerGlobalRef.style.pointerEvents = 'auto';
   }
 }
 
-// Улучшенный обработчик закрытия модального окна по клику вне контента
 function handleCloseInteractions(event) {
-    // Закрыть дропдаун, если клик был вне его или кнопки
     if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
-        if (!moreOptionsButtonGlobalRef.contains(event.target) && !optionsDropdownGlobalRef.contains(event.target)) {
+        if (moreOptionsButtonGlobalRef &&
+            !moreOptionsButtonGlobalRef.contains(event.target) &&
+            !optionsDropdownGlobalRef.contains(event.target)) {
             optionsDropdownGlobalRef.style.display = 'none';
         }
     }
 
-    // Закрыть модальное окно, если клик был по самому фону модального окна
     if (imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal') && event.target === imageModalGlobalRef) {
         closeModal();
     }
 }
 
-// Event listener для закрытия модального окна по клику вне контента
 window.addEventListener('click', handleCloseInteractions);
 
-// Обработчик для закрытия модального окна по нажатию ESC
 window.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && imageModalGlobalRef.classList.contains('show-modal')) {
         closeModal();
