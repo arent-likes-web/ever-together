@@ -1,4 +1,4 @@
-// main-page.js (Остается практически без изменений, так как стилизация в CSS)
+// main-page.js (Остается без изменений)
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
