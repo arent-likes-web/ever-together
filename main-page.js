@@ -3,7 +3,7 @@
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Используем полный путь для auth
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
 
 // Firebase Config (Ваши данные)
@@ -157,7 +157,7 @@ function displayImage(imageData, imageId) {
     });
 
     imageWrapper.appendChild(img);
-    targetColumn.prepend(imageWrapper); // Добавляем в начало колонки (новые сверху)
+    targetColumn.prepend(imageWrapper); // Используем prepend для "новые сверху"
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
 }
 
@@ -264,18 +264,18 @@ function openModal(imgElement) {
 // Функция закрытия модального окна
 function closeModal() {
     console.log("[main-page.js] Закрытие модального окна.");
-    if (imageModalGlobalRef) { // Добавлена проверка на существование элемента
+    if (imageModalGlobalRef) {
         imageModalGlobalRef.classList.remove('show-modal');
     }
     if (optionsDropdownGlobalRef) {
         optionsDropdownGlobalRef.style.display = 'none';
     }
-    if (modalImageElement) { // Добавлена проверка на существование элемента
+    if (modalImageElement) {
         modalImageElement.src = '';
         modalImageElement.dataset.id = '';
     }
-    if (imageInfo) { // Добавлена проверка на существование элемента
-        document.getElementById('imageInfo').innerHTML = '';
+    if (imageInfo) {
+        imageInfo.innerHTML = '';
     }
 
 
@@ -308,7 +308,7 @@ window.addEventListener('click', handleCloseInteractions);
 
 // Обработчик для закрытия модального окна по нажатию ESC
 window.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) { // Добавлена проверка на imageModalGlobalRef
+    if (event.key === 'Escape' && imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) {
         console.log("[main-page.js] Нажата ESC, закрываем модальное окно.");
         closeModal();
     }
@@ -323,7 +323,8 @@ fileInput.multiple = true;
 fileInput.style.display = 'none'; // Скрываем элемент input, так как будем вызывать его через кнопку
 document.body.appendChild(fileInput);
 
-const uploadButtons = document.querySelectorAll('.upload-buttons button');
+// Обновляем селектор кнопок загрузки
+const uploadButtons = document.querySelectorAll('.image-column button[id^="upload"]'); // Селектор для кнопок внутри колонок
 uploadButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
         event.stopPropagation();
