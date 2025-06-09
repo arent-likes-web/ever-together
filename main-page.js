@@ -36,20 +36,20 @@ const leftColumn = document.getElementById('leftColumn');
 const centerColumn = document.getElementById('centerColumn');
 const rightColumn = document.getElementById('rightColumn');
 
-// Заглушка для кнопки выхода (она должна быть удалена из HTML основной страницы, если не используется)
-const signOutButton = document.getElementById('signOutButton');
-if (signOutButton) {
-    signOutButton.addEventListener('click', async () => {
-        try {
-            await signOut(auth);
-            console.log("[main-page.js] Пользователь вышел.");
-            window.location.href = "entry.html"; // Перенаправление на страницу входа
-        } catch (error) {
-            console.error("[main-page.js] Ошибка при выходе:", error);
-            alert("Ошибка при выходе: " + error.message);
-        }
-    });
-}
+// 5. Кнопка "Выйти" убрана, поэтому этот блок кода больше не нужен
+// const signOutButton = document.getElementById('signOutButton');
+// if (signOutButton) {
+//     signOutButton.addEventListener('click', async () => {
+//         try {
+//             await signOut(auth);
+//             console.log("[main-page.js] Пользователь вышел.");
+//             window.location.href = "entry.html"; // Перенаправление на страницу входа
+//         } catch (error) {
+//             console.error("[main-page.js] Ошибка при выходе:", error);
+//             alert("Ошибка при выходе: " + error.message);
+//         }
+//     });
+// }
 
 
 // Проверка авторизации при загрузке страницы
@@ -74,12 +74,12 @@ function loadImagesFromFirebase() {
         console.log("[main-page.js] onValue: Получен snapshot данных из Firebase.");
         const data = snapshot.val();
         
-        // Очищаем ТОЛЬКО обертки изображений, оставляя кнопки загрузки
+        // Очищаем ТОЛЬКО обертки изображений
         console.log("[main-page.js] Очистка только оберток изображений перед загрузкой.");
         const columns = [leftColumn, centerColumn, rightColumn];
         columns.forEach(column => {
             if (column) {
-                // Удаляем только .image-wrapper, оставляя .column-top-actions
+                // Удаляем только .image-wrapper
                 const imageWrappers = column.querySelectorAll('.image-wrapper');
                 imageWrappers.forEach(wrapper => wrapper.remove()); 
             }
@@ -89,7 +89,7 @@ function loadImagesFromFirebase() {
             console.log("[main-page.js] Данные изображений из Firebase:", data);
             const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
             
-            // Сортируем по времени создания (новые сверху)
+            // 4. Сортируем по времени создания (новые сверху)
             // Это помещает НОВЕЙШИЕ элементы в НАЧАЛО массива.
             imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
 
@@ -168,27 +168,10 @@ function displayImage(imageData, imageId) {
 
     imageWrapper.appendChild(img);
     
-    // НАХОДИМ БЛОК С КНОПКАМИ ВВЕРХУ КОЛОНКИ
-    const columnTopActions = targetColumn.querySelector('.column-top-actions');
-
-    // Поскольку массив отсортирован от НОВЫХ к СТАРЫМ,
-    // мы хотим, чтобы каждое НОВОЕ изображение вставлялось после кнопок
-    // и перед ЛЮБЫМИ уже добавленными изображениями.
-    // Этого можно достичь, всегда вставляя новый imageWrapper
-    // сразу после columnTopActions, но перед первым изображением
-    if (columnTopActions) {
-        const firstImageWrapper = columnTopActions.nextElementSibling; // Первый элемент после columnTopActions
-        if (firstImageWrapper && firstImageWrapper.classList.contains('image-wrapper')) {
-            targetColumn.insertBefore(imageWrapper, firstImageWrapper);
-        } else {
-            // Если после кнопок нет изображений, добавляем imageWrapper сразу после кнопок
-            columnTopActions.after(imageWrapper);
-        }
-    } else {
-        // Если columnTopActions не найден (чего быть не должно),
-        // просто добавляем в начало колонки, чтобы новые были сверху
-        targetColumn.prepend(imageWrapper);
-    }
+    // 4. Вставляем новое изображение в начало колонки
+    // Так как массив отсортирован от НОВЫХ к СТАРЫМ,
+    // новые фото будут добавляться в начало (сверху).
+    targetColumn.prepend(imageWrapper);
 
     console.log(`[main-page.js] Элемент изображения для ID: ${imageId} добавлен в DOM.`);
 }
@@ -287,7 +270,8 @@ function openModal(imgElement) {
         optionsDropdownGlobalRef.style.display = 'none';
     };
 
-    // Предотвращаем закрытие модального окна при клике внутри его контента
+    // 2. Убраны обработчики для .close-button, так как он удален из HTML
+    // Исключаем onclick для модального окна, чтобы оно закрывалось только по Esc или клику по фону
     modalImageElement.onclick = (event) => event.stopPropagation();
     modalActionsContainer.onclick = (event) => event.stopPropagation();
     imageInfo.onclick = (event) => event.stopPropagation();
@@ -355,8 +339,9 @@ fileInput.multiple = true;
 fileInput.style.display = 'none'; // Скрываем элемент input, так как будем вызывать его через кнопку
 document.body.appendChild(fileInput);
 
-// Обновляем селектор кнопок загрузки
-const uploadButtons = document.querySelectorAll('.column-top-actions button[id^="upload"]'); // Селектор для кнопок внутри .column-top-actions
+// Обновляем селектор кнопок загрузки (они теперь в top-upload-buttons-container)
+// Они по-прежнему имеют ID, так что селектор можно оставить
+const uploadButtons = document.querySelectorAll('.top-upload-buttons-container button[id^="upload"]'); 
 uploadButtons.forEach((button) => {
     button.addEventListener('click', (event) => {
         event.stopPropagation();
