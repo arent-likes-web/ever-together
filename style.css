@@ -16,13 +16,13 @@ body {
 
 /* Общие стили для элементов */
 a {
-    color: #8CACEA; /* Акцентный цвет для ссылок, более приглушенный */
+    color: #9C829C; /* Приглушенный сиреневый акцент для ссылок */
     text-decoration: none;
     transition: color 0.3s ease; /* Плавный переход цвета для ссылок */
 }
 
 a:hover {
-    color: #B4CCF5; /* Более светлый акцент при наведении */
+    color: #C0A4C0; /* Более светлый сиреневый акцент при наведении */
 }
 
 button {
@@ -55,6 +55,12 @@ header h1 {
     font-weight: normal; /* Для минимализма часто используется normal или light */
     letter-spacing: 2px; /* Небольшой трекинг для "аэро" */
     text-transform: uppercase; /* Верхний регистр для индустриального вида */
+    color: #E0E0E0; /* Основной цвет заголовка */
+    /* Добавляем легкий пастельный градиент */
+    background: linear-gradient(90deg, #E0E0E0 0%, #C899E0 50%, #E0E0E0 100%); /* Белый с пурпурным акцентом */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 5px rgba(200, 153, 224, 0.3); /* Легкое свечение */
 }
 
 .auth-status {
@@ -92,7 +98,8 @@ header h1 {
 }
 
 .top-upload-buttons-container .column-top-actions button {
-    background-color: #5A6D7C; /* Индустриальный сине-серый */
+    /* Меняем цвет кнопки на пастельный акцент */
+    background-color: #8CACEA; /* Приглушенный сиреневый */
     color: white;
     border-radius: 6px; /* Немного более сглаженные углы */
     padding: 15px 30px; /* Увеличим padding */
@@ -103,7 +110,7 @@ header h1 {
 }
 
 .top-upload-buttons-container .column-top-actions button:hover {
-    background-color: #6D8291; /* Чуть светлее при наведении */
+    background-color: #B4CCF5; /* Чуть светлее при наведении */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     transform: translateY(-3px); /* Чуть больше подъем */
 }
@@ -144,7 +151,6 @@ header h1 {
 .image-wrapper {
     position: relative;
     width: 100%;
-    /* aspect-ratio: 16/9; */ /* Если нужны фиксированные пропорции, иначе auto */
     background-color: #4A4A4A; /* Более темный placeholder */
     border-radius: 6px;
     overflow: hidden;
@@ -159,12 +165,15 @@ header h1 {
 .image-wrapper:hover {
     transform: translateY(-5px) scale(1.02); /* Более заметный подъем и легкое увеличение */
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4); /* Усиленная тень при наведении */
+    /* Добавляем легкое свечение при наведении с пастельным акцентом */
+    outline: 2px solid #C899E0; /* Пурпурная рамка */
+    outline-offset: -2px; /* чтобы рамка была внутри */
 }
 
 .image-wrapper img {
     display: block;
     width: 100%;
-    height: auto; /* Или fixed height с object-fit: cover */
+    height: auto; 
     object-fit: cover;
     border-radius: 6px;
     transition: opacity 0.5s ease;
@@ -234,7 +243,7 @@ header h1 {
     flex-direction: column;
     align-items: center;
     box-sizing: border-box;
-    overflow: hidden;
+    /* overflow: hidden; /* УДАЛЯЕМ overflow: hidden, чтобы дропдаун был виден */
     transform: scale(0.95); /* Начальный масштаб для анимации появления */
     transition: transform 0.4s ease-out; /* Анимация масштабирования */
 }
@@ -252,8 +261,6 @@ header h1 {
     border-radius: 4px; /* Слегка скругленные углы у изображения в модальном окне */
 }
 
-/* Close button - УДАЛЕНА */
-
 .modal-actions-container {
     position: relative;
     width: 100%;
@@ -262,39 +269,45 @@ header h1 {
     padding: 15px 0; /* Больше отступа */
     box-sizing: border-box;
     border-top: 1px solid #4A4A4A; /* Тонкая разделительная линия */
+    z-index: 10; /* Убедимся, что это выше */
 }
 
 .more-options-button {
     background: none;
-    border: 1px solid #5A6D7C; /* Тонкая рамка */
+    border: 1px solid #9C829C; /* Рамка сиреневого акцента */
     font-size: 1.4em;
     cursor: pointer;
-    color: #8CACEA; /* Акцентный цвет */
+    color: #9C829C; /* Сиреневый акцент */
     padding: 8px 15px; /* Увеличим padding */
     border-radius: 5px;
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .more-options-button:hover {
-    background-color: #5A6D7C;
+    background-color: #9C829C; /* Сиреневый фон при наведении */
     color: white;
-    border-color: #5A6D7C;
+    border-color: #9C829C;
 }
 
 .options-dropdown {
+    /* 2. Исправление видимости дропдауна: */
+    /* Важно: z-index должен быть выше, чем у родительского .modal-content,
+       и overflow: hidden должен быть удален с .modal-content */
     display: none;
     position: absolute;
     background-color: #3A3A3A; /* Темный фон для дропдауна */
     min-width: 180px; /* Чуть шире */
     box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.4); /* Более выраженная тень */
-    z-index: 1;
+    z-index: 100; /* Увеличиваем z-index, чтобы быть поверх всего */
     right: 0;
     top: calc(100% + 10px); /* Отступ от кнопки */
     border-radius: 6px;
-    overflow: hidden;
+    overflow: visible; /* Убедимся, что дропдаун не обрезается */
     opacity: 0;
     transform: translateY(-10px);
     animation: dropdownFadeIn 0.3s forwards ease-out; /* Анимация появления дропдауна */
+    /* Добавляем тонкую пастельную рамку */
+    border: 1px solid #C899E0; /* Пурпурная рамка */
 }
 
 @keyframes dropdownFadeIn {
@@ -312,8 +325,8 @@ header h1 {
 }
 
 .options-dropdown a:hover {
-    background-color: #5A6D7C; /* Акцентный цвет при наведении */
-    color: white;
+    background-color: #B4CCF5; /* Более светлый сиреневый при наведении */
+    color: #1A1A1A; /* Темный текст на светлом фоне */
 }
 
 /* Image Info */
