@@ -47,9 +47,8 @@ let currentImageIndex = -1; // Индекс текущего изображен�
 // --- Переменные для свайпа ---
 let startX = 0;
 let isDragging = false;
-let currentTranslate = -modalImageCarousel.offsetWidth; // Начальное смещение для центрирования modalImageElement
-let prevTranslate = 0; // Сохраняем предыдущее смещение для расчета сдвига
-
+let currentTranslate = 0; // The actual translateX value of the carousel (px)
+let prevTranslate = 0;    // The translateX value at the start of a drag (px)
 
 document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
@@ -245,23 +244,31 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("One or more modal elements are missing.");
             return;
         }
-
-        // При открытии модала, убедимся, что карусель в исходном состоянии (показывает центральное изображение)
-        currentTranslate = -modalImageCarousel.offsetWidth; // Устанавливаем смещение для центрирования
-        modalImageCarousel.style.transform = `translateX(${currentTranslate}px)`;
-        modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Убедимся, что transition включен
-
+        
         imageModalGlobalRef.classList.add('show-modal');
         optionsDropdownGlobalRef.style.display = 'none';
 
-        // Загружаем текущее и соседние изображения
-        updateCarouselImages(currentImageIndex);
+        // Инициализируем карусель в правильное положение и загружаем изображения
+        // Важно: установить transition to 'none' перед первым transform, чтобы избежать нежелательной анимации при открытии
+        modalImageCarousel.style.transition = 'none'; 
+        currentTranslate = -modalImageCarousel.offsetWidth; // Центрируем `modalImageElement`
+        setTranslate(currentTranslate);
+        updateCarouselImages(currentImageIndex); // Загружаем текущее и соседние изображения
         
+        // После установки начального положения, можно снова включить transition
+        // Используем setTimeout 0 для отложенного включения transition,
+        // чтобы браузер успел отрисовать изменения без transition
+        setTimeout(() => {
+            modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+        }, 0);
+
+
         imageInfo.innerHTML = '';
         commentsList.innerHTML = '';
         commentInput.value = '';
 
-        loadCommentsForImage(currentImageId);
+        // Комментарии загружаются внутри updateCarouselImages
+        // loadCommentsForImage(currentImageId); 
 
         // Блокируем прокрутку body, если модальное окно открыто
         document.body.style.overflow = 'hidden'; 
@@ -273,33 +280,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // Обновляет src изображений в карусели
     function updateCarouselImages(index) {
         // Убедимся, что prevImageElement и nextImageElement пустые, если нет предыдущего/следующего
+        // И сбрасываем src для всех на всякий случай
         prevImageElement.src = '';
+        modalImageElement.src = '';
         nextImageElement.src = '';
 
         // Текущее изображение
-        const currentImgData = allImagesInCurrentColumn[index];
-        if (currentImgData) {
-            modalImageElement.src = currentImgData.querySelector('img').src;
-            modalImageElement.dataset.id = currentImgData.dataset.id;
+        const currentImgDataWrapper = allImagesInCurrentColumn[index];
+        if (currentImgDataWrapper) {
+            modalImageElement.src = currentImgDataWrapper.querySelector('img').src;
+            modalImageElement.dataset.id = currentImgDataWrapper.dataset.id;
             modalImageElement.setAttribute('crossorigin', 'anonymous');
-            currentImageId = currentImgData.dataset.id; // Обновляем global currentImageId
+            currentImageId = currentImgDataWrapper.dataset.id; // Обновляем global currentImageId
         } else {
-            modalImageElement.src = '';
-            modalImageElement.dataset.id = '';
+            // Это должно быть невозможно, если index корректен
+            console.warn("Attempted to update carousel with invalid current image index:", index);
             currentImageId = null;
         }
 
         // Предыдущее изображение
         if (index > 0) {
-            const prevImgData = allImagesInCurrentColumn[index - 1];
-            prevImageElement.src = prevImgData.querySelector('img').src;
+            const prevImgDataWrapper = allImagesInCurrentColumn[index - 1];
+            prevImageElement.src = prevImgDataWrapper.querySelector('img').src;
             prevImageElement.setAttribute('crossorigin', 'anonymous');
         }
 
         // Следующее изображение
         if (index < allImagesInCurrentColumn.length - 1) {
-            const nextImgData = allImagesInCurrentColumn[index + 1];
-            nextImageElement.src = nextImgData.querySelector('img').src;
+            const nextImgDataWrapper = allImagesInCurrentColumn[index + 1];
+            nextImageElement.src = nextImgDataWrapper.querySelector('img').src;
             nextImageElement.setAttribute('crossorigin', 'anonymous');
         }
 
@@ -311,88 +320,119 @@ document.addEventListener('DOMContentLoaded', () => {
         modalImageCarousel.style.transform = `translateX(${xPos}px)`;
     }
 
+    function getTranslateX(element) {
+        const style = window.getComputedStyle(element);
+        const matrix = new DOMMatrixReadOnly(style.transform);
+        return matrix.m41;
+    }
+
     function touchStart(event) {
+        // Игнорируем, если дропдаун открыт, чтобы не конфликтовать
         if (optionsDropdownGlobalRef.style.display === 'block') { 
-            // Если дропдаун открыт, игнорируем свайп на карусели
             return;
         }
+
+        // Предотвращаем дефолтное поведение, чтобы избежать прокрутки страницы на мобильных
+        // при начале свайпа на карусели. Это важно, если палец зацепил не только карусель
+        // but it's part of the global touchmove listener as well.
+        // For carousel, if we are dragging, we want to control the movement.
+        if (event.target === modalImageCarousel || modalImageCarousel.contains(event.target)) {
+            event.preventDefault();
+        }
+        
         isDragging = true;
         startX = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
         modalImageCarousel.classList.add('dragging');
         modalImageCarousel.style.transition = 'none'; // Отключаем transition во время перетаскивания
-        // prevTranslate теперь должен быть текущим translate X карусели
-        const style = window.getComputedStyle(modalImageCarousel);
-        const matrix = new DOMMatrixReadOnly(style.transform);
-        prevTranslate = matrix.m41; 
+        
+        prevTranslate = getTranslateX(modalImageCarousel); // Запоминаем текущее смещение в px
     }
 
     function touchMove(event) {
         if (!isDragging) return;
 
+        // Ensure only one touch is tracked for mobile to prevent erratic behavior
+        if (event.type.includes('touch') && event.touches.length > 1) return;
+
+        // Предотвращаем дефолтное поведение, чтобы не прокручивалась страница
+        // если пользователь свайпает по карусели, но не по комментариям.
+        if (event.target === modalImageCarousel || modalImageCarousel.contains(event.target)) {
+            event.preventDefault();
+        }
+
         const currentPosition = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
-        currentTranslate = prevTranslate + currentPosition - startX;
+        currentTranslate = prevTranslate + (currentPosition - startX); // currentTranslate is the new calculated position based on drag
         setTranslate(currentTranslate);
     }
 
     function touchEnd() {
+        if (!isDragging) return; // Prevent multiple calls if mouseleave triggers after mouseup etc.
         isDragging = false;
         modalImageCarousel.classList.remove('dragging');
 
-        const movedBy = currentTranslate - prevTranslate; // Насколько сильно сдвинули от начальной точки перетаскивания
-        const threshold = modalImageCarousel.offsetWidth / 4; // Порог для переключения изображения (25% ширины)
+        const carouselWidth = modalImageCarousel.offsetWidth;
+        const movedBy = currentTranslate - prevTranslate; // Positive if dragged right, negative if dragged left
+        const threshold = carouselWidth / 4; // 25% of image width
 
-        let targetIndex = currentImageIndex; // Предполагаем, что изображение не поменяется
-        let newTranslateOffset = 0; // Насколько нужно сместить карусель относительно -100%
+        let finalTranslateX = -carouselWidth; // Default to center the current image
+        let newImageIndex = currentImageIndex;
 
-        // Проверяем, куда свайпнули
-        if (movedBy < -threshold) { // Свайп влево (к следующему изображению)
+        if (movedBy < -threshold) { // Swiped left (towards next image)
             if (currentImageIndex < allImagesInCurrentColumn.length - 1) {
-                targetIndex = currentImageIndex + 1;
-                newTranslateOffset = -modalImageCarousel.offsetWidth; // Перемещаем карусель на одно изображение влево
+                newImageIndex = currentImageIndex + 1;
+                finalTranslateX = -carouselWidth * 2; // Target: show next image (right slot)
             }
-        } else if (movedBy > threshold) { // Свайп вправо (к предыдущему изображению)
+        } else if (movedBy > threshold) { // Swiped right (towards previous image)
             if (currentImageIndex > 0) {
-                targetIndex = currentImageIndex - 1;
-                newTranslateOffset = modalImageCarousel.offsetWidth; // Перемещаем карусель на одно изображение вправо
+                newImageIndex = currentImageIndex - 1;
+                finalTranslateX = 0; // Target: show previous image (left slot)
             }
         }
 
-        // Если изображение меняется
-        if (targetIndex !== currentImageIndex) {
-            currentImageIndex = targetIndex;
-            // Устанавливаем конечное положение для анимации
-            setTranslate(currentTranslate + newTranslateOffset); // Двигаем на новое положение с учетом свайпа
-            modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+        modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+        setTranslate(finalTranslateX);
 
-            // Ждем завершения анимации, затем сбрасываем положение карусели и обновляем изображения
+        if (newImageIndex !== currentImageIndex) {
+            currentImageIndex = newImageIndex;
+            // After the animation finishes, reset carousel to show the new current image centrally
             modalImageCarousel.addEventListener('transitionend', function handler() {
                 modalImageCarousel.removeEventListener('transitionend', handler);
-                currentTranslate = -modalImageCarousel.offsetWidth; // Сброс на центрированное положение
+                modalImageCarousel.style.transition = 'none'; // Temporarily disable transition for instant snap
+                currentTranslate = -carouselWidth; // Reset to center the new main image
                 setTranslate(currentTranslate);
-                modalImageCarousel.style.transition = 'none'; // Отключаем transition для мгновенного сброса
-                updateCarouselImages(currentImageIndex); // Обновляем src изображений
-                modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Включаем обратно
+                updateCarouselImages(currentImageIndex); // Update image sources for the new central image
+                
+                // Use setTimeout to re-enable transition after the browser has rendered the snap
+                setTimeout(() => {
+                    modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+                }, 0);
             }, { once: true });
         } else {
-            // Если свайп недостаточен, возвращаемся на текущее изображение
-            currentTranslate = -modalImageCarousel.offsetWidth; // Возвращаем в центральное положение
+            // No index change, snap back to current image
+            currentTranslate = -carouselWidth; // Ensure it snaps back to the correct center
             setTranslate(currentTranslate);
-            modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Плавное возвращение
         }
     }
 
     // Добавляем слушателей событий для свайпа к modalImageCarousel
-    modalImageCarousel.addEventListener('touchstart', touchStart);
-    modalImageCarousel.addEventListener('touchmove', touchMove);
+    modalImageCarousel.addEventListener('touchstart', touchStart, { passive: false });
+    modalImageCarousel.addEventListener('touchmove', touchMove, { passive: false });
     modalImageCarousel.addEventListener('touchend', touchEnd);
 
     // Для десктопа:
-    modalImageCarousel.addEventListener('mousedown', touchStart);
-    modalImageCarousel.addEventListener('mousemove', touchMove);
-    modalImageCarousel.addEventListener('mouseup', touchEnd);
-    modalImageCarousel.addEventListener('mouseleave', () => { 
+    modalImageCarousel.addEventListener('mousedown', touchStart); 
+    modalImageCarousel.addEventListener('mousemove', touchMove); 
+    // События mouseup и mouseleave должны быть на document, чтобы захватывать отпускания вне элемента
+    document.addEventListener('mouseup', touchEnd); 
+    document.addEventListener('mouseleave', (event) => { 
+        // Если курсор мыши покидает окно браузера во время перетаскивания,
+        // это считается завершением перетаскивания.
         if (isDragging) {
-            touchEnd();
+            // Дополнительная проверка, чтобы убедиться, что это не просто перемещение по элементам DOM
+            // а именно уход курсора из окна
+            if (event.clientY <= 0 || event.clientX <= 0 || (event.clientX >= window.innerWidth || event.clientY >= window.innerHeight)) {
+                touchEnd();
+            }
         }
     });
 
@@ -568,8 +608,14 @@ document.addEventListener('DOMContentLoaded', () => {
             optionsDropdownGlobalRef.classList.remove('show');
         }
         if (modalImageCarousel) {
-            modalImageCarousel.style.transform = 'translateX(-100%)'; // Сбрасываем transform при закрытии
-            modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Возвращаем transition
+            // Reset the carousel to its default centered state without transition
+            modalImageCarousel.style.transition = 'none'; 
+            currentTranslate = -modalImageCarousel.offsetWidth;
+            setTranslate(currentTranslate);
+            // Re-enable transition for next open, delayed to allow snap
+            setTimeout(() => {
+                modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+            }, 0);
         }
         if (imageInfo) {
             imageInfo.innerHTML = '';
@@ -603,13 +649,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     imageModalGlobalRef.addEventListener('click', (event) => {
         // Проверяем, что клик был именно по фону модального окна, а не по его содержимому
-        // Исключаем клики по элементам карусели, чтобы они не закрывали модал
-        if (event.target === imageModalGlobalRef) {
+        // Исключаем клики по элементам карусели и dropdown, чтобы они не закрывали модал
+        if (event.target === imageModalGlobalRef || 
+            (event.target !== modalImageCarousel && !modalImageCarousel.contains(event.target) &&
+             event.target !== optionsDropdownGlobalRef && !optionsDropdownGlobalRef.contains(event.target) &&
+             event.target !== moreOptionsButtonGlobalRef)) {
             closeModal();
         }
     });
 
     document.addEventListener('click', (event) => {
+        // Если дропдаун открыт и клик не был по кнопке или самому дропдауну, закрыть его
         if (optionsDropdownGlobalRef.style.display === 'block') {
             if (!moreOptionsButtonGlobalRef.contains(event.target) && !optionsDropdownGlobalRef.contains(event.target)) {
                 optionsDropdownGlobalRef.style.display = 'none';
@@ -622,71 +672,77 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.key === 'Escape' && imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) {
             closeModal();
         } else if (imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) {
-            // Обработка клавиш-стрелок для навигации
-            if (event.key === 'ArrowLeft') {
-                event.preventDefault(); // Предотвращаем прокрутку страницы
-                if (currentImageIndex > 0) {
-                    currentImageIndex--;
-                    // Симулируем свайп вправо (предыдущее фото)
-                    currentTranslate = 0; // Изначально смещаем карусель, чтобы показать предыдущее фото
-                    setTranslate(currentTranslate);
-                    modalImageCarousel.style.transition = 'transform 0.3s ease-out';
-                    
-                    // Ждем завершения анимации, затем сбрасываем и обновляем
-                    modalImageCarousel.addEventListener('transitionend', function handler() {
-                        modalImageCarousel.removeEventListener('transitionend', handler);
-                        currentTranslate = -modalImageCarousel.offsetWidth; // Сброс на центрированное положение
-                        setTranslate(currentTranslate);
-                        modalImageCarousel.style.transition = 'none';
-                        updateCarouselImages(currentImageIndex);
-                        modalImageCarousel.style.transition = 'transform 0.3s ease-out';
-                    }, { once: true });
+            const carouselWidth = modalImageCarousel.offsetWidth;
+            let newIndex = currentImageIndex;
+            let targetX = -carouselWidth; // Default to current position (centered)
 
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault(); 
+                if (currentImageIndex > 0) {
+                    newIndex = currentImageIndex - 1;
+                    targetX = 0; // Show previous image (left slot)
                 } else {
-                    // Если достигнуто начало, можно показать легкую "пружину"
-                    modalImageCarousel.style.transform = 'translateX(calc(-100% + 20px))';
+                    // "Bounce" effect at the start
+                    modalImageCarousel.style.transition = 'transform 0.1s ease-out';
+                    setTranslate(-carouselWidth + 20); // Bounce right (from center)
                     setTimeout(() => {
-                        modalImageCarousel.style.transform = 'translateX(-100%)';
+                        setTranslate(-carouselWidth);
                     }, 100);
+                    return; // Exit as no image change
                 }
             } else if (event.key === 'ArrowRight') {
-                event.preventDefault(); // Предотвращаем прокрутку страницы
+                event.preventDefault(); 
                 if (currentImageIndex < allImagesInCurrentColumn.length - 1) {
-                    currentImageIndex++;
-                    // Симулируем свайп влево (следующее фото)
-                    currentTranslate = -modalImageCarousel.offsetWidth * 2; // Изначально смещаем карусель, чтобы показать следующее фото
-                    setTranslate(currentTranslate);
-                    modalImageCarousel.style.transition = 'transform 0.3s ease-out';
-
-                    // Ждем завершения анимации, затем сбрасываем и обновляем
-                    modalImageCarousel.addEventListener('transitionend', function handler() {
-                        modalImageCarousel.removeEventListener('transitionend', handler);
-                        currentTranslate = -modalImageCarousel.offsetWidth; // Сброс на центрированное положение
-                        setTranslate(currentTranslate);
-                        modalImageCarousel.style.transition = 'none';
-                        updateCarouselImages(currentImageIndex);
-                        modalImageCarousel.style.transition = 'transform 0.3s ease-out';
-                    }, { once: true });
+                    newIndex = currentImageIndex + 1;
+                    targetX = -carouselWidth * 2; // Show next image (right slot)
                 } else {
-                    // Если достигнут конец, можно показать легкую "пружину"
-                    modalImageCarousel.style.transform = 'translateX(calc(-100% - 20px))';
+                    // "Bounce" effect at the end
+                    modalImageCarousel.style.transition = 'transform 0.1s ease-out';
+                    setTranslate(-carouselWidth - 20); // Bounce left (from center)
                     setTimeout(() => {
-                        modalImageCarousel.style.transform = 'translateX(-100%)';
+                        setTranslate(-carouselWidth);
                     }, 100);
+                    return; // Exit as no image change
                 }
+            }
+
+            if (newIndex !== currentImageIndex) {
+                currentImageIndex = newIndex;
+                modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+                setTranslate(targetX);
+
+                modalImageCarousel.addEventListener('transitionend', function handler() {
+                    modalImageCarousel.removeEventListener('transitionend', handler);
+                    modalImageCarousel.style.transition = 'none'; // Snap instantly
+                    currentTranslate = -carouselWidth; // Reset to center
+                    setTranslate(currentTranslate);
+                    updateCarouselImages(currentImageIndex);
+                    // Re-enable transition after snap
+                    setTimeout(() => {
+                        modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+                    }, 0);
+                }, { once: true });
             }
         }
     });
 
-    // Это уже было, но важно, чтобы не конфликтовало со свайпом
+    // Обработчик touchmove на imageModalGlobalRef (фоне модального окна)
     imageModalGlobalRef.addEventListener('touchmove', (event) => {
-        // Мы не блокируем touchmove здесь, чтобы позволить свайп изображения.
-        // Вместо этого мы управляем прокруткой body через CSS и JS.
-        // Если event.target - это commentsList и он прокручивается, то это нормально.
-        // Если это не modalImageElement или commentsList, то можно остановить.
-        if (imageModalGlobalRef.classList.contains('show-modal') && event.target !== commentsList && !commentsList.contains(event.target) && !modalImageCarousel.contains(event.target)) {
-            // Проверяем, что мы не пытаемся прокрутить список комментариев или саму карусель
+        if (imageModalGlobalRef.classList.contains('show-modal')) {
+            const isTargetComments = commentsList.contains(event.target) || event.target === commentsList;
+            const isTargetCarousel = modalImageCarousel.contains(event.target) || event.target === modalImageCarousel;
+
+            // Если это свайп по карусели и мы в режиме перетаскивания, позволяем ему работать
+            if (isTargetCarousel && isDragging) {
+                return;
+            }
+            // Если цель - список комментариев и он прокручивается, позволяем ему работать
+            if (isTargetComments && commentsList.scrollHeight > commentsList.clientHeight) {
+                return;
+            }
+            // В остальных случаях предотвращаем прокрутку фона
             event.preventDefault();
         }
-    }, { passive: false });
+    }, { passive: false }); // passive: false необходимо для использования preventDefault()
+
 });
