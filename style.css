@@ -15,10 +15,9 @@ body {
     color: #E0E0E0;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-smoothing: grayscale;
+    -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth; 
-    /* !!! ВАЖНО: Убираем overflow-x: hidden; чтобы допустить горизонтальную прокрутку, если 3 колонки не влезут */
-    /* overflow-x: hidden; */ 
+    /* Убрано overflow-x: hidden; чтобы допустить горизонтальную прокрутку, если 3 колонки не влезут */
     min-width: 280px; /* Уменьшим минимальную ширину body для очень маленьких экранов */
 }
 
@@ -229,7 +228,7 @@ header h1 {
     align-items: center;
     opacity: 0;
     transition: opacity 0.4s ease-out;
-    cursor: pointer; /* Добавлено для iOS, чтобы фон был кликабельным */
+    cursor: pointer; /* !!! ВАЖНО: Добавлено для iOS, чтобы фон был кликабельным */
 }
 
 .modal.show-modal {
