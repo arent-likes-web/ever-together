@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const img = document.createElement('img');
         img.src = imageData.url; // <-- Здесь устанавливается URL Cloudinary
-        console.log(`DEBUG: Set src for thumbnail ID ${imageId} to: ${img.src}`); // Лог после установки src
+        console.log(`DEBUG: Set src for thumbnail ID ${imageId} to: ${img.src}`);
         img.classList.add('thumbnail');
         img.alt = 'Gallery Image';
         img.loading = 'lazy';
@@ -284,11 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Обновляет src изображений в карусели
     function updateCarouselImages(index) {
-        // Убедимся, что prevImageElement и nextImageElement пустые, если нет предыдущего/следующего
-        // И сбрасываем src для всех на всякий случай
-        prevImageElement.src = '';
-        modalImageElement.src = '';
-        nextImageElement.src = '';
+        // УДАЛЕНЫ СТРОКИ prevImageElement.src = ''; modalImageElement.src = ''; nextImageElement.src = '';
 
         // Текущее изображение
         const currentImgDataWrapper = allImagesInCurrentColumn[index];
@@ -296,21 +292,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const thumbnailImg = currentImgDataWrapper.querySelector('img');
             if (thumbnailImg) {
                 const thumbnailSrc = thumbnailImg.src;
-                console.log("DEBUG: Thumbnail image source for current image in updateCarouselImages:", thumbnailSrc); // Лог перед установкой src модалу
-                if (thumbnailSrc && thumbnailSrc !== window.location.href) { // Убедимся, что это не URL страницы
+                console.log("DEBUG: Thumbnail image source for current image in updateCarouselImages:", thumbnailSrc);
+                if (thumbnailSrc && thumbnailSrc !== window.location.href) {
                     modalImageElement.src = thumbnailSrc;
                     modalImageElement.dataset.id = currentImgDataWrapper.dataset.id;
                     modalImageElement.setAttribute('crossorigin', 'anonymous');
-                    currentImageId = currentImgDataWrapper.dataset.id; // Обновляем global currentImageId
-                    // Добавляем обработчик ошибок для текущего изображения
+                    currentImageId = currentImgDataWrapper.dataset.id;
                     modalImageElement.onerror = () => { 
                         console.error("Failed to load modalImageElement src:", modalImageElement.src); 
-                        // Можно добавить резервное изображение или сообщение
                         modalImageElement.alt = "Ошибка загрузки фото";
                     };
                 } else {
                     console.error("DEBUG: Thumbnail src is invalid or empty for current image, or is the page URL (in updateCarouselImages):", thumbnailSrc);
-                    modalImageElement.src = ''; // Явно очищаем, если недействительно
+                    modalImageElement.src = '';
                     modalImageElement.alt = "Изображение не найдено или недействительно.";
                 }
             } else {
@@ -319,7 +313,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalImageElement.alt = "Изображение не найдено.";
             }
         } else {
-            // Это должно быть невозможно, если index корректен
             console.warn("Attempted to update carousel with invalid current image index:", index);
             currentImageId = null;
         }
@@ -344,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 prevImageElement.src = '';
             }
         } else {
-            prevImageElement.src = ''; // Убедимся, что пусто, если нет предыдущего изображения
+            prevImageElement.src = '';
         }
 
         // Следующее изображение
@@ -367,10 +360,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 nextImageElement.src = '';
             }
         } else {
-            nextImageElement.src = ''; // Убедимся, что пусто, если нет следующего изображения
+            nextImageElement.src = '';
         }
 
-        loadCommentsForImage(currentImageId); // Обновляем комментарии для нового текущего изображения
+        loadCommentsForImage(currentImageId);
     }
 
     // --- Функции для свайпа ---
@@ -422,26 +415,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function touchEnd() {
-        if (!isDragging) return; // Prevent multiple calls if mouseleave triggers after mouseup etc.
+        if (!isDragging) return;
         isDragging = false;
         modalImageCarousel.classList.remove('dragging');
 
         const carouselWidth = modalImageCarousel.offsetWidth;
-        const movedBy = currentTranslate - prevTranslate; // Positive if dragged right, negative if dragged left
-        const threshold = carouselWidth / 4; // 25% of image width
+        const movedBy = currentTranslate - prevTranslate;
+        const threshold = carouselWidth / 4;
 
-        let finalTranslateX = -carouselWidth; // Default to center the current image
+        let finalTranslateX = -carouselWidth;
         let newImageIndex = currentImageIndex;
 
         if (movedBy < -threshold) { // Swiped left (towards next image)
             if (currentImageIndex < allImagesInCurrentColumn.length - 1) {
                 newImageIndex = currentImageIndex + 1;
-                finalTranslateX = -carouselWidth * 2; // Target: show next image (right slot)
+                finalTranslateX = -carouselWidth * 2;
             }
         } else if (movedBy > threshold) { // Swiped right (towards previous image)
             if (currentImageIndex > 0) {
                 newImageIndex = currentImageIndex - 1;
-                finalTranslateX = 0; // Target: show previous image (left slot)
+                finalTranslateX = 0;
             }
         }
 
@@ -465,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, { once: true });
         } else {
             // No index change, snap back to current image
-            currentTranslate = -carouselWidth; // Ensure it snaps back to the correct center
+            currentTranslate = -carouselWidth;
             setTranslate(currentTranslate);
         }
     }
@@ -799,6 +792,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // В остальных случаях предотвращаем прокрутку фона
             event.preventDefault();
         }
-    }, { passive: false }); // passive: false необходимо для использования preventDefault()
+    }, { passive: false });
 
 });
