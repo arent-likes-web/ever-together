@@ -1,8 +1,12 @@
-@ -1,389 +1,226 @@
+@ -1,392 +1,390 @@
 // main-page.js
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Ошибка здесь, getDatabase, ref, set, push, onValue, update, remove должны быть из firebase-database.js
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+
+// Исправленная строка импорта Firebase Database
 // ИСПРАВЛЕНО: getDatabase, ref, set, push, onValue, update, remove должны быть импортированы из firebase-database.js
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
@@ -37,30 +41,6 @@ const imageInfo = document.getElementById('imageInfo');
 const leftColumn = document.getElementById('leftColumn');
 const centerColumn = document.getElementById('centerColumn');
 const rightColumn = document.getElementById('rightColumn');
-document.addEventListener('DOMContentLoaded', () => {
-    // --- Кнопки загрузки изображений ---
-    const uploadHimPeachBtn = document.getElementById('uploadHimPeach');
-    const uploadOurDreamBtn = document.getElementById('uploadOurDream');
-    const uploadHerCatBtn = document.getElementById('uploadHerCat');
-
-    // Назначаем обработчики для кнопок загрузки
-    uploadHimPeachBtn.addEventListener('click', () => triggerUpload('him-peach-column'));
-    uploadOurDreamBtn.addEventListener('click', () => triggerUpload('our-dream-column'));
-    uploadHerCatBtn.addEventListener('click', () => triggerUpload('her-cat-column'));
-
-    function triggerUpload(columnId) {
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.style.display = 'none'; // Скрываем, чтобы пользователь его не видел
-
-        fileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                uploadImage(file, columnId);
-            }
-            document.body.removeChild(fileInput); // Удаляем input после использования
-        });
 
 // Проверка авторизации при загрузке страницы
 console.log("[main-page.js] Вызов onAuthStateChanged...");
@@ -72,8 +52,6 @@ onAuthStateChanged(auth, (user) => {
     } else {
         console.log("[main-page.js] Пользователь не авторизован. Перенаправление на страницу входа.");
         window.location.href = "entry.html"; // Перенаправляем, если нет авторизации
-        document.body.appendChild(fileInput);
-        fileInput.click(); // Имитируем клик
     }
 });
 
@@ -81,8 +59,6 @@ onAuthStateChanged(auth, (user) => {
 function loadImagesFromFirebase() {
     console.log("[main-page.js] Функция loadImagesFromFirebase запущена. Ожидание данных из Firebase...");
     const imagesRef = dbRef(database, 'images');
-    function uploadImage(file, targetColumnId) {
-        const reader = new FileReader();
 
     onValue(imagesRef, (snapshot) => {
         console.log("[main-page.js] onValue: Получен snapshot данных из Firebase.");
@@ -93,12 +69,6 @@ function loadImagesFromFirebase() {
         leftColumn.innerHTML = '';
         centerColumn.innerHTML = '';
         rightColumn.innerHTML = '';
-        reader.onload = function(e) {
-            const imageUrl = e.target.result;
-            const imageWrapper = document.createElement('div');
-            imageWrapper.className = 'image-wrapper';
-            // Сохраняем ID колонки, в которую загружено изображение
-            imageWrapper.setAttribute('data-column-origin', targetColumnId);
 
         if (data) {
             console.log("[main-page.js] Данные изображений из Firebase:", data);
@@ -107,9 +77,6 @@ function loadImagesFromFirebase() {
             // Сортируем по времени создания (новые сверху)
             // Это гарантирует, что imageArray будет отсортирован правильно.
             imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
-            const img = document.createElement('img');
-            img.src = imageUrl;
-            img.alt = 'Uploaded Image';
 
             console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
             
@@ -118,12 +85,6 @@ function loadImagesFromFirebase() {
                 left: document.createDocumentFragment(),
                 center: document.createDocumentFragment(),
                 right: document.createDocumentFragment()
-            img.onload = () => {
-                img.classList.add('loaded'); // Для CSS-анимации появления
-            };
-            img.onerror = () => {
-                imageWrapper.classList.add('image-load-error');
-                imageWrapper.textContent = 'Ошибка загрузки изображения';
             };
 
             imageArray.forEach((imgData) => {
@@ -134,71 +95,17 @@ function loadImagesFromFirebase() {
                 } else {
                     console.warn(`[main-page.js] Предупреждение: Колонка "${targetColumnName}" не найдена для изображения ID: ${imgData.id}`);
                 }
-            // Добавляем кнопку "..."
-            const moreOptionsBtn = document.createElement('button');
-            moreOptionsBtn.className = 'more-options-button';
-            moreOptionsBtn.textContent = '...';
-            moreOptionsBtn.addEventListener('click', (event) => {
-                event.stopPropagation(); // Предотвращаем срабатывание обработчика на imageWrapper
-                toggleOptionsDropdown(moreOptionsBtn, imageWrapper);
             });
-            imageWrapper.appendChild(moreOptionsBtn);
-            
-            imageWrapper.appendChild(img);
 
             // Добавляем фрагменты в соответствующие колонки
             leftColumn.appendChild(fragments.left);
             centerColumn.appendChild(fragments.center);
             rightColumn.appendChild(fragments.right);
-            const targetColumn = document.getElementById(targetColumnId);
-            if (targetColumn) {
-                targetColumn.appendChild(imageWrapper);
-            } else {
-                console.error('Target column not found:', targetColumnId);
-            }
-        };
-        reader.readAsDataURL(file);
-    }
 
             console.log("[main-page.js] Все изображения обновлены в DOM.");
-    // --- Модальное окно и его функциональность ---
-    const modal = document.getElementById('imageModal');
-    const modalImage = document.getElementById('modalImage');
-    const imageInfo = document.getElementById('imageInfo');
-    const moreOptionsButton = document.querySelector('.modal-actions-container .more-options-button');
-    const optionsDropdown = document.querySelector('.modal-actions-container .options-dropdown');
-
-    let currentImageWrapper = null; // Для отслеживания текущего открытого image-wrapper
-
-    // Открытие модального окна при клике на изображение
-    document.querySelectorAll('.image-column').forEach(column => {
-        column.addEventListener('click', (event) => {
-            let targetImageWrapper = event.target.closest('.image-wrapper');
-            if (targetImageWrapper && !event.target.classList.contains('more-options-button')) { // Убедимся, что не кликнули на кнопку "..."
-                currentImageWrapper = targetImageWrapper;
-                const img = targetImageWrapper.querySelector('img');
-                if (img) {
-                    modalImage.src = img.src;
-                    imageInfo.textContent = `Информация о файле: ${img.alt}`; // Пример информации
-                    modal.classList.add('show-modal');
-                    // Скрываем скролл на body при открытии модального окна
-                    document.body.style.overflow = 'hidden';
-                }
-            }
-        });
-    });
 
         } else {
             console.log("[main-page.js] В базе данных Firebase нет записей об изображениях.");
-    // Закрытие модального окна при клике вне содержимого
-    modal.addEventListener('click', (event) => {
-        // Проверяем, что клик произошел именно по модальному фону, а не по его содержимому
-        if (event.target === modal) {
-            modal.classList.remove('show-modal');
-            optionsDropdown.style.display = 'none'; // Убедимся, что дропдаун закрыт
-            optionsDropdown.classList.remove('show');
-            document.body.style.overflow = ''; // Восстанавливаем скролл
-            currentImageWrapper = null;
         }
     }, (error) => { // Обработчик ошибок для onValue
         console.error("[main-page.js] Ошибка при получении данных из Firebase Realtime Database:", error);
@@ -243,10 +150,6 @@ function createImageElement(imageData, imageId) {
 
     imageWrapper.addEventListener('click', (event) => {
         openModal(img);
-    // Обработчик для кнопки "..." в модальном окне
-    moreOptionsButton.addEventListener('click', (event) => {
-        event.stopPropagation(); // Предотвращаем закрытие модального окна при клике на "..."
-        toggleOptionsDropdown(moreOptionsButton, currentImageWrapper);
     });
 
     imageWrapper.appendChild(img);
@@ -267,9 +170,6 @@ function openModal(imgElement) {
     modalImageElement.src = imgElement.src;
     modalImageElement.dataset.id = imgElement.dataset.id;
     modalImageElement.setAttribute('crossorigin', 'anonymous');
-    // Функция для переключения дропдауна
-    function toggleOptionsDropdown(button, imageWrapper) {
-        if (!imageWrapper) return; // На всякий случай
 
     imageInfo.innerHTML = ''; // Очищаем инфо
 
@@ -288,13 +188,6 @@ function openModal(imgElement) {
     } else if (column === 'center' && (userIsAretren || userIsChoisalery)) {
         shouldIncrementView = true;
     }
-        // Закрываем все другие открытые дропдауны
-        document.querySelectorAll('.options-dropdown').forEach(d => {
-            if (d !== optionsDropdown) { // Проверяем, что это не текущий дропдаун
-                d.style.display = 'none';
-                d.classList.remove('show');
-            }
-        });
 
     if (shouldIncrementView) {
         currentViews += 1;
@@ -309,64 +202,12 @@ function openModal(imgElement) {
         const wrapperElement = document.querySelector(`.image-wrapper[data-id="${imageId}"]`);
         if (wrapperElement) {
             wrapperElement.dataset.views = currentViews;
-        // Если дропдаун уже открыт, закрываем его
-        if (optionsDropdown.style.display === 'block') {
-            optionsDropdown.style.display = 'none';
-            optionsDropdown.classList.remove('show');
-            return;
         }
     }
 
     // Блокируем взаимодействие с фоном
     if (imageContainerGlobalRef) {
         imageContainerGlobalRef.style.pointerEvents = 'none';
-        optionsDropdown.innerHTML = ''; // Очищаем содержимое перед заполнением
-        const currentColumnId = imageWrapper.getAttribute('data-column-origin');
-
-        const columns = [
-            { id: 'him-peach-column', name: 'Him peach' },
-            { id: 'our-dream-column', name: 'Our dream' },
-            { id: 'her-cat-column', name: 'Her cat' }
-        ];
-
-        columns.forEach(col => {
-            if (col.id !== currentColumnId) {
-                const moveLink = document.createElement('a');
-                moveLink.href = '#';
-                moveLink.textContent = `Переместить в ${col.name}`;
-                moveLink.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    event.stopPropagation(); // Важно: предотвратить закрытие модального окна
-                    moveImage(imageWrapper, col.id);
-                    optionsDropdown.style.display = 'none';
-                    optionsDropdown.classList.remove('show');
-                    // Можно также закрыть модальное окно после перемещения, если нужно:
-                    // modal.classList.remove('show-modal');
-                    // document.body.style.overflow = '';
-                    // currentImageWrapper = null;
-                });
-                optionsDropdown.appendChild(moveLink);
-            }
-        });
-
-        // Добавить кнопку "Удалить"
-        const deleteLink = document.createElement('a');
-        deleteLink.href = '#';
-        deleteLink.textContent = 'Удалить';
-        deleteLink.addEventListener('click', (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            deleteImage(imageWrapper);
-            optionsDropdown.style.display = 'none';
-            optionsDropdown.classList.remove('show');
-            modal.classList.remove('show-modal'); // Закрыть модальное окно после удаления
-            document.body.style.overflow = ''; // Восстановить скролл
-            currentImageWrapper = null;
-        });
-        optionsDropdown.appendChild(deleteLink);
-
-        optionsDropdown.style.display = 'block';
-        optionsDropdown.classList.add('show');
     }
 
     moreOptionsButtonGlobalRef.onclick = function(event) {
@@ -395,12 +236,6 @@ function openModal(imgElement) {
                         closeModal();
                     })
                     .catch(error => console.error("[main-page.js] Ошибка удаления:", error));
-    function moveImage(imageWrapper, targetColumnId) {
-        const targetColumn = document.getElementById(targetColumnId);
-        if (targetColumn) {
-            const currentParent = imageWrapper.parentNode;
-            if (currentParent) {
-                currentParent.removeChild(imageWrapper);
             }
         } else if (action === 'move') {
             const newColumn = targetActionElement.dataset.column;
@@ -410,11 +245,6 @@ function openModal(imgElement) {
                     closeModal();
                 })
                 .catch(error => console.error("[main-page.js] Ошибка перемещения:", error));
-            targetColumn.appendChild(imageWrapper);
-            imageWrapper.setAttribute('data-column-origin', targetColumnId); // Обновляем ID колонки
-            // Не закрываем модальное окно после перемещения, только дропдаун
-        } else {
-            console.error('Target column not found:', targetColumnId);
         }
 
         optionsDropdownGlobalRef.style.display = 'none';
@@ -457,10 +287,6 @@ function handleCloseInteractions(event) {
             !optionsDropdownGlobalRef.contains(event.target)) {
             console.log("[main-page.js] Клик вне дропдауна/кнопки, закрываем дропдаун.");
             optionsDropdownGlobalRef.style.display = 'none';
-    function deleteImage(imageWrapper) {
-        const parent = imageWrapper.parentNode;
-        if (parent) {
-            parent.removeChild(imageWrapper);
         }
     }
 
@@ -499,13 +325,6 @@ uploadButtons.forEach((button) => {
         const column = button.id.replace('upload', '').toLowerCase();
         fileInput.dataset.column = column; // Сохраняем целевую колонку
         fileInput.click(); // Открываем диалог выбора файла
-    // --- Закрытие дропдауна при клике вне его (но не при клике по кнопке "...") ---
-    document.addEventListener('click', (event) => {
-        // Если клик не по кнопке "..." и не внутри самого дропдауна, закрываем его
-        if (!moreOptionsButton.contains(event.target) && !optionsDropdown.contains(event.target)) {
-            optionsDropdown.style.display = 'none';
-            optionsDropdown.classList.remove('show');
-        }
     });
 });
 
@@ -562,17 +381,10 @@ fileInput.addEventListener('change', async (event) => {
                 console.error(`[main-page.js] Критическая ошибка при загрузке файла ${file.name}:`, error);
                 alert(`Произошла ошибка при загрузке файла ${file.name}: ${error.message}. Проверьте консоль.`);
             }
-    // Обработчик для предотвращения прокрутки body, когда модальное окно активно
-    // Это уже обрабатывается через document.body.style.overflow = 'hidden';
-    // Но для iOS иногда полезно добавить touchmove prevention
-    modal.addEventListener('touchmove', (event) => {
-        if (modal.classList.contains('show-modal')) {
-            event.preventDefault();
         }
         event.target.value = null; // Сбрасываем выбранные файлы для возможности повторной загрузки тех же файлов
         console.log("[main-page.js] Пакетная загрузка завершена.");
     }
-    }, { passive: false }); // {passive: false} важен для preventDefault
 });
 
 // Функция getColumnViews все еще нужна для подсчета просмотров
