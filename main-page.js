@@ -248,19 +248,27 @@ document.addEventListener('DOMContentLoaded', () => {
         imageModalGlobalRef.classList.add('show-modal');
         optionsDropdownGlobalRef.style.display = 'none';
 
-        // Инициализируем карусель в правильное положение и загружаем изображения
-        // Важно: установить transition to 'none' перед первым transform, чтобы избежать нежелательной анимации при открытии
-        modalImageCarousel.style.transition = 'none'; 
-        currentTranslate = -modalImageCarousel.offsetWidth; // Центрируем `modalImageElement`
-        setTranslate(currentTranslate);
-        updateCarouselImages(currentImageIndex); // Загружаем текущее и соседние изображения
-        
-        // После установки начального положения, можно снова включить transition
-        // Используем setTimeout 0 для отложенного включения transition,
-        // чтобы браузер успел отрисовать изменения без transition
-        setTimeout(() => {
-            modalImageCarousel.style.transition = 'transform 0.3s ease-out';
-        }, 0);
+        // Блокируем прокрутку body, если модальное окно открыто
+        document.body.style.overflow = 'hidden'; 
+        if (imageContainerGlobalRef) {
+            imageContainerGlobalRef.style.pointerEvents = 'none';
+        }
+
+        // Используем requestAnimationFrame, чтобы убедиться, что модальное окно и карусель
+        // полностью отрисованы и имеют правильные размеры, прежде чем мы будем использовать offsetWidth
+        requestAnimationFrame(() => {
+            modalImageCarousel.style.transition = 'none'; 
+            currentTranslate = -modalImageCarousel.offsetWidth; // Центрируем `modalImageElement`
+            setTranslate(currentTranslate);
+            updateCarouselImages(currentImageIndex); // Загружаем текущее и соседние изображения
+            
+            // После установки начального положения, можно снова включить transition
+            // Используем setTimeout 0 для отложенного включения transition,
+            // чтобы браузер успел отрисовать изменения без transition
+            setTimeout(() => {
+                modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+            }, 0);
+        });
 
 
         imageInfo.innerHTML = '';
@@ -269,12 +277,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Комментарии загружаются внутри updateCarouselImages
         // loadCommentsForImage(currentImageId); 
-
-        // Блокируем прокрутку body, если модальное окно открыто
-        document.body.style.overflow = 'hidden'; 
-        if (imageContainerGlobalRef) {
-            imageContainerGlobalRef.style.pointerEvents = 'none';
-        }
     }
 
     // Обновляет src изображений в карусели
@@ -292,6 +294,12 @@ document.addEventListener('DOMContentLoaded', () => {
             modalImageElement.dataset.id = currentImgDataWrapper.dataset.id;
             modalImageElement.setAttribute('crossorigin', 'anonymous');
             currentImageId = currentImgDataWrapper.dataset.id; // Обновляем global currentImageId
+            // Добавляем обработчик ошибок для текущего изображения
+            modalImageElement.onerror = () => { 
+                console.error("Failed to load modalImageElement src:", modalImageElement.src); 
+                // Можно добавить резервное изображение или сообщение
+                modalImageElement.alt = "Ошибка загрузки фото";
+            };
         } else {
             // Это должно быть невозможно, если index корректен
             console.warn("Attempted to update carousel with invalid current image index:", index);
@@ -303,6 +311,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const prevImgDataWrapper = allImagesInCurrentColumn[index - 1];
             prevImageElement.src = prevImgDataWrapper.querySelector('img').src;
             prevImageElement.setAttribute('crossorigin', 'anonymous');
+            // Добавляем обработчик ошибок для предыдущего изображения
+            prevImageElement.onerror = () => { console.error("Failed to load prevImageElement src:", prevImageElement.src); };
         }
 
         // Следующее изображение
@@ -310,6 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const nextImgDataWrapper = allImagesInCurrentColumn[index + 1];
             nextImageElement.src = nextImgDataWrapper.querySelector('img').src;
             nextImageElement.setAttribute('crossorigin', 'anonymous');
+            // Добавляем обработчик ошибок для следующего изображения
+            nextImageElement.onerror = () => { console.error("Failed to load nextImageElement src:", nextImageElement.src); };
         }
 
         loadCommentsForImage(currentImageId); // Обновляем комментарии для нового текущего изображения
@@ -333,9 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Предотвращаем дефолтное поведение, чтобы избежать прокрутки страницы на мобильных
-        // при начале свайпа на карусели. Это важно, если палец зацепил не только карусель
-        // but it's part of the global touchmove listener as well.
-        // For carousel, if we are dragging, we want to control the movement.
+        // при начале свайпа на карусели
         if (event.target === modalImageCarousel || modalImageCarousel.contains(event.target)) {
             event.preventDefault();
         }
