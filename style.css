@@ -344,11 +344,17 @@ header h1 {
 
 /* --- Стили для новой кнопки со звездой --- */
 
-.star-button {
-    position: absolute; /* Делаем кнопку абсолютно позиционированной */
+.star-button-link { /* Новый класс для ссылки-обертки */
+    position: absolute; /* Делаем ссылку абсолютно позиционированной */
     right: 20px; /* Отступ от правого края заголовка */
     top: 50%; /* Центрируем по вертикали */
     transform: translateY(-50%); /* Точная вертикальная центровка */
+    /* Убираем background-color, border-radius, width, height, display, justify-content, align-items, box-shadow, z-index, transition, font-size отсюда */
+    /* Эти стили теперь будут применяться к самой button внутри link */
+    z-index: 101; /* Убедимся, что ссылка поверх всего */
+}
+
+.star-button { /* Стили для самой кнопки внутри ссылки */
     background-color: #C899E0; /* Приятный фиолетовый цвет */
     color: white;
     border-radius: 50%; /* Круглая кнопка */
@@ -358,7 +364,6 @@ header h1 {
     justify-content: center;
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    z-index: 101; /* Убедимся, что кнопка поверх всего */
     transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     font-size: 1.5em; /* Размер иконки звезды (если это текст) */
     /* Если иконка будет SVG или IMG, то уберем font-size и зададим ширину/высоту для img */
@@ -366,14 +371,15 @@ header h1 {
 
 .star-button:hover {
     background-color: #E0B0FF; /* Более светлый фиолетовый при наведении */
-    transform: translateY(-50%) scale(1.1); /* Небольшое увеличение при наведении */
+    transform: scale(1.1); /* Небольшое увеличение при наведении */
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
 .star-button:active {
-    transform: translateY(-50%) scale(1); /* Возвращение к исходному размеру при нажатии */
+    transform: scale(1); /* Возвращение к исходному размеру при нажатии */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 
 /* ALL DEVICES: Responsive adjustments to ALWAYS have 3 columns */
 @media (max-width: 768px) {
@@ -459,8 +465,10 @@ header h1 {
     }
 
     /* Стили для кнопки со звездой на мобильных */
-    .star-button {
+    .star-button-link { /* Стили для ссылки-обертки на мобильных */
         right: 10px; /* Меньший отступ от края на мобильных */
+    }
+    .star-button { /* Стили для самой кнопки внутри ссылки на мобильных */
         width: 30px; /* Меньший размер кнопки на мобильных */
         height: 30px;
         font-size: 1.2em; /* Меньший размер иконки на мобильных */
