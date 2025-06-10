@@ -45,9 +45,9 @@
         <div class="modal-content">
             <span class="close-button">&times;</span>
             <div class="modal-image-carousel">
-                <img id="prevImage" class="carousel-image loading" alt="Предыдущее фото">
-                <img id="modalImage" class="carousel-image loading" alt="Текущее фото">
-                <img id="nextImage" class="carousel-image loading" alt="Следующее фото">
+                <img id="prevImage" class="carousel-image" src="" alt="Previous image">
+                <img id="modalImage" class="carousel-image" src="" alt="Full size image">
+                <img id="nextImage" class="carousel-image" src="" alt="Next image">
             </div>
             
             <div id="imageInfo"></div>
@@ -55,7 +55,11 @@
                 <div class="modal-actions-container">
                     <button id="moreOptionsButton" class="more-options-button">...</button>
                     <div id="optionsDropdown" class="options-dropdown">
-                        </div>
+                        <a href="#" data-action="delete">Удалить</a>
+                        <a href="#" data-action="move" data-column="left">В Him peach</a>
+                        <a href="#" data-action="move" data-column="center">В Our dreams</a>
+                        <a href="#" data-action="move" data-column="right">В Her cat</a>
+                    </div>
                 </div>
 
                 <div class="comments-section">
