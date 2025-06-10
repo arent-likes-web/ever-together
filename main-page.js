@@ -194,7 +194,8 @@ document.addEventListener('DOMContentLoaded', () => {
         imageWrapper.dataset.columnOrigin = imageData.column;
 
         const img = document.createElement('img');
-        img.src = imageData.url;
+        img.src = imageData.url; // <-- Здесь устанавливается URL Cloudinary
+        console.log(`DEBUG: Set src for thumbnail ID ${imageId} to: ${img.src}`); // Лог после установки src
         img.classList.add('thumbnail');
         img.alt = 'Gallery Image';
         img.loading = 'lazy';
@@ -219,6 +220,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         imageWrapper.addEventListener('click', (event) => {
             if (event.target === imageWrapper || event.target === img) {
+                const clickedThumbnailSrc = imageWrapper.querySelector('img').src;
+                console.log(`DEBUG: Clicked thumbnail ID ${imageWrapper.dataset.id}, its src is: ${clickedThumbnailSrc}`);
                 openModal(imageWrapper);
             }
         });
@@ -290,16 +293,31 @@ document.addEventListener('DOMContentLoaded', () => {
         // Текущее изображение
         const currentImgDataWrapper = allImagesInCurrentColumn[index];
         if (currentImgDataWrapper) {
-            modalImageElement.src = currentImgDataWrapper.querySelector('img').src;
-            modalImageElement.dataset.id = currentImgDataWrapper.dataset.id;
-            modalImageElement.setAttribute('crossorigin', 'anonymous');
-            currentImageId = currentImgDataWrapper.dataset.id; // Обновляем global currentImageId
-            // Добавляем обработчик ошибок для текущего изображения
-            modalImageElement.onerror = () => { 
-                console.error("Failed to load modalImageElement src:", modalImageElement.src); 
-                // Можно добавить резервное изображение или сообщение
-                modalImageElement.alt = "Ошибка загрузки фото";
-            };
+            const thumbnailImg = currentImgDataWrapper.querySelector('img');
+            if (thumbnailImg) {
+                const thumbnailSrc = thumbnailImg.src;
+                console.log("DEBUG: Thumbnail image source for current image in updateCarouselImages:", thumbnailSrc); // Лог перед установкой src модалу
+                if (thumbnailSrc && thumbnailSrc !== window.location.href) { // Убедимся, что это не URL страницы
+                    modalImageElement.src = thumbnailSrc;
+                    modalImageElement.dataset.id = currentImgDataWrapper.dataset.id;
+                    modalImageElement.setAttribute('crossorigin', 'anonymous');
+                    currentImageId = currentImgDataWrapper.dataset.id; // Обновляем global currentImageId
+                    // Добавляем обработчик ошибок для текущего изображения
+                    modalImageElement.onerror = () => { 
+                        console.error("Failed to load modalImageElement src:", modalImageElement.src); 
+                        // Можно добавить резервное изображение или сообщение
+                        modalImageElement.alt = "Ошибка загрузки фото";
+                    };
+                } else {
+                    console.error("DEBUG: Thumbnail src is invalid or empty for current image, or is the page URL (in updateCarouselImages):", thumbnailSrc);
+                    modalImageElement.src = ''; // Явно очищаем, если недействительно
+                    modalImageElement.alt = "Изображение не найдено или недействительно.";
+                }
+            } else {
+                console.error("DEBUG: No img element found in currentImgDataWrapper for current image.");
+                modalImageElement.src = '';
+                modalImageElement.alt = "Изображение не найдено.";
+            }
         } else {
             // Это должно быть невозможно, если index корректен
             console.warn("Attempted to update carousel with invalid current image index:", index);
@@ -309,19 +327,47 @@ document.addEventListener('DOMContentLoaded', () => {
         // Предыдущее изображение
         if (index > 0) {
             const prevImgDataWrapper = allImagesInCurrentColumn[index - 1];
-            prevImageElement.src = prevImgDataWrapper.querySelector('img').src;
-            prevImageElement.setAttribute('crossorigin', 'anonymous');
-            // Добавляем обработчик ошибок для предыдущего изображения
-            prevImageElement.onerror = () => { console.error("Failed to load prevImageElement src:", prevImageElement.src); };
+            const prevThumbnailImg = prevImgDataWrapper.querySelector('img');
+            if (prevThumbnailImg) {
+                const prevThumbnailSrc = prevThumbnailImg.src;
+                console.log("DEBUG: Thumbnail image source for previous image in updateCarouselImages:", prevThumbnailSrc);
+                if (prevThumbnailSrc && prevThumbnailSrc !== window.location.href) {
+                    prevImageElement.src = prevThumbnailSrc;
+                    prevImageElement.setAttribute('crossorigin', 'anonymous');
+                    prevImageElement.onerror = () => { console.error("Failed to load prevImageElement src:", prevImageElement.src); };
+                } else {
+                    console.error("DEBUG: Thumbnail src is invalid or empty for previous image, or is the page URL (in updateCarouselImages):", prevThumbnailSrc);
+                    prevImageElement.src = '';
+                }
+            } else {
+                console.error("DEBUG: No img element found in prevImgDataWrapper for previous image.");
+                prevImageElement.src = '';
+            }
+        } else {
+            prevImageElement.src = ''; // Убедимся, что пусто, если нет предыдущего изображения
         }
 
         // Следующее изображение
         if (index < allImagesInCurrentColumn.length - 1) {
             const nextImgDataWrapper = allImagesInCurrentColumn[index + 1];
-            nextImageElement.src = nextImgDataWrapper.querySelector('img').src;
-            nextImageElement.setAttribute('crossorigin', 'anonymous');
-            // Добавляем обработчик ошибок для следующего изображения
-            nextImageElement.onerror = () => { console.error("Failed to load nextImageElement src:", nextImageElement.src); };
+            const nextThumbnailImg = nextImgDataWrapper.querySelector('img');
+            if (nextThumbnailImg) {
+                const nextThumbnailSrc = nextThumbnailImg.src;
+                console.log("DEBUG: Thumbnail image source for next image in updateCarouselImages:", nextThumbnailSrc);
+                if (nextThumbnailSrc && nextThumbnailSrc !== window.location.href) {
+                    nextImageElement.src = nextThumbnailSrc;
+                    nextImageElement.setAttribute('crossorigin', 'anonymous');
+                    nextImageElement.onerror = () => { console.error("Failed to load nextImageElement src:", nextImageElement.src); };
+                } else {
+                    console.error("DEBUG: Thumbnail src is invalid or empty for next image, or is the page URL (in updateCarouselImages):", nextThumbnailSrc);
+                    nextImageElement.src = '';
+                }
+            } else {
+                console.error("DEBUG: No img element found in nextImgDataWrapper for next image.");
+                nextImageElement.src = '';
+            }
+        } else {
+            nextImageElement.src = ''; // Убедимся, что пусто, если нет следующего изображения
         }
 
         loadCommentsForImage(currentImageId); // Обновляем комментарии для нового текущего изображения
