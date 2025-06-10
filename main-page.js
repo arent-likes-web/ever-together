@@ -2,7 +2,6 @@
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-// ИСПРАВЛЕНО: getDatabase, ref, set, push, onValue, update, remove должны быть импортированы из firebase-database.js
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
 
@@ -37,353 +36,445 @@ const leftColumn = document.getElementById('leftColumn');
 const centerColumn = document.getElementById('centerColumn');
 const rightColumn = document.getElementById('rightColumn');
 
-// Проверка авторизации при загрузке страницы
-console.log("[main-page.js] Вызов onAuthStateChanged...");
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        console.log(`[main-page.js] Пользователь авторизован: ${user.email}. Загрузка изображений.`);
-        window.currentUser = user.email; // Устанавливаем текущего пользователя
-        loadImagesFromFirebase(); // Загружаем изображения
-    } else {
-        console.log("[main-page.js] Пользователь не авторизован. Перенаправление на страницу входа.");
-        window.location.href = "entry.html"; // Перенаправляем, если нет авторизации
-    }
-});
+// Глобальная переменная для отслеживания текущего открытого image-wrapper в модальном окне
+let currentImageWrapper = null;
 
-// Загрузка изображений из Firebase
-function loadImagesFromFirebase() {
-    console.log("[main-page.js] Функция loadImagesFromFirebase запущена. Ожидание данных из Firebase...");
-    const imagesRef = dbRef(database, 'images');
+document.addEventListener('DOMContentLoaded', () => {
+    // Проверка авторизации при загрузке страницы
+    console.log("[main-page.js] Вызов onAuthStateChanged...");
+    onAuthStateChanged(auth, (user) => {
+        const isAuthPage = window.location.pathname.includes("entry.html") ||
+                           window.location.pathname.includes("registration.html");
 
-    onValue(imagesRef, (snapshot) => {
-        console.log("[main-page.js] onValue: Получен snapshot данных из Firebase.");
-        const data = snapshot.val();
-        
-        // Очищаем ВСЕ колонки перед полной перерисовкой
-        console.log("[main-page.js] Полная очистка всех колонок перед обновлением.");
-        leftColumn.innerHTML = '';
-        centerColumn.innerHTML = '';
-        rightColumn.innerHTML = '';
-
-        if (data) {
-            console.log("[main-page.js] Данные изображений из Firebase:", data);
-            const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-            
-            // Сортируем по времени создания (новые сверху)
-            // Это гарантирует, что imageArray будет отсортирован правильно.
-            imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
-
-            console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
-            
-            // Временные фрагменты для каждой колонки для эффективного DOM-манипулирования
-            const fragments = {
-                left: document.createDocumentFragment(),
-                center: document.createDocumentFragment(),
-                right: document.createDocumentFragment()
-            };
-
-            imageArray.forEach((imgData) => {
-                const targetColumnName = imgData.column;
-                const imageWrapper = createImageElement(imgData, imgData.id);
-                if (fragments[targetColumnName]) {
-                    fragments[targetColumnName].appendChild(imageWrapper);
-                } else {
-                    console.warn(`[main-page.js] Предупреждение: Колонка "${targetColumnName}" не найдена для изображения ID: ${imgData.id}`);
-                }
-            });
-
-            // Добавляем фрагменты в соответствующие колонки
-            leftColumn.appendChild(fragments.left);
-            centerColumn.appendChild(fragments.center);
-            rightColumn.appendChild(fragments.right);
-
-            console.log("[main-page.js] Все изображения обновлены в DOM.");
-
+        if (user) {
+            console.log(`[main-page.js] Пользователь авторизован: ${user.email}.`);
+            window.currentUser = user.email;
+            if (isAuthPage) {
+                console.log("[main-page.js] Авторизованный пользователь на странице входа. Перенаправление на main-page.html.");
+                window.location.href = "main-page.html";
+            } else {
+                loadImagesFromFirebase();
+            }
         } else {
-            console.log("[main-page.js] В базе данных Firebase нет записей об изображениях.");
+            console.log("[main-page.js] Пользователь не авторизован.");
+            if (!isAuthPage) {
+                console.log("[main-page.js] Неавторизованный пользователь не на странице входа. Перенаправление на entry.html.");
+                window.location.href = "entry.html";
+            }
         }
-    }, (error) => { // Обработчик ошибок для onValue
-        console.error("[main-page.js] Ошибка при получении данных из Firebase Realtime Database:", error);
-        alert("Ошибка загрузки данных из базы данных. Проверьте консоль разработчика.");
-    });
-}
-
-// Изменена функция для создания элемента изображения
-function createImageElement(imageData, imageId) {
-    const imageWrapper = document.createElement('div');
-    imageWrapper.classList.add('image-wrapper');
-    imageWrapper.dataset.timestamp = imageData.timestamp;
-    imageWrapper.dataset.views = imageData.views || 0;
-    imageWrapper.dataset.id = imageId;
-    imageWrapper.dataset.column = imageData.column;
-
-    const img = document.createElement('img');
-    img.src = imageData.url;
-    img.classList.add('thumbnail');
-    img.alt = 'Gallery Image';
-    img.loading = 'lazy';
-    img.setAttribute('crossorigin', 'anonymous');
-
-    img.onload = () => {
-        img.classList.add('loaded');
-        // console.log(`[main-page.js] Изображение ${imageData.url} (ID: ${imageId}) успешно загружено.`);
-    };
-
-    img.onerror = (e) => {
-        console.error(`[main-page.js] ОШИБКА ЗАГРУЗКИ ИЗОБРАЖЕНИЯ: ${img.src} (ID: ${imageId})`, e);
-        imageWrapper.classList.add('image-load-error');
-        const errorText = document.createElement('p');
-        errorText.textContent = 'Ошибка загрузки фото';
-        errorText.style.color = 'red';
-        errorText.style.position = 'absolute';
-        errorText.style.top = '50%';
-        errorText.style.left = '50%';
-        errorText.style.transform = 'translate(-50%, -50%)';
-        errorText.style.textAlign = 'center';
-        imageWrapper.appendChild(errorText);
-    };
-
-    imageWrapper.addEventListener('click', (event) => {
-        openModal(img);
     });
 
-    imageWrapper.appendChild(img);
-    return imageWrapper;
-}
+    // Инициализация файлового ввода для загрузки
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.multiple = true;
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
 
-// Открытие модального окна
-function openModal(imgElement) {
-    console.log("[main-page.js] Открытие модального окна для изображения:", imgElement.src);
-    if (!imageModalGlobalRef || !modalImageElement || !moreOptionsButtonGlobalRef || !optionsDropdownGlobalRef || !imageInfo) {
-        console.error("[main-page.js] ОШИБКА: Не найдены все необходимые элементы модального окна в HTML. Проверьте ID.");
-        return;
+    // Обновляем селектор кнопок загрузки (они теперь в top-upload-buttons-container)
+    const uploadButtons = document.querySelectorAll('.top-upload-buttons-container button[id^="upload"]');
+    uploadButtons.forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const column = button.id.replace('upload', '').toLowerCase(); // 'left', 'center', 'right'
+            fileInput.dataset.column = column; // Сохраняем целевую колонку
+            fileInput.click(); // Открываем диалог выбора файла
+        });
+    });
+
+    fileInput.addEventListener('change', async (event) => {
+        const files = event.target.files;
+        if (files.length > 0) {
+            const selectedColumn = fileInput.dataset.column;
+            console.log(`[main-page.js] Начало пакетной загрузки ${files.length} файлов в колонку ${selectedColumn}`);
+
+            for (const file of files) {
+                console.log(`[main-page.js] Загрузка файла: ${file.name} (${file.type}, ${file.size} байт)...`);
+                try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("upload_preset", "ever_together_upload");
+
+                    const cloudinaryResponse = await fetch("https://api.cloudinary.com/v1_1/dozbf3jis/image/upload", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!cloudinaryResponse.ok) {
+                        let errorDetails = `HTTP ошибка ${cloudinaryResponse.status}: ${cloudinaryResponse.statusText}`;
+                        try {
+                            const errorData = await cloudinaryResponse.json();
+                            if (errorData.error && errorData.error.message) {
+                                errorDetails += ` - ${errorData.error.message}`;
+                            }
+                        } catch (e) {
+                            console.warn("[main-page.js] Не удалось распарсить JSON ошибки Cloudinary.", e);
+                        }
+                        console.error(`[main-page.js] Ошибка Cloudinary при загрузке ${file.name}: ${errorDetails}`);
+                        alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorDetails}. Проверьте консоль.`);
+                        continue;
+                    }
+
+                    const cloudinaryData = await cloudinaryResponse.json();
+
+                    if (cloudinaryData.secure_url) {
+                        const newImageRef = push(dbRef(database, 'images'));
+                        await set(newImageRef, {
+                            url: cloudinaryData.secure_url,
+                            timestamp: new Date().toISOString(),
+                            views: 0,
+                            column: selectedColumn
+                        });
+                        console.log(`[main-page.js] Файл ${file.name} успешно загружен в Cloudinary и сохранен в Firebase.`);
+                    } else {
+                        const errorMsg = cloudinaryData.error && cloudinaryData.error.message ? cloudinaryData.error.message : "URL не получен от Cloudinary.";
+                        console.error(`[main-page.js] Ошибка: URL не получен от Cloudinary для ${file.name}:`, cloudinaryData);
+                        alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorMsg}.`);
+                    }
+                } catch (error) {
+                    console.error(`[main-page.js] Критическая ошибка при загрузке файла ${file.name}:`, error);
+                    alert(`Произошла ошибка при загрузке файла ${file.name}: ${error.message}. Проверьте консоль.`);
+                }
+            }
+            event.target.value = null;
+            console.log("[main-page.js] Пакетная загрузка завершена.");
+        }
+    });
+
+    // Загрузка изображений из Firebase
+    function loadImagesFromFirebase() {
+        console.log("[main-page.js] Функция loadImagesFromFirebase запущена. Ожидание данных из Firebase...");
+        const imagesRef = dbRef(database, 'images');
+
+        onValue(imagesRef, (snapshot) => {
+            console.log("[main-page.js] onValue: Получен snapshot данных из Firebase.");
+            const data = snapshot.val();
+            
+            // Очищаем ВСЕ колонки перед полной перерисовкой
+            console.log("[main-page.js] Полная очистка всех колонок перед обновлением.");
+            leftColumn.innerHTML = '';
+            centerColumn.innerHTML = '';
+            rightColumn.innerHTML = '';
+
+            if (data) {
+                console.log("[main-page.js] Данные изображений из Firebase:", data);
+                const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                
+                imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                console.log(`[main-page.js] Найдено ${imageArray.length} изображений. Начинаем отображение.`);
+                
+                const fragments = {
+                    left: document.createDocumentFragment(),
+                    center: document.createDocumentFragment(),
+                    right: document.createDocumentFragment()
+                };
+
+                imageArray.forEach((imgData) => {
+                    const targetColumnName = imgData.column;
+                    const imageWrapper = createImageElement(imgData, imgData.id);
+                    if (fragments[targetColumnName]) {
+                        fragments[targetColumnName].appendChild(imageWrapper);
+                    } else {
+                        console.warn(`[main-page.js] Предупреждение: Колонка "${targetColumnName}" не найдена для изображения ID: ${imgData.id}`);
+                    }
+                });
+                
+                leftColumn.appendChild(fragments.left);
+                centerColumn.appendChild(fragments.center);
+                rightColumn.appendChild(fragments.right);
+                
+                console.log("[main-page.js] Все изображения обновлены в DOM.");
+
+            } else {
+                console.log("[main-page.js] В базе данных Firebase нет записей об изображениях.");
+            }
+        }, (error) => {
+            console.error("[main-page.js] Ошибка при получении данных из Firebase Realtime Database:", error);
+            alert("Ошибка загрузки данных из базы данных. Проверьте консоль разработчика.");
+        });
     }
 
-    imageModalGlobalRef.classList.add('show-modal'); // Показываем модальное окно через класс CSS
-    optionsDropdownGlobalRef.style.display = 'none'; // Убедимся, что дропдаун скрыт при открытии
+    function createImageElement(imageData, imageId) {
+        const imageWrapper = document.createElement('div');
+        imageWrapper.classList.add('image-wrapper');
+        imageWrapper.dataset.timestamp = imageData.timestamp;
+        imageWrapper.dataset.views = imageData.views || 0;
+        imageWrapper.dataset.id = imageId;
+        imageWrapper.dataset.columnOrigin = imageData.column; // Используем columnOrigin для ясности
 
-    modalImageElement.src = imgElement.src;
-    modalImageElement.dataset.id = imgElement.dataset.id;
-    modalImageElement.setAttribute('crossorigin', 'anonymous');
+        const img = document.createElement('img');
+        img.src = imageData.url;
+        img.classList.add('thumbnail');
+        img.alt = 'Gallery Image';
+        img.loading = 'lazy';
+        img.setAttribute('crossorigin', 'anonymous');
+        // Передаем id и column на элемент img для удобства в openModal, хотя лучше брать из wrapper
+        img.dataset.id = imageId;
+        img.dataset.column = imageData.column;
 
-    imageInfo.innerHTML = ''; // Очищаем инфо
+        img.onload = () => {
+            img.classList.add('loaded');
+        };
 
-    const imageId = imgElement.dataset.id;
-    const column = imgElement.dataset.column;
-    let currentViews = parseInt(imgElement.dataset.views) || 0;
+        img.onerror = (e) => {
+            console.error(`[main-page.js] ОШИБКА ЗАГРУЗКИ ИЗОБРАЖЕНИЯ: ${img.src} (ID: ${imageId})`, e);
+            imageWrapper.classList.add('image-load-error');
+            const errorText = document.createElement('p');
+            errorText.textContent = 'Ошибка загрузки фото';
+            errorText.style.color = 'red';
+            errorText.style.position = 'absolute';
+            errorText.style.top = '50%';
+            errorText.style.left = '50%';
+            errorText.style.transform = 'translate(-50%, -50%)';
+            errorText.style.textAlign = 'center';
+            imageWrapper.appendChild(errorText);
+        };
 
-    const userIsAretren = window.currentUser === 'aretren@gmail.com';
-    const userIsChoisalery = window.currentUser === 'choisalery@gmail.com';
-    let shouldIncrementView = false;
+        imageWrapper.addEventListener('click', (event) => {
+            // Убедитесь, что клик был именно по обертке или изображению, а не по каким-то будущим элементам (например, кнопке опций)
+            if (event.target === imageWrapper || event.target === img) {
+                openModal(imageWrapper); // Передаем imageWrapper, чтобы получить все dataset
+            }
+        });
 
-    if (column === 'left' && userIsAretren) {
-        shouldIncrementView = true;
-    } else if (column === 'right' && userIsChoisalery) {
-        shouldIncrementView = true;
-    } else if (column === 'center' && (userIsAretren || userIsChoisalery)) {
-        shouldIncrementView = true;
+        imageWrapper.appendChild(img);
+        return imageWrapper;
     }
 
-    if (shouldIncrementView) {
-        currentViews += 1;
-        const imageRefDB = dbRef(database, `images/${imageId}`);
-        update(imageRefDB, { views: currentViews })
+    // Открытие модального окна
+    function openModal(imageWrapper) {
+        if (!imageWrapper) {
+            console.error("[main-page.js] openModal: imageWrapper не предоставлен.");
+            return;
+        }
+        currentImageWrapper = imageWrapper; // Сохраняем ссылку на текущий image-wrapper
+        const imgElement = imageWrapper.querySelector('img');
+
+        console.log("[main-page.js] Открытие модального окна для изображения:", imgElement.src);
+        if (!imageModalGlobalRef || !modalImageElement || !moreOptionsButtonGlobalRef || !optionsDropdownGlobalRef || !imageInfo) {
+            console.error("[main-page.js] ОШИБКА: Не найдены все необходимые элементы модального окна в HTML. Проверьте ID.");
+            return;
+        }
+
+        imageModalGlobalRef.classList.add('show-modal');
+        optionsDropdownGlobalRef.style.display = 'none';
+
+        modalImageElement.src = imgElement.src;
+        modalImageElement.dataset.id = imageWrapper.dataset.id; // Берем ID из wrapper
+        modalImageElement.setAttribute('crossorigin', 'anonymous');
+        
+        imageInfo.innerHTML = '';
+
+        const imageId = imageWrapper.dataset.id;
+        const column = imageWrapper.dataset.columnOrigin; // Используем columnOrigin из wrapper
+        let currentViews = parseInt(imageWrapper.dataset.views) || 0;
+
+        const userIsAretren = window.currentUser === 'aretren@gmail.com';
+        const userIsChoisalery = window.currentUser === 'choisalery@gmail.com';
+        let shouldIncrementView = false;
+
+        if (column === 'left' && userIsAretren) {
+            shouldIncrementView = true;
+        } else if (column === 'right' && userIsChoisalery) {
+            shouldIncrementView = true;
+        } else if (column === 'center' && (userIsAretren || userIsChoisalery)) {
+            shouldIncrementView = true;
+        }
+
+        if (shouldIncrementView) {
+            currentViews += 1;
+            const imageRefDB = dbRef(database, `images/${imageId}`);
+            update(imageRefDB, { views: currentViews })
+                .then(() => {
+                    console.log(`[main-page.js] Просмотр для ${imageId} обновлен до ${currentViews}.`);
+                    // Обновляем dataset на imageWrapper, чтобы изменения были видны без перезагрузки
+                    imageWrapper.dataset.views = currentViews; 
+                })
+                .catch(error => {
+                    console.error(`[main-page.js] Ошибка обновления просмотров для ${imageId}:`, error);
+                });
+        }
+
+        // Блокируем взаимодействие с фоном
+        if (imageContainerGlobalRef) {
+            imageContainerGlobalRef.style.pointerEvents = 'none';
+        }
+    }
+
+    // Функция для переключения дропдауна опций
+    function toggleOptionsDropdown() {
+        if (!currentImageWrapper) {
+            console.warn("[main-page.js] toggleOptionsDropdown: currentImageWrapper не установлен.");
+            return;
+        }
+
+        // Закрываем все другие открытые дропдауны, если они есть (хотя тут он один)
+        document.querySelectorAll('.options-dropdown').forEach(d => {
+            if (d !== optionsDropdownGlobalRef) {
+                d.style.display = 'none';
+                d.classList.remove('show'); // Если вы используете класс для анимации
+            }
+        });
+
+        // Если дропдаун уже открыт, закрываем его
+        if (optionsDropdownGlobalRef.style.display === 'block') {
+            optionsDropdownGlobalRef.style.display = 'none';
+            optionsDropdownGlobalRef.classList.remove('show');
+            return;
+        }
+
+        // Очищаем дропдаун перед заполнением
+        optionsDropdownGlobalRef.innerHTML = '';
+
+        const currentColumnId = currentImageWrapper.dataset.columnOrigin; // ID текущей колонки изображения
+
+        const columns = [
+            { id: 'left', name: 'Him peach' },
+            { id: 'center', name: 'Our dreams' },
+            { id: 'right', name: 'Her cat' }
+        ];
+
+        // Добавляем ссылки для перемещения
+        columns.forEach(col => {
+            if (col.id !== currentColumnId) { // Не предлагаем перемещать в текущую колонку
+                const moveLink = document.createElement('a');
+                moveLink.href = '#';
+                moveLink.textContent = `Переместить в ${col.name}`;
+                moveLink.dataset.action = 'move';
+                moveLink.dataset.column = col.id; // Передаем ID колонки для Firebase
+                moveLink.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    moveImage(currentImageWrapper.dataset.id, col.id);
+                    optionsDropdownGlobalRef.style.display = 'none'; // Скрываем дропдаун после действия
+                    closeModal(); // Закрываем модальное окно после перемещения
+                });
+                optionsDropdownGlobalRef.appendChild(moveLink);
+            }
+        });
+
+        // Добавляем ссылку для удаления
+        const deleteLink = document.createElement('a');
+        deleteLink.href = '#';
+        deleteLink.textContent = 'Удалить';
+        deleteLink.dataset.action = 'delete';
+        deleteLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (confirm('Вы уверены, что хотите удалить это изображение?')) {
+                deleteImage(currentImageWrapper.dataset.id);
+                optionsDropdownGlobalRef.style.display = 'none'; // Скрываем дропдаун после действия
+                closeModal(); // Закрываем модальное окно после удаления
+            }
+        });
+        optionsDropdownGlobalRef.appendChild(deleteLink);
+
+        // Показываем дропдаун
+        optionsDropdownGlobalRef.style.display = 'block';
+        optionsDropdownGlobalRef.classList.add('show'); // Если у вас есть CSS анимация для show
+    }
+
+    function moveImage(imageId, targetColumnId) {
+        update(dbRef(database, `images/${imageId}`), { column: targetColumnId })
             .then(() => {
-                console.log(`[main-page.js] Просмотр для ${imageId} обновлен до ${currentViews}.`);
+                console.log(`[main-page.js] Изображение ${imageId} перемещено в ${targetColumnId} в Firebase.`);
             })
             .catch(error => {
-                console.error(`[main-page.js] Ошибка обновления просмотров для ${imageId}:`, error);
+                console.error("[main-page.js] Ошибка перемещения изображения в Firebase:", error);
             });
-        const wrapperElement = document.querySelector(`.image-wrapper[data-id="${imageId}"]`);
-        if (wrapperElement) {
-            wrapperElement.dataset.views = currentViews;
+    }
+
+    function deleteImage(imageId) {
+        remove(dbRef(database, `images/${imageId}`))
+            .then(() => {
+                console.log("[main-page.js] Изображение удалено из Firebase:", imageId);
+            })
+            .catch(error => {
+                console.error("[main-page.js] Ошибка удаления изображения из Firebase:", error);
+            });
+    }
+
+    // Функция закрытия модального окна
+    function closeModal() {
+        console.log("[main-page.js] Закрытие модального окна.");
+        if (imageModalGlobalRef) {
+            imageModalGlobalRef.classList.remove('show-modal');
         }
-    }
-
-    // Блокируем взаимодействие с фоном
-    if (imageContainerGlobalRef) {
-        imageContainerGlobalRef.style.pointerEvents = 'none';
-    }
-
-    moreOptionsButtonGlobalRef.onclick = function(event) {
-        event.stopPropagation(); // Предотвращаем закрытие модального окна при клике на кнопку ...
-        optionsDropdownGlobalRef.style.display = optionsDropdownGlobalRef.style.display === 'block' ? 'none' : 'block';
-        console.log(`[main-page.js] Дропдаун опций: ${optionsDropdownGlobalRef.style.display}`);
-    };
-
-    optionsDropdownGlobalRef.onclick = function(event) {
-        event.preventDefault(); // Предотвращаем переход по ссылке
-        event.stopPropagation(); // Предотвращаем закрытие дропдауна/модального окна
-
-        const targetActionElement = event.target.closest('a[data-action]');
-        if (!targetActionElement) return;
-
-        const action = targetActionElement.dataset.action;
-        const currentImageId = modalImageElement.dataset.id;
-
-        console.log(`[main-page.js] Действие: ${action} для изображения ${currentImageId}`);
-
-        if (action === 'delete') {
-            if (confirm('Вы уверены, что хотите удалить это изображение?')) {
-                remove(dbRef(database, `images/${currentImageId}`))
-                    .then(() => {
-                        console.log("[main-page.js] Изображение удалено:", currentImageId);
-                        closeModal();
-                    })
-                    .catch(error => console.error("[main-page.js] Ошибка удаления:", error));
-            }
-        } else if (action === 'move') {
-            const newColumn = targetActionElement.dataset.column;
-            update(dbRef(database, `images/${currentImageId}`), { column: newColumn })
-                .then(() => {
-                    console.log(`[main-page.js] Изображение ${currentImageId} перемещено в ${newColumn}`);
-                    closeModal();
-                })
-                .catch(error => console.error("[main-page.js] Ошибка перемещения:", error));
-        }
-
-        optionsDropdownGlobalRef.style.display = 'none';
-    };
-
-    modalImageElement.onclick = (event) => event.stopPropagation();
-    modalActionsContainer.onclick = (event) => event.stopPropagation();
-    imageInfo.onclick = (event) => event.stopPropagation();
-}
-
-// Функция закрытия модального окна
-function closeModal() {
-    console.log("[main-page.js] Закрытие модального окна.");
-    if (imageModalGlobalRef) {
-        imageModalGlobalRef.classList.remove('show-modal');
-    }
-    if (optionsDropdownGlobalRef) {
-        optionsDropdownGlobalRef.style.display = 'none';
-    }
-    if (modalImageElement) {
-        modalImageElement.src = '';
-        modalImageElement.dataset.id = '';
-    }
-    if (imageInfo) {
-        imageInfo.innerHTML = '';
-    }
-
-
-    if (imageContainerGlobalRef) {
-        imageContainerGlobalRef.style.pointerEvents = 'auto'; // Разблокируем взаимодействие с фоном
-    }
-}
-
-// Обработчик для закрытия модального окна по клику вне контента
-function handleCloseInteractions(event) {
-    // Если дропдаун открыт и клик был вне кнопки и самого дропдауна, закрываем дропдаун
-    if (optionsDropdownGlobalRef && optionsDropdownGlobalRef.style.display === 'block') {
-        if (moreOptionsButtonGlobalRef &&
-            !moreOptionsButtonGlobalRef.contains(event.target) &&
-            !optionsDropdownGlobalRef.contains(event.target)) {
-            console.log("[main-page.js] Клик вне дропдауна/кнопки, закрываем дропдаун.");
+        if (optionsDropdownGlobalRef) {
             optionsDropdownGlobalRef.style.display = 'none';
+            optionsDropdownGlobalRef.classList.remove('show'); // Удаляем класс анимации
         }
+        if (modalImageElement) {
+            modalImageElement.src = '';
+            modalImageElement.dataset.id = '';
+        }
+        if (imageInfo) {
+            imageInfo.innerHTML = '';
+        }
+
+        document.body.style.overflow = ''; // Сбросить overflow, если он был изменен
+        if (imageContainerGlobalRef) {
+            imageContainerGlobalRef.style.pointerEvents = 'auto'; // Разблокируем взаимодействие с фоном
+        }
+        currentImageWrapper = null; // Очищаем ссылку на текущий wrapper
     }
 
-    // Если модальное окно открыто и клик был по его фону (но не по контенту внутри)
-    if (imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal') && event.target === imageModalGlobalRef) {
-        console.log("[main-page.js] Клик по фону модального окна, закрываем модальное окно.");
-        closeModal();
-    }
-}
+    // --- Обработчики событий для модального окна и дропдауна (привязываются один раз) ---
 
-// Event listener для закрытия модального окна по клику вне контента
-window.addEventListener('click', handleCloseInteractions);
-
-// Обработчик для закрытия модального окна по нажатию ESC
-window.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) {
-        console.log("[main-page.js] Нажата ESC, закрываем модальное окно.");
-        closeModal();
-    }
-});
-
-
-// Инициализация файлового ввода для загрузки
-const fileInput = document.createElement('input');
-fileInput.type = 'file';
-fileInput.accept = 'image/*';
-fileInput.multiple = true;
-fileInput.style.display = 'none'; // Скрываем элемент input, так как будем вызывать его через кнопку
-document.body.appendChild(fileInput);
-
-// Обновляем селектор кнопок загрузки (они теперь в top-upload-buttons-container)
-const uploadButtons = document.querySelectorAll('.top-upload-buttons-container button[id^="upload"]'); 
-uploadButtons.forEach((button) => {
-    button.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const column = button.id.replace('upload', '').toLowerCase();
-        fileInput.dataset.column = column; // Сохраняем целевую колонку
-        fileInput.click(); // Открываем диалог выбора файла
+    // Обработчик для кнопки "..."
+    moreOptionsButtonGlobalRef.addEventListener('click', (event) => {
+        event.stopPropagation(); // Важно, чтобы не закрывалось модальное окно или дропдаун
+        toggleOptionsDropdown();
     });
-});
 
-fileInput.addEventListener('change', async (event) => {
-    const files = event.target.files;
-    if (files.length > 0) {
-        const selectedColumn = fileInput.dataset.column;
-        console.log(`[main-page.js] Начало пакетной загрузки ${files.length} файлов в колонку ${selectedColumn}`);
+    // Обработчик для закрытия модального окна по клику вне контента
+    imageModalGlobalRef.addEventListener('click', (event) => {
+        // Если клик был по самому фону модального окна, а не по его содержимому
+        if (event.target === imageModalGlobalRef) {
+            console.log("[main-page.js] Клик по фону модального окна, закрываем модальное окно.");
+            closeModal();
+        }
+    });
 
-        for (const file of files) {
-            console.log(`[main-page.js] Загрузка файла: ${file.name} (${file.type}, ${file.size} байт)...`);
-            try {
-                const formData = new FormData();
-                formData.append("file", file);
-                formData.append("upload_preset", "ever_together_upload"); // Важно: убедитесь, что этот preset существует в Cloudinary
-
-                const cloudinaryResponse = await fetch("https://api.cloudinary.com/v1_1/dozbf3jis/image/upload", {
-                    method: "POST",
-                    body: formData
-                });
-
-                if (!cloudinaryResponse.ok) {
-                    let errorDetails = `HTTP ошибка ${cloudinaryResponse.status}: ${cloudinaryResponse.statusText}`;
-                    try {
-                        const errorData = await cloudinaryResponse.json();
-                        if (errorData.error && errorData.error.message) {
-                            errorDetails += ` - ${errorData.error.message}`;
-                        }
-                    } catch (e) {
-                        console.warn("[main-page.js] Не удалось распарсить JSON ошибки Cloudinary.", e);
-                    }
-                    console.error(`[main-page.js] Ошибка Cloudinary при загрузке ${file.name}: ${errorDetails}`);
-                    alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorDetails}. Проверьте консоль.`);
-                    continue; // Продолжаем загрузку других файлов
-                }
-
-                const cloudinaryData = await cloudinaryResponse.json();
-
-                if (cloudinaryData.secure_url) {
-                    const newImageRef = push(dbRef(database, 'images')); // Генерируем уникальный ключ
-                    await set(newImageRef, {
-                        url: cloudinaryData.secure_url,
-                        timestamp: new Date().toISOString(),
-                        views: 0, // Начальное количество просмотров
-                        column: selectedColumn
-                    });
-                    console.log(`[main-page.js] Файл ${file.name} успешно загружен в Cloudinary и сохранен в Firebase.`);
-                } else {
-                    const errorMsg = cloudinaryData.error && cloudinaryData.error.message ? cloudinaryData.error.message : "URL не получен от Cloudinary.";
-                    console.error(`[main-page.js] Ошибка: URL не получен от Cloudinary для ${file.name}:`, cloudinaryData);
-                    alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorMsg}.`);
-                }
-            } catch (error) {
-                console.error(`[main-page.js] Критическая ошибка при загрузке файла ${file.name}:`, error);
-                alert(`Произошла ошибка при загрузке файла ${file.name}: ${error.message}. Проверьте консоль.`);
+    // Обработчик для закрытия дропдауна при клике вне его (но внутри модального окна)
+    // или при клике вне модального окна вообще (если оно открыто)
+    document.addEventListener('click', (event) => {
+        if (optionsDropdownGlobalRef.style.display === 'block') {
+            // Если клик был вне кнопки "..." и вне самого дропдауна
+            if (!moreOptionsButtonGlobalRef.contains(event.target) && !optionsDropdownGlobalRef.contains(event.target)) {
+                optionsDropdownGlobalRef.style.display = 'none';
+                optionsDropdownGlobalRef.classList.remove('show');
+                console.log("[main-page.js] Клик вне дропдауна/кнопки, закрываем дропдаун.");
             }
         }
-        event.target.value = null; // Сбрасываем выбранные файлы для возможности повторной загрузки тех же файлов
-        console.log("[main-page.js] Пакетная загрузка завершена.");
-    }
+    });
+
+    // Обработчик для закрытия модального окна по нажатию ESC
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) {
+            console.log("[main-page.js] Нажата ESC, закрываем модальное окно.");
+            closeModal();
+        }
+    });
+
+    // Исправление для iOS: предотвращение прокрутки фона при открытом модальном окне
+    // и обеспечение кликабельности фона
+    imageModalGlobalRef.addEventListener('touchmove', (event) => {
+        if (imageModalGlobalRef.classList.contains('show-modal')) {
+            event.preventDefault();
+        }
+    }, { passive: false });
 });
 
 // Функция getColumnViews все еще нужна для подсчета просмотров
 function getColumnViews(columnName) {
-    const images = document.querySelectorAll(`.image-column#${columnName}Column .image-wrapper`);
+    const columnElement = document.getElementById(columnName + 'Column'); // Добавляем 'Column' к имени
+    if (!columnElement) {
+        console.warn(`[main-page.js] Колонка с ID "${columnName}Column" не найдена для подсчета просмотров.`);
+        return 0;
+    }
+    const images = columnElement.querySelectorAll('.image-wrapper');
     return Array.from(images).reduce((acc, wrapper) => acc + (parseInt(wrapper.dataset.views) || 0), 0);
 }
