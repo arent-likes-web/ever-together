@@ -1,12 +1,7 @@
-@ -1,392 +1,390 @@
 // main-page.js
 
 // Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"; // Ошибка здесь, getDatabase, ref, set, push, onValue, update, remove должны быть из firebase-database.js
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-
-// Исправленная строка импорта Firebase Database
 // ИСПРАВЛЕНО: getDatabase, ref, set, push, onValue, update, remove должны быть импортированы из firebase-database.js
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
