@@ -2,55 +2,56 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>Ever Together - Your Gallery</title>
-    <link rel="icon" href="heart.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery</title>
     <link rel="stylesheet" href="style.css">
-</head>
+    </head>
 <body>
     <header>
-        <h1>Ever Together</h1>
+        <h1>Галерея</h1>
         <div class="auth-status">
-            <span id="userName"></span>
+            <span>Войти</span>
         </div>
     </header>
 
-    <div class="top-upload-buttons-container">
-        <div class="column-top-actions">
-            <button id="uploadLeft">Him peach</button>
-        </div>
-        <div class="column-top-actions">
-            <button id="uploadCenter">Our dreams</button>
-        </div>
-        <div class="column-top-actions">
-            <button id="uploadRight">Her cat</button>
-        </div>
-    </div>
+    <main>
+        <section class="upload-section">
+            <div class="top-upload-buttons-container">
+                <div class="column-top-actions">
+                    <button id="uploadHimPeach" data-column-id="him-peach-column">Him peach</button>
+                </div>
+                <div class="column-top-actions">
+                    <button id="uploadOurDream" data-column-id="our-dream-column">Our dream</button>
+                </div>
+                <div class="column-top-actions">
+                    <button id="uploadHerCat" data-column-id="her-cat-column">Her cat</button>
+                </div>
+            </div>
+        </section>
 
-    <div class="image-container">
-        <div class="image-column" id="leftColumn">
+        <section class="gallery-section">
+            <div class="image-container">
+                <div id="him-peach-column" class="image-column">
+                    </div>
+                <div id="our-dream-column" class="image-column">
+                    </div>
+                <div id="her-cat-column" class="image-column">
+                    </div>
             </div>
-        <div class="image-column" id="centerColumn">
-            </div>
-        <div class="image-column" id="rightColumn">
-            </div>
-    </div>
+        </section>
+    </main>
 
     <div id="imageModal" class="modal">
         <div class="modal-content">
             <img id="modalImage" src="" alt="Full size image">
             <div class="modal-actions-container">
-                <button id="moreOptionsButton" class="more-options-button">...</button>
-                <div id="optionsDropdown" class="options-dropdown">
-                    <a href="#" data-action="delete">Удалить</a>
-                    <a href="#" data-action="move" data-column="left">В Him peach</a>
-                    <a href="#" data-action="move" data-column="center">В Our dreams</a>
-                    <a href="#" data-action="move" data-column="right">В Her cat</a>
-                </div>
+                <button class="more-options-button">...</button>
+                <div class="options-dropdown"></div> 
             </div>
             <div id="imageInfo"></div>
         </div>
     </div>
 
-    <script type="module" src="main-page.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
