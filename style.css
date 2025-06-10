@@ -130,7 +130,7 @@ header h1 {
 
 .top-upload-buttons-container .column-top-actions button:active {
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Image Grid Container */
@@ -237,6 +237,8 @@ header h1 {
     opacity: 0;
     transition: opacity 0.4s ease-out;
     cursor: pointer; /* Добавлено для iOS, чтобы фон был кликабельным */
+    /* Важно для свайпа: предотвращаем прокрутку body при открытом модале */
+    overflow: hidden; 
 }
 
 .modal.show-modal {
@@ -272,7 +274,18 @@ header h1 {
     object-fit: contain;
     margin-bottom: 20px;
     border-radius: 4px;
+
+    /* Стили для свайпа */
+    position: relative; /* Чтобы можно было использовать transform */
+    transition: transform 0.3s ease-out; /* Плавность анимации свайпа */
+    cursor: grab; /* Изменяем курсор для перетаскивания */
 }
+
+.modal-content img.dragging {
+    cursor: grabbing;
+    transition: none; /* Отключаем transition во время перетаскивания для мгновенной реакции */
+}
+
 
 /* Новый контейнер для действий и комментариев */
 .modal-actions-and-comments-container {
