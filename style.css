@@ -17,8 +17,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-smoothing: grayscale;
     scroll-behavior: smooth;    
-    /* overflow-x: hidden; */    
-    min-width: 280px; 
+    min-width: 280px; /* Уменьшим минимальную ширину body для очень маленьких экранов */
 }
 
 /* Общие стили для элементов */
@@ -37,7 +36,7 @@ button {
     border: none;
     outline: none;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    font-family: 'Geoform', sans-serif; 
+    font-family: 'Geoform', sans-serif; /* Применяем новый шрифт к кнопкам */
 }
 
 /* Header */
@@ -54,9 +53,7 @@ header {
     top: 0;
     width: 100%;
     box-sizing: border-box;
-    min-height: 80px; 
-    /* Добавим padding-right, чтобы освободить место для новой кнопки */
-    padding-right: 120px; /* Отступ справа для кнопки выхода */
+    min-height: 80px; /* Примерная минимальная высота для заголовка */
 }
 
 header h1 {
@@ -77,8 +74,8 @@ header h1 {
     align-items: center;
     gap: 15px;
     font-size: 1.1em;
-    /* Убираем margin-right, так как его место займет padding-right у header */
-    /* margin-right: 60px; */ 
+    /* Увеличиваем margin-right, чтобы дать место для новой кнопки */
+    margin-right: 20px; 
 }
 
 .auth-status span {
@@ -233,7 +230,7 @@ header h1 {
     align-items: center;
     opacity: 0;
     transition: opacity 0.4s ease-out;
-    cursor: pointer; 
+    cursor: pointer; /* Добавлено для iOS, чтобы фон был кликабельным */
 }
 
 .modal.show-modal {
@@ -304,7 +301,7 @@ header h1 {
     box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.4);
     z-index: 10001;
     right: 0;
-    bottom: calc(100% + 10px); 
+    bottom: calc(100% + 10px); /* Привязываем к верху кнопки, чтобы он выпадал ВВЕРХ */
     border-radius: 6px;
     overflow: visible;
     opacity: 0;
@@ -312,9 +309,9 @@ header h1 {
     animation: dropdownFadeIn 0.3s forwards ease-out;
     border: 1px solid #C899E0;
 
-    max-height: calc(100vh - 100px); 
-    overflow-y: auto; 
-    transform-origin: bottom right; 
+    max-height: calc(100vh - 100px); /* Ограничиваем высоту дропдауна, чтобы он не выходил за рамки экрана */
+    overflow-y: auto; /* Добавляем прокрутку, если содержимое не помещается */
+    transform-origin: bottom right; /* Точка трансформации для анимации появления вверх */
 }
 
 @keyframes dropdownFadeIn {
@@ -345,44 +342,44 @@ header h1 {
     color: #A0A0A0;
 }
 
-/* --- Стили для кнопки выхода со звездой --- */
-.logout-button {
-    position: absolute; /* Абсолютное позиционирование относительно header */
-    right: 30px; /* Отступ от правого края */
+/* --- Стили для новой кнопки со звездой --- */
+
+.star-button {
+    position: absolute; /* Делаем кнопку абсолютно позиционированной */
+    right: 20px; /* Отступ от правого края заголовка */
     top: 50%; /* Центрируем по вертикали */
     transform: translateY(-50%); /* Точная вертикальная центровка */
-    background-color: #555555; /* Темный фон кнопки */
-    color: #FFD1DC; /* Цвет звезды (розовый) */
-    border-radius: 50%; /* Делаем кнопку круглой */
-    width: 50px; /* Ширина кнопки */
-    height: 50px; /* Высота кнопки */
-    display: flex; /* Используем flexbox для центрирования иконки */
+    background-color: #C899E0; /* Приятный фиолетовый цвет */
+    color: white;
+    border-radius: 50%; /* Круглая кнопка */
+    width: 40px; /* Ширина кнопки */
+    height: 40px; /* Высота кнопки (для круглой формы должны быть равны) */
+    display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2em; /* Размер иконки звезды */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Легкая тень */
-    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
-    z-index: 101; /* Убедитесь, что кнопка поверх всего */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    z-index: 101; /* Убедимся, что кнопка поверх всего */
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1.5em; /* Размер иконки звезды (если это текст) */
+    /* Если иконка будет SVG или IMG, то уберем font-size и зададим ширину/высоту для img */
 }
 
-.logout-button:hover {
-    background-color: #6A6A6A; /* Более светлый фон при наведении */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Усиленная тень при наведении */
-    transform: translateY(-50%) scale(1.05); /* Немного увеличиваем при наведении */
+.star-button:hover {
+    background-color: #E0B0FF; /* Более светлый фиолетовый при наведении */
+    transform: translateY(-50%) scale(1.1); /* Небольшое увеличение при наведении */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
 }
 
-.logout-button:active {
-    background-color: #4A4A4A;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-    transform: translateY(-50%) scale(0.98);
+.star-button:active {
+    transform: translateY(-50%) scale(1); /* Возвращение к исходному размеру при нажатии */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* ALL DEVICES: Responsive adjustments to ALWAYS have 3 columns */
-@media (max-width: 768px) { 
+@media (max-width: 768px) {
     header {
         padding: 15px 10px;    
         min-height: 50px; 
-        padding-right: 90px; /* Уменьшим padding-right на мобильных */
     }
     header h1 {
         font-size: 1.5em;
@@ -390,7 +387,7 @@ header h1 {
     }
 
     .auth-status {
-        /* margin-right: 50px; */ /* Здесь больше не нужен, т.к. кнопка будет абсолютно позиционирована */
+        margin-right: 15px; /* Меньший отступ на мобильных */
     }
 
     .top-upload-buttons-container,
@@ -461,11 +458,11 @@ header h1 {
         padding: 8px 10px; 
     }
 
-    /* Стили для кнопки выхода на мобильных */
-    .logout-button {
-        width: 40px; /* Меньше на мобильных */
-        height: 40px;
-        font-size: 1.5em; /* Меньше звезда на мобильных */
-        right: 20px; /* Отступ от правого края на мобильных */
+    /* Стили для кнопки со звездой на мобильных */
+    .star-button {
+        right: 10px; /* Меньший отступ от края на мобильных */
+        width: 30px; /* Меньший размер кнопки на мобильных */
+        height: 30px;
+        font-size: 1.2em; /* Меньший размер иконки на мобильных */
     }
 }
