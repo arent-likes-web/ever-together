@@ -2,61 +2,72 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Ever Together - Your Gallery</title>
-    <link rel="icon" href="heart.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVER TOGETHER</title>
     <link rel="stylesheet" href="style.css">
-</head>
+    </head>
 <body>
     <header>
-        <h1>Ever Together</h1>
+        <h1>EVER TOGETHER</h1>
         <div class="auth-status">
-            <span id="userName"></span>
-        </div>
-        
-        <a href="wish.html" class="peel-button-container" aria-label="Открыть страницу желаний">
-            <div class="peel-corner"></div>
-            <img src="star_favourite_fav_icon_153874.ico" alt="Избранное" class="peel-icon">
-        </a>
-        </header>
+            </div>
+        <button class="star-button">★</button> </header>
 
-    <div class="top-upload-buttons-container">
-        <div class="column-top-actions">
-            <button id="uploadLeft">Him peach</button>
+    <main>
+        <div class="top-upload-buttons-container">
+            <div class="column-top-actions">
+                <button id="himPeachBtn">HIM PEACH</button>
+            </div>
+            <div class="column-top-actions">
+                <button id="ourDreamsBtn">OUR DREAMS</button>
+            </div>
+            <div class="column-top-actions">
+                <button id="herCatBtn">HER CAT</button>
+            </div>
         </div>
-        <div class="column-top-actions">
-            <button id="uploadCenter">Our dreams</button>
-        </div>
-        <div class="column-top-actions">
-            <button id="uploadRight">Her cat</button>
-        </div>
-    </div>
 
-    <div class="image-container">
-        <div class="image-column" id="leftColumn">
-            </div>
-        <div class="image-column" id="centerColumn">
-            </div>
-        <div class="image-column" id="rightColumn">
-            </div>
-    </div>
+        <div class="image-container">
+            <div id="himPeachColumn" class="image-column active">
+                <div class="image-wrapper" data-src="image_e5bf9c.jpg" data-category="himPeach">
+                    <img src="image_e5bf9c.jpg" alt="Him Peach 1">
+                </div>
+                <div class="image-wrapper" data-src="image_7e5e6d.jpg" data-category="himPeach">
+                    <img src="image_7e5e6d.jpg" alt="Him Peach 2">
+                </div>
+                <div class="image-wrapper" data-src="image_7ecf51.jpg" data-category="himPeach">
+                    <img src="image_7ecf51.jpg" alt="Him Peach 3">
+                </div>
+                <div class="image-wrapper" data-src="image_7f37d0.jpg" data-category="himPeach">
+                    <img src="image_7f37d0.jpg" alt="Him Peach 4">
+                </div>
+                <div class="image-wrapper" data-src="image_8a91f2.jpg" data-category="himPeach">
+                    <img src="image_8a91f2.jpg" alt="Him Peach 5">
+                </div>
+                </div>
+
+            <div id="ourDreamsColumn" class="image-column hidden">
+                </div>
+
+            <div id="herCatColumn" class="image-column hidden">
+                </div>
+        </div>
+    </main>
 
     <div id="imageModal" class="modal">
         <div class="modal-content">
             <img id="modalImage" src="" alt="Full size image">
+            <div id="imageInfo"></div>
             <div class="modal-actions-container">
-                <button id="moreOptionsButton" class="more-options-button">...</button>
-                <div id="optionsDropdown" class="options-dropdown">
-                    <a href="#" data-action="delete">Удалить</a>
-                    <a href="#" data-action="move" data-column="left">В Him peach</a>
-                    <a href="#" data-action="move" data-column="center">В Our dreams</a>
-                    <a href="#" data-action="move" data-column="right">В Her cat</a>
+                <button class="more-options-button" id="moreOptionsBtn">...</button>
+                <div class="options-dropdown" id="optionsDropdown">
+                    <a href="#" id="copyLinkBtn">Copy Link</a>
+                    <a href="#" id="downloadImageBtn">Download Image</a>
+                    <a href="#" id="reportImageBtn">Report Image</a>
                 </div>
             </div>
-            <div id="imageInfo"></div>
         </div>
     </div>
 
-    <script type="module" src="main-page.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
