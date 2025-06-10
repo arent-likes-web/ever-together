@@ -6,15 +6,17 @@
     <title>Ever Together - Your Gallery</title>
     <link rel="icon" href="heart.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
-    </head>
+</head>
 <body>
     <header>
         <h1>EVER TOGETHER</h1>
-        <div class="header-right-section"> <div class="auth-status">
+        <div class="header-right-section">
+            <div class="auth-status">
                 <span id="userName"></span>
             </div>
             <a href="wish.html" class="star-button-link" aria-label="Открыть страницу желаний">
-                <button class="star-button">★</button> </a>
+                <button class="star-button">★</button>
+            </a>
         </div>
     </header>
 
@@ -41,24 +43,24 @@
 
     <div id="imageModal" class="modal">
         <div class="modal-content">
+            <span class="close-button">&times;</span>
             <div class="modal-image-carousel">
-                <img id="prevImage" class="carousel-image" src="" alt="Previous image">
-                <img id="modalImage" class="carousel-image" src="" alt="Full size image">
-                <img id="nextImage" class="carousel-image" src="" alt="Next image">
+                <img id="prevImage" class="carousel-image loading" alt="Предыдущее фото">
+                <img id="modalImage" class="carousel-image loading" alt="Текущее фото">
+                <img id="nextImage" class="carousel-image loading" alt="Следующее фото">
             </div>
             
-            <div id="imageInfo"></div> <div class="modal-actions-and-comments-container"> <div class="modal-actions-container">
+            <div id="imageInfo"></div>
+            <div class="modal-actions-and-comments-container">
+                <div class="modal-actions-container">
                     <button id="moreOptionsButton" class="more-options-button">...</button>
                     <div id="optionsDropdown" class="options-dropdown">
-                        <a href="#" data-action="delete">Удалить</a>
-                        <a href="#" data-action="move" data-column="left">В Him peach</a>
-                        <a href="#" data-action="move" data-column="center">В Our dreams</a>
-                        <a href="#" data-action="move" data-column="right">В Her cat</a>
-                    </div>
+                        </div>
                 </div>
 
-                <div class="comments-section"> <div class="comments-list" id="commentsList">
-                        </div>
+                <div class="comments-section">
+                    <div class="comments-list" id="commentsList">
+                    </div>
                     <div class="comment-input-container">
                         <textarea id="commentInput" placeholder="Добавить комментарий..."></textarea>
                         <button id="sendCommentBtn">Отправить</button>
