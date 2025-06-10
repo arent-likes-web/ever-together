@@ -194,18 +194,20 @@ document.addEventListener('DOMContentLoaded', () => {
         imageWrapper.dataset.columnOrigin = imageData.column;
 
         const img = document.createElement('img');
-        img.src = imageData.url; // <-- Здесь устанавливается URL Cloudinary
+        img.src = imageData.url; 
         console.log(`DEBUG: Set src for thumbnail ID ${imageId} to: ${img.src}`);
         img.classList.add('thumbnail');
         img.alt = 'Gallery Image';
         img.loading = 'lazy';
         img.setAttribute('crossorigin', 'anonymous');
 
-        img.onload = () => {
-            img.classList.add('loaded');
+        // Используем более надежный подход для загрузки
+        const tempImg = new Image();
+        tempImg.src = imageData.url;
+        tempImg.onload = () => {
+            img.classList.add('loaded'); // Показываем изображение после загрузки
         };
-
-        img.onerror = (e) => {
+        tempImg.onerror = () => {
             imageWrapper.classList.add('image-load-error');
             const errorText = document.createElement('p');
             errorText.textContent = 'Ошибка загрузки фото';
@@ -216,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
             errorText.style.transform = 'translate(-50%, -50%)';
             errorText.style.textAlign = 'center';
             imageWrapper.appendChild(errorText);
+            img.style.display = 'none'; // Скрываем сломанное изображение
         };
 
         imageWrapper.addEventListener('click', (event) => {
@@ -257,30 +260,20 @@ document.addEventListener('DOMContentLoaded', () => {
             imageContainerGlobalRef.style.pointerEvents = 'none';
         }
 
-        // Сбросим классы загрузки для всех изображений карусели
-        prevImageElement.classList.remove('loaded');
-        prevImageElement.classList.add('loading');
-        modalImageElement.classList.remove('loaded');
-        modalImageElement.classList.add('loading');
-        nextImageElement.classList.remove('loaded');
-        nextImageElement.classList.add('loading');
-
         // Используем requestAnimationFrame, чтобы убедиться, что модальное окно и карусель
         // полностью отрисованы и имеют правильные размеры, прежде чем мы будем использовать offsetWidth
         requestAnimationFrame(() => {
             const carouselWidth = modalImageCarousel.offsetWidth;
-            console.log(`DEBUG: Carousel width in openModal: ${carouselWidth}px`); // Отладка ширины
+            console.log(`DEBUG: Carousel width in openModal: ${carouselWidth}px`);
             
             modalImageCarousel.style.transition = 'none'; 
             currentTranslate = -carouselWidth; // Центрируем `modalImageElement`
             setTranslate(currentTranslate);
             
-            // Загружаем изображения, убедившись, что карусель имеет правильный размер
+            // Загружаем изображения
             updateCarouselImages(currentImageIndex); 
             
             // После установки начального положения, можно снова включить transition
-            // Используем setTimeout 0 для отложенного включения transition,
-            // чтобы браузер успел отрисовать изменения без transition
             setTimeout(() => {
                 modalImageCarousel.style.transition = 'transform 0.3s ease-out';
             }, 0);
@@ -300,44 +293,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const carouselWidth = modalImageCarousel.offsetWidth;
         console.log(`DEBUG: Carousel width in updateCarouselImages: ${carouselWidth}px`);
 
-        // Функция для загрузки изображения и управления классами
-        const loadImage = (imgElement, src, altText, isCurrent = false) => {
-            // Сбрасываем предыдущие классы и альт-текст
-            imgElement.classList.remove('loaded');
-            imgElement.classList.add('loading');
-            imgElement.alt = altText; // Установим alt по умолчанию
-
-            if (src && src !== window.location.href) {
-                // Временно очищаем src, чтобы принудительно сработал onload/onerror для нового src
-                // Но делаем это внутри колбэка, чтобы избежать гонки условий
-                imgElement.src = ''; 
-                imgElement.src = src; // Присваиваем новый src
-
-                imgElement.onload = () => {
+        // Функция для загрузки изображения
+        const loadImage = (imgElement, src, altText) => {
+            imgElement.src = src || ''; // Устанавливаем src, если он есть, иначе пустая строка
+            imgElement.alt = altText;
+            
+            // Добавляем атрибут crossorigin для поддержки изображений с других доменов
+            imgElement.setAttribute('crossorigin', 'anonymous'); 
+            
+            // Принудительная перезагрузка изображения, если src изменился
+            // Это может быть полезно для обеспечения срабатывания onload/onerror,
+            // даже если браузер закешировал изображение.
+            if (imgElement.src) { // Только если есть src
+                const tempImage = new Image();
+                tempImage.src = imgElement.src;
+                tempImage.onload = () => {
                     console.log(`DEBUG: Image loaded successfully for ${imgElement.id}: ${imgElement.src}`);
-                    imgElement.classList.remove('loading');
-                    imgElement.classList.add('loaded');
-                    if (isCurrent) {
-                        // Только для текущего изображения, чтобы убедиться, что оно в центре
-                        requestAnimationFrame(() => {
-                            // currentTranslate = -carouselWidth; // Убеждаемся, что центральное изображение по центру
-                            // setTranslate(currentTranslate);
-                            // console.log(`DEBUG: Centering carousel after current image loaded: ${currentTranslate}px`);
-                        });
-                    }
                 };
-                imgElement.onerror = () => {
+                tempImage.onerror = () => {
                     console.error(`Failed to load ${imgElement.id} src:`, imgElement.src);
                     imgElement.alt = "Ошибка загрузки фото"; // Изменяем alt при ошибке
-                    imgElement.classList.remove('loading');
-                    imgElement.classList.add('loaded'); // Показываем, даже если ошибка, чтобы alt был виден
                 };
-            } else {
-                console.error(`DEBUG: Invalid or empty src for ${imgElement.id}:`, src);
-                imgElement.src = '';
-                imgElement.alt = "Изображение не найдено или недействительно.";
-                imgElement.classList.remove('loading');
-                imgElement.classList.add('loaded'); // Показываем пустой img или alt текст
             }
         };
 
@@ -348,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (thumbnailImg) {
                 const thumbnailSrc = thumbnailImg.src;
                 console.log("DEBUG: Thumbnail image source for current image in updateCarouselImages:", thumbnailSrc);
-                loadImage(modalImageElement, thumbnailSrc, 'Текущее фото', true);
+                loadImage(modalImageElement, thumbnailSrc, 'Текущее фото');
                 modalImageElement.dataset.id = currentImgDataWrapper.dataset.id;
                 currentImageId = currentImgDataWrapper.dataset.id;
             } else {
@@ -375,6 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             loadImage(prevImageElement, '', ''); // Нет предыдущего, очищаем
+            console.warn("DEBUG: No previous image for index", index);
         }
 
         // Следующее изображение
@@ -391,6 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             loadImage(nextImageElement, '', ''); // Нет следующего, очищаем
+            console.warn("DEBUG: No next image for index", index);
         }
 
         loadCommentsForImage(currentImageId);
@@ -703,7 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalImageCarousel) {
             // Reset the carousel to its default centered state without transition
             modalImageCarousel.style.transition = 'none'; 
-            currentTranslate = -modalImageCarousel.offsetWidth;
+            currentTranslate = -modalImageCarousel.offsetWidth; // Убедиться, что это правильное смещение
             setTranslate(currentTranslate);
             // Re-enable transition for next open, delayed to allow snap
             setTimeout(() => {
@@ -729,18 +707,10 @@ document.addEventListener('DOMContentLoaded', () => {
         allImagesInCurrentColumn = []; // Очищаем массив при закрытии
         currentImageIndex = -1; // Сбрасываем индекс
 
-        // Очищаем src всех изображений в карусели и сбрасываем их видимость
+        // Очищаем src всех изображений в карусели
         prevImageElement.src = '';
-        prevImageElement.classList.remove('loaded');
-        prevImageElement.classList.add('loading'); // Снова скрыть при закрытии
-
         modalImageElement.src = '';
-        modalImageElement.classList.remove('loaded');
-        modalImageElement.classList.add('loading');
-
         nextImageElement.src = '';
-        nextImageElement.classList.remove('loaded');
-        nextImageElement.classList.add('loading');
     }
 
     moreOptionsButtonGlobalRef.addEventListener('click', (event) => {
