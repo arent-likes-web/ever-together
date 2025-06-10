@@ -120,34 +120,20 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.click();
     }
 
-    // Проверка авторизации при загрузке страницы (ИСПРАВЛЕНО v3)
+    // Проверка авторизации при загрузке страницы (ИСПРАВЛЕНО)
     console.log("[main-page.js] Вызов onAuthStateChanged...");
     onAuthStateChanged(auth, (user) => {
-        // Определяем, является ли текущая страница одной из страниц входа/регистрации
-        const isAuthPage = window.location.pathname.includes("entry.html") || 
-                           window.location.pathname.includes("registration.html");
-
         if (user) {
-            console.log(`[main-page.js] Пользователь авторизован: ${user.email}.`);
+            console.log(`[main-page.js] Пользователь авторизован: ${user.email}. Загрузка изображений.`);
             window.currentUser = user.email; // Устанавливаем текущего пользователя
-            // Если пользователь авторизован, но находится на странице входа/регистрации,
-            // перенаправляем его на главную страницу (main-page.html)
-            if (isAuthPage) {
-                console.log("[main-page.js] Авторизованный пользователь на странице входа. Перенаправление на main-page.html.");
-                window.location.href = "main-page.html"; // Убедитесь, что это правильный путь к вашей основной странице
-            } else {
-                loadImagesFromFirebase(); // Загружаем изображения, если пользователь авторизован и находится на основной странице
-            }
+            loadImagesFromFirebase(); // Загружаем изображения, если пользователь авторизован
         } else {
             console.log("[main-page.js] Пользователь не авторизован.");
-            // Если пользователь не авторизован и НЕ находится на странице входа/регистрации,
-            // перенаправляем его на страницу входа
-            if (!isAuthPage) {
-                console.log("[main-page.js] Неавторизованный пользователь не на странице входа. Перенаправление на entry.html.");
+            // Перенаправляем только если мы не на странице входа/регистрации
+            if (!window.location.pathname.includes("entry.html") && !window.location.pathname.includes("registration.html")) {
+                console.log("[main-page.js] Перенаправление на страницу входа.");
                 window.location.href = "entry.html";
             }
-            // Если пользователь не авторизован и УЖЕ находится на странице входа/регистрации,
-            // то ничего не делаем, он остается там.
         }
     });
 
