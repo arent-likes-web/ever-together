@@ -279,18 +279,8 @@ header h1 {
     user-select: none; /* Запрещает выделение текста/изображений */
     -webkit-user-drag: none; /* Запрещает перетаскивание изображения */
     flex-shrink: 0; /* Не сжимать изображения */
-    transition: opacity 0.3s ease-in-out; /* Плавное появление */
-}
-
-/* Новые правила для контроля загрузки изображений в карусели */
-.carousel-image.loading {
-    opacity: 0;
-    visibility: hidden; /* Скрываем изображения, пока они загружаются */
-}
-
-.carousel-image.loaded {
-    opacity: 1;
-    visibility: visible;
+    opacity: 1; /* УБРАНО: opacity: 0; */ /* Изображения всегда видны */
+    transition: opacity 0.3s ease-in-out; /* Плавное появление (на всякий случай) */
 }
 
 
