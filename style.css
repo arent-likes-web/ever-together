@@ -16,9 +16,9 @@ body {
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-smoothing: grayscale;
-    scroll-behavior: smooth; 
+    scroll-behavior: smooth;    
     /* !!! ВАЖНО: Убираем overflow-x: hidden; чтобы допустить горизонтальную прокрутку, если 3 колонки не влезут */
-    /* overflow-x: hidden; */ 
+    /* overflow-x: hidden; */    
     min-width: 280px; /* Уменьшим минимальную ширину body для очень маленьких экранов */
 }
 
@@ -55,6 +55,7 @@ header {
     top: 0;
     width: 100%;
     box-sizing: border-box;
+    padding-right: 100px; /* Добавил padding-right, чтобы кнопка не перекрывала контент заголовка */
 }
 
 header h1 {
@@ -85,10 +86,10 @@ header h1 {
 /* Top Upload Buttons Container */
 .top-upload-buttons-container {
     display: flex;
-    justify-content: center; 
+    justify-content: center;    
     padding: 30px 20px 20px;
     gap: 30px;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;    
     box-sizing: border-box;
     width: 100%;
     max-width: 1200px;
@@ -96,7 +97,7 @@ header h1 {
 }
 
 .top-upload-buttons-container .column-top-actions {
-    flex: 1; 
+    flex: 1;    
     min-width: 250px;
     max-width: 350px;
     display: flex;
@@ -129,10 +130,10 @@ header h1 {
 /* Image Grid Container */
 .image-container {
     display: flex;
-    justify-content: center; 
+    justify-content: center;    
     padding: 30px 20px;
     gap: 30px;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;    
     max-width: 1200px;
     margin: 0 auto 50px;
 }
@@ -178,7 +179,7 @@ header h1 {
 .image-wrapper img {
     display: block;
     width: 100%;
-    height: auto; 
+    height: auto;    
     object-fit: cover;
     border-radius: 6px;
     transition: opacity 0.5s ease;
@@ -341,11 +342,72 @@ header h1 {
     color: #A0A0A0;
 }
 
+/* --- Стили для "отклеивающейся" кнопки --- */
+
+/* Контейнер кнопки, расположенный в правом верхнем углу заголовка */
+.peel-button-container {
+    position: absolute;
+    top: 0; /* Прижимаем к верхнему краю */
+    right: 0; /* Прижимаем к правому краю */
+    width: 80px; /* Ширина видимой части кнопки - увеличена для лучшего вида */
+    height: 80px; /* Высота видимой части кнопки - увеличена */
+    overflow: hidden; /* Обрезаем все, что выходит за пределы контейнера */
+    text-decoration: none; /* Убираем подчеркивание у ссылки */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 101; /* Убедитесь, что кнопка поверх header */
+    cursor: pointer;
+    box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.3); /* Добавил тень контейнеру */
+    transition: all 0.3s ease-out;
+}
+
+.peel-button-container:hover {
+    box-shadow: -10px 10px 20px rgba(0, 0, 0, 0.4); /* Усиленная тень при наведении */
+    transform: translate(-3px, 3px); /* Небольшое смещение для эффекта "отклеивания" */
+}
+
+.peel-button-container:hover .peel-corner {
+    transform: rotate(0deg); /* Разворачиваем уголок при наведении */
+}
+
+.peel-button-container:hover .peel-icon {
+    opacity: 1; /* Показываем иконку при наведении */
+    transform: scale(1);
+}
+
+/* Сам "отклеивающийся" уголок */
+.peel-corner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%; /* Занимает всю ширину контейнера */
+    height: 100%; /* Занимает всю высоту контейнера */
+    background: linear-gradient(to bottom left, transparent 50%, #FFD1DC 50%); /* Нежно-пастельно розовый фон */
+    transform-origin: top right; /* Точка вращения - верхний правый угол */
+    transform: rotate(45deg); /* Поворачиваем, чтобы создать эффект "отклеивания" */
+    transition: transform 0.3s ease-out; /* Анимация при наведении */
+    box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.2); /* Небольшая тень для объема */
+}
+
+/* Иконка внутри кнопки */
+.peel-icon {
+    position: relative; /* Чтобы была поверх peel-corner */
+    width: 60%; /* Размер иконки относительно контейнера кнопки */
+    height: 60%;
+    object-fit: contain; /* Чтобы иконка вписывалась без искажений */
+    opacity: 0; /* Изначально скрываем иконку */
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* Анимация появления иконки */
+    transform: scale(0.8); /* Немного уменьшаем иконку по умолчанию */
+    z-index: 2; /* Убедитесь, что иконка выше уголка */
+}
+
 /* ALL DEVICES: Responsive adjustments to ALWAYS have 3 columns */
 /* One single media query to enforce 3 columns on all relevant mobile sizes */
 @media (max-width: 768px) { /* Applies to all screens up to 768px width */
     header {
-        padding: 15px 10px; 
+        padding: 15px 10px;    
+        padding-right: 60px; /* Уменьшим padding-right для мобильных, чтобы кнопка не занимала много места */
     }
     header h1 {
         font-size: 1.5em;
@@ -358,12 +420,12 @@ header h1 {
         display: flex;
         flex-direction: row; /* Всегда ряд */
         justify-content: space-around; /* Равномерное распределение */
-        padding: 10px 5px; 
+        padding: 10px 5px;    
         gap: 5px; /* Минимальный зазор между элементами */
         flex-wrap: nowrap; /* !!! КЛЮЧЕВО: Никогда не переносить на новую строку */
         align-items: flex-start;
-        width: 100%; 
-        max-width: none; 
+        width: 100%;    
+        max-width: none;    
         margin: 0 auto;
         box-sizing: border-box;
     }
@@ -385,8 +447,8 @@ header h1 {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        width: 100%; 
-        display: block; 
+        width: 100%;    
+        display: block;    
     }
 
     /* Дополнительные стили для колонок изображений */
@@ -422,5 +484,16 @@ header h1 {
     }
     .options-dropdown a {
         padding: 8px 10px; /* ЕЩЁ МЕНЬШЕ padding в дропдауне */
+    }
+
+    /* Стили для "отклеивающейся" кнопки на мобильных */
+    .peel-button-container {
+        width: 60px; /* Меньше на мобильных */
+        height: 60px; /* Меньше на мобильных */
+    }
+
+    .peel-icon {
+        width: 50%; /* Меньше иконка на мобильных */
+        height: 50%;
     }
 }
