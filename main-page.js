@@ -23,15 +23,19 @@ const imageModalGlobalRef = document.getElementById('imageModal');
 const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
 const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
 const modalImageElement = document.getElementById('modalImage');
-const modalActionsContainer = document.querySelector('.modal-actions-container');
+// const modalActionsContainer = document.querySelector('.modal-actions-container'); // Теперь не нужен, используем новый контейнер
 const imageContainerGlobalRef = document.querySelector('.image-container');
 const imageInfo = document.getElementById('imageInfo');
+const commentsList = document.getElementById('commentsList'); // Новый элемент для списка комментариев
+const commentInput = document.getElementById('commentInput'); // Новый элемент для поля ввода комментария
+const sendCommentBtn = document.getElementById('sendCommentBtn'); // Новый элемент для кнопки отправки комментария
 
 const leftColumn = document.getElementById('leftColumn');
 const centerColumn = document.getElementById('centerColumn');
 const rightColumn = document.getElementById('rightColumn');
 
 let currentImageWrapper = null;
+let currentImageId = null; // Добавим для хранения ID текущего изображения
 
 document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
@@ -40,6 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (user) {
             window.currentUser = user.email;
+            // Установим отображаемое имя пользователя (часть почты до '@')
+            const userNameSpan = document.getElementById('userName');
+            if (userNameSpan) {
+                userNameSpan.textContent = user.email.split('@')[0];
+            }
+
             if (isAuthPage) {
                 window.location.href = "main-page.html";
             } else {
@@ -146,6 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (fragments[targetColumnName]) {
                         fragments[targetColumnName].appendChild(imageWrapper);
                     } else {
+                        // Если столбец не найден (возможно, устаревшие данные), добавим в левую колонку по умолчанию
+                        fragments.left.appendChild(imageWrapper);
                     }
                 });
                 
@@ -154,9 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 rightColumn.appendChild(fragments.right);
                 
             } else {
+                // console.log("No images found in Firebase.");
             }
         }, (error) => {
             alert("Ошибка загрузки данных из базы данных. Проверьте консоль разработчика.");
+            console.error("Firebase load error:", error);
         });
     }
 
@@ -206,9 +220,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         currentImageWrapper = imageWrapper;
+        currentImageId = imageWrapper.dataset.id; // Сохраняем ID текущего изображения
         const imgElement = imageWrapper.querySelector('img');
 
-        if (!imageModalGlobalRef || !modalImageElement || !moreOptionsButtonGlobalRef || !optionsDropdownGlobalRef || !imageInfo) {
+        if (!imageModalGlobalRef || !modalImageElement || !moreOptionsButtonGlobalRef || !optionsDropdownGlobalRef || !imageInfo || !commentsList || !commentInput || !sendCommentBtn) {
+            console.error("One or more modal elements are missing.");
             return;
         }
 
@@ -216,15 +232,96 @@ document.addEventListener('DOMContentLoaded', () => {
         optionsDropdownGlobalRef.style.display = 'none';
 
         modalImageElement.src = imgElement.src;
-        modalImageElement.dataset.id = imageWrapper.dataset.id;
+        modalImageElement.dataset.id = currentImageId; // Используем currentImageId
         modalImageElement.setAttribute('crossorigin', 'anonymous');
         
         imageInfo.innerHTML = '';
+        commentsList.innerHTML = ''; // Очищаем список комментариев при открытии модалки
+        commentInput.value = ''; // Очищаем поле ввода комментария
+
+        // Загружаем и отображаем комментарии
+        loadCommentsForImage(currentImageId);
 
         if (imageContainerGlobalRef) {
             imageContainerGlobalRef.style.pointerEvents = 'none';
         }
     }
+
+    // Новая функция для загрузки комментариев
+    function loadCommentsForImage(imageId) {
+        if (!imageId) return;
+
+        const commentsRef = dbRef(database, `images/${imageId}/comments`);
+        onValue(commentsRef, (snapshot) => {
+            const commentsData = snapshot.val();
+            commentsList.innerHTML = ''; // Очищаем перед обновлением
+
+            if (commentsData) {
+                const commentArray = Object.keys(commentsData).map(key => ({ id: key, ...commentsData[key] }));
+                commentArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // Сортируем по дате, старые вверху
+
+                commentArray.forEach(comment => {
+                    const commentElement = document.createElement('p');
+                    const authorSpan = document.createElement('span');
+                    authorSpan.classList.add('comment-author');
+                    authorSpan.textContent = `${comment.author.split('@')[0]}: `; // Отображаем имя пользователя без домена
+
+                    const textSpan = document.createElement('span');
+                    textSpan.classList.add('comment-text');
+                    textSpan.textContent = comment.text;
+
+                    const dateSpan = document.createElement('span');
+                    dateSpan.classList.add('comment-date');
+                    const date = new Date(comment.timestamp);
+                    dateSpan.textContent = date.toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    commentElement.appendChild(authorSpan);
+                    commentElement.appendChild(textSpan);
+                    commentElement.appendChild(dateSpan);
+                    commentsList.appendChild(commentElement);
+                });
+                commentsList.scrollTop = commentsList.scrollHeight; // Прокрутка к последнему комментарию
+            }
+        }, (error) => {
+            console.error("Ошибка загрузки комментариев:", error);
+        });
+    }
+
+    // Обработчик отправки комментария
+    sendCommentBtn.addEventListener('click', async () => {
+        const commentText = commentInput.value.trim();
+        if (commentText === '' || !currentImageId || !window.currentUser) {
+            return;
+        }
+
+        try {
+            const newCommentRef = push(dbRef(database, `images/${currentImageId}/comments`));
+            await set(newCommentRef, {
+                author: window.currentUser,
+                text: commentText,
+                timestamp: new Date().toISOString()
+            });
+            commentInput.value = ''; // Очищаем поле ввода
+        } catch (error) {
+            console.error("Ошибка при добавлении комментария:", error);
+            alert("Не удалось добавить комментарий. Попробуйте снова.");
+        }
+    });
+
+    // Добавляем обработчик для Enter в поле комментария
+    commentInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) { // Проверяем, что это просто Enter, а не Shift+Enter
+            event.preventDefault(); // Предотвращаем стандартное поведение (перенос строки)
+            sendCommentBtn.click(); // Имитируем клик по кнопке отправки
+        }
+    });
+
 
     function toggleOptionsDropdown() {
         if (!currentImageWrapper) {
@@ -294,16 +391,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function moveImage(imageId, targetColumnId) {
         update(dbRef(database, `images/${imageId}`), { column: targetColumnId })
             .then(() => {
+                // console.log("Изображение перемещено успешно!");
             })
             .catch(error => {
+                console.error("Ошибка при перемещении изображения:", error);
+                alert("Не удалось переместить изображение.");
             });
     }
 
     function deleteImage(imageId) {
         remove(dbRef(database, `images/${imageId}`))
             .then(() => {
+                // console.log("Изображение удалено успешно!");
             })
             .catch(error => {
+                console.error("Ошибка при удалении изображения:", error);
+                alert("Не удалось удалить изображение.");
             });
     }
 
@@ -322,12 +425,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (imageInfo) {
             imageInfo.innerHTML = '';
         }
+        if (commentsList) { // Очищаем комментарии при закрытии
+            commentsList.innerHTML = '';
+        }
+        if (commentInput) { // Очищаем поле ввода
+            commentInput.value = '';
+        }
+
 
         document.body.style.overflow = '';
         if (imageContainerGlobalRef) {
             imageContainerGlobalRef.style.pointerEvents = 'auto';
         }
         currentImageWrapper = null;
+        currentImageId = null; // Обнуляем ID текущего изображения
     }
 
     moreOptionsButtonGlobalRef.addEventListener('click', (event) => {
