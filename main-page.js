@@ -23,19 +23,26 @@ const imageModalGlobalRef = document.getElementById('imageModal');
 const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
 const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
 const modalImageElement = document.getElementById('modalImage');
-// const modalActionsContainer = document.querySelector('.modal-actions-container'); // Теперь не нужен, используем новый контейнер
 const imageContainerGlobalRef = document.querySelector('.image-container');
 const imageInfo = document.getElementById('imageInfo');
-const commentsList = document.getElementById('commentsList'); // Новый элемент для списка комментариев
-const commentInput = document.getElementById('commentInput'); // Новый элемент для поля ввода комментария
-const sendCommentBtn = document.getElementById('sendCommentBtn'); // Новый элемент для кнопки отправки комментария
+const commentsList = document.getElementById('commentsList');
+const commentInput = document.getElementById('commentInput');
+const sendCommentBtn = document.getElementById('sendCommentBtn');
 
 const leftColumn = document.getElementById('leftColumn');
 const centerColumn = document.getElementById('centerColumn');
 const rightColumn = document.getElementById('rightColumn');
 
 let currentImageWrapper = null;
-let currentImageId = null; // Добавим для хранения ID текущего изображения
+let currentImageId = null;
+let allImagesInCurrentColumn = []; // Массив всех изображений в текущей колонке
+let currentImageIndex = -1; // Индекс текущего изображения в allImagesInCurrentColumn
+
+// --- Переменные для свайпа ---
+let startX = 0;
+let isDragging = false;
+let currentTranslate = 0;
+let prevTranslate = 0;
 
 document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
@@ -44,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (user) {
             window.currentUser = user.email;
-            // Установим отображаемое имя пользователя (часть почты до '@')
             const userNameSpan = document.getElementById('userName');
             if (userNameSpan) {
                 userNameSpan.textContent = user.email.split('@')[0];
@@ -220,51 +226,161 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         currentImageWrapper = imageWrapper;
-        currentImageId = imageWrapper.dataset.id; // Сохраняем ID текущего изображения
+        currentImageId = imageWrapper.dataset.id;
         const imgElement = imageWrapper.querySelector('img');
+        const currentColumn = imageWrapper.dataset.columnOrigin;
+
+        // Заполняем allImagesInCurrentColumn и currentImageIndex
+        allImagesInCurrentColumn = Array.from(document.getElementById(`${currentColumn}Column`).querySelectorAll('.image-wrapper'))
+                                        .sort((a, b) => new Date(b.dataset.timestamp) - new Date(a.dataset.timestamp));
+        currentImageIndex = allImagesInCurrentColumn.findIndex(wrapper => wrapper.dataset.id === currentImageId);
 
         if (!imageModalGlobalRef || !modalImageElement || !moreOptionsButtonGlobalRef || !optionsDropdownGlobalRef || !imageInfo || !commentsList || !commentInput || !sendCommentBtn) {
             console.error("One or more modal elements are missing.");
             return;
         }
 
+        // При открытии модала, убедимся, что изображение в исходном состоянии (transform: none)
+        modalImageElement.style.transform = 'translateX(0)';
+        modalImageElement.style.transition = 'transform 0.3s ease-out'; // Убедимся, что transition включен
+
         imageModalGlobalRef.classList.add('show-modal');
         optionsDropdownGlobalRef.style.display = 'none';
 
         modalImageElement.src = imgElement.src;
-        modalImageElement.dataset.id = currentImageId; // Используем currentImageId
+        modalImageElement.dataset.id = currentImageId;
         modalImageElement.setAttribute('crossorigin', 'anonymous');
         
         imageInfo.innerHTML = '';
-        commentsList.innerHTML = ''; // Очищаем список комментариев при открытии модалки
-        commentInput.value = ''; // Очищаем поле ввода комментария
+        commentsList.innerHTML = '';
+        commentInput.value = '';
 
-        // Загружаем и отображаем комментарии
         loadCommentsForImage(currentImageId);
 
+        // Блокируем прокрутку body, если модальное окно открыто
+        document.body.style.overflow = 'hidden'; 
         if (imageContainerGlobalRef) {
             imageContainerGlobalRef.style.pointerEvents = 'none';
         }
     }
 
-    // Новая функция для загрузки комментариев
+    // --- Функции для свайпа ---
+    function setPositionByIndex() {
+        modalImageElement.style.transform = `translateX(${currentTranslate}px)`;
+        modalImageElement.style.transition = 'transform 0.3s ease-out'; // Плавное завершение свайпа
+    }
+
+    function touchStart(event) {
+        if (optionsDropdownGlobalRef.style.display === 'block') { // Если дропдаун открыт, игнорируем свайп
+            return;
+        }
+        isDragging = true;
+        startX = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+        modalImageElement.classList.add('dragging');
+        modalImageElement.style.transition = 'none'; // Отключаем transition во время перетаскивания
+        prevTranslate = currentTranslate; // Запоминаем текущее смещение
+    }
+
+    function touchMove(event) {
+        if (!isDragging) return;
+
+        const currentPosition = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+        currentTranslate = prevTranslate + currentPosition - startX;
+        modalImageElement.style.transform = `translateX(${currentTranslate}px)`;
+    }
+
+    function touchEnd() {
+        isDragging = false;
+        modalImageElement.classList.remove('dragging');
+
+        const movedBy = currentTranslate - prevTranslate; // Насколько сильно сдвинули
+        const threshold = modalImageElement.offsetWidth / 4; // Порог для переключения изображения (25% ширины)
+
+        if (movedBy < -threshold && currentImageIndex < allImagesInCurrentColumn.length - 1) {
+            // Свайп влево (к следующему изображению)
+            currentImageIndex++;
+            showImageByIndex(currentImageIndex, 'left');
+        } else if (movedBy > threshold && currentImageIndex > 0) {
+            // Свайп вправо (к предыдущему изображению)
+            currentImageIndex--;
+            showImageByIndex(currentImageIndex, 'right');
+        } else {
+            // Свайп недостаточен, возвращаемся на текущее изображение
+            currentTranslate = 0;
+            setPositionByIndex();
+        }
+    }
+
+    function showImageByIndex(index, direction) {
+        if (index < 0 || index >= allImagesInCurrentColumn.length) {
+            // Если вышли за пределы, возвращаем изображение на место
+            currentTranslate = 0;
+            setPositionByIndex();
+            return;
+        }
+
+        const nextImageWrapper = allImagesInCurrentColumn[index];
+        const nextImageId = nextImageWrapper.dataset.id;
+        const nextImageSrc = nextImageWrapper.querySelector('img').src;
+
+        // Если это новое изображение, обновим src и комментарии
+        if (nextImageId !== currentImageId) {
+            // Запускаем анимацию "перелистывания"
+            modalImageElement.style.transform = `translateX(${direction === 'left' ? -modalImageElement.offsetWidth : modalImageElement.offsetWidth}px)`;
+            modalImageElement.style.transition = 'transform 0.3s ease-out';
+
+            // Ждем завершения анимации, затем меняем изображение и сбрасываем transform
+            modalImageElement.addEventListener('transitionend', function handler() {
+                modalImageElement.src = nextImageSrc;
+                modalImageElement.dataset.id = nextImageId;
+                currentImageId = nextImageId;
+                loadCommentsForImage(currentImageId);
+                
+                modalImageElement.style.transform = 'translateX(0)';
+                modalImageElement.removeEventListener('transitionend', handler); // Удаляем обработчик, чтобы он не срабатывал повторно
+                currentTranslate = 0; // Сбрасываем смещение
+            }, { once: true }); // Убедимся, что обработчик удаляется после первого срабатывания
+        } else {
+            // Если изображение не изменилось (например, при свайпе в конце/начале),
+            // просто возвращаем его на место.
+            currentTranslate = 0;
+            setPositionByIndex();
+        }
+    }
+
+    // Добавляем слушателей событий для свайпа к modalImageElement
+    modalImageElement.addEventListener('touchstart', touchStart);
+    modalImageElement.addEventListener('touchmove', touchMove);
+    modalImageElement.addEventListener('touchend', touchEnd);
+
+    // Для десктопа:
+    modalImageElement.addEventListener('mousedown', touchStart); // Используем touchStart, т.к. логика схожа
+    modalImageElement.addEventListener('mousemove', touchMove); // Используем touchMove
+    modalImageElement.addEventListener('mouseup', touchEnd); // Используем touchEnd
+    modalImageElement.addEventListener('mouseleave', () => { // Если мышка ушла с элемента во время перетаскивания
+        if (isDragging) {
+            touchEnd();
+        }
+    });
+
+
     function loadCommentsForImage(imageId) {
         if (!imageId) return;
 
         const commentsRef = dbRef(database, `images/${imageId}/comments`);
         onValue(commentsRef, (snapshot) => {
             const commentsData = snapshot.val();
-            commentsList.innerHTML = ''; // Очищаем перед обновлением
+            commentsList.innerHTML = '';
 
             if (commentsData) {
                 const commentArray = Object.keys(commentsData).map(key => ({ id: key, ...commentsData[key] }));
-                commentArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // Сортируем по дате, старые вверху
+                commentArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
                 commentArray.forEach(comment => {
                     const commentElement = document.createElement('p');
                     const authorSpan = document.createElement('span');
                     authorSpan.classList.add('comment-author');
-                    authorSpan.textContent = `${comment.author.split('@')[0]}: `; // Отображаем имя пользователя без домена
+                    authorSpan.textContent = `${comment.author.split('@')[0]}: `;
 
                     const textSpan = document.createElement('span');
                     textSpan.classList.add('comment-text');
@@ -286,14 +402,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     commentElement.appendChild(dateSpan);
                     commentsList.appendChild(commentElement);
                 });
-                commentsList.scrollTop = commentsList.scrollHeight; // Прокрутка к последнему комментарию
+                commentsList.scrollTop = commentsList.scrollHeight;
             }
         }, (error) => {
             console.error("Ошибка загрузки комментариев:", error);
         });
     }
 
-    // Обработчик отправки комментария
     sendCommentBtn.addEventListener('click', async () => {
         const commentText = commentInput.value.trim();
         if (commentText === '' || !currentImageId || !window.currentUser) {
@@ -307,18 +422,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 text: commentText,
                 timestamp: new Date().toISOString()
             });
-            commentInput.value = ''; // Очищаем поле ввода
+            commentInput.value = '';
         } catch (error) {
             console.error("Ошибка при добавлении комментария:", error);
             alert("Не удалось добавить комментарий. Попробуйте снова.");
         }
     });
 
-    // Добавляем обработчик для Enter в поле комментария
     commentInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && !event.shiftKey) { // Проверяем, что это просто Enter, а не Shift+Enter
-            event.preventDefault(); // Предотвращаем стандартное поведение (перенос строки)
-            sendCommentBtn.click(); // Имитируем клик по кнопке отправки
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendCommentBtn.click();
         }
     });
 
@@ -421,24 +535,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalImageElement) {
             modalImageElement.src = '';
             modalImageElement.dataset.id = '';
+            modalImageElement.style.transform = 'translateX(0)'; // Сбрасываем transform при закрытии
+            modalImageElement.style.transition = 'transform 0.3s ease-out'; // Возвращаем transition
         }
         if (imageInfo) {
             imageInfo.innerHTML = '';
         }
-        if (commentsList) { // Очищаем комментарии при закрытии
+        if (commentsList) {
             commentsList.innerHTML = '';
         }
-        if (commentInput) { // Очищаем поле ввода
+        if (commentInput) {
             commentInput.value = '';
         }
 
-
-        document.body.style.overflow = '';
+        document.body.style.overflow = ''; // Разблокируем прокрутку body
         if (imageContainerGlobalRef) {
             imageContainerGlobalRef.style.pointerEvents = 'auto';
         }
         currentImageWrapper = null;
-        currentImageId = null; // Обнуляем ID текущего изображения
+        currentImageId = null;
+        allImagesInCurrentColumn = []; // Очищаем массив при закрытии
+        currentImageIndex = -1; // Сбрасываем индекс
     }
 
     moreOptionsButtonGlobalRef.addEventListener('click', (event) => {
@@ -447,6 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     imageModalGlobalRef.addEventListener('click', (event) => {
+        // Проверяем, что клик был именно по фону модального окна, а не по его содержимому
         if (event.target === imageModalGlobalRef) {
             closeModal();
         }
@@ -464,11 +582,44 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) {
             closeModal();
+        } else if (imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) {
+            // Обработка клавиш-стрелок для навигации
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault(); // Предотвращаем прокрутку страницы
+                if (currentImageIndex > 0) {
+                    currentImageIndex--;
+                    showImageByIndex(currentImageIndex, 'right');
+                } else {
+                    // Если достигнуто начало, можно показать легкую "пружину"
+                    modalImageElement.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        modalImageElement.style.transform = 'translateX(0)';
+                    }, 100);
+                }
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault(); // Предотвращаем прокрутку страницы
+                if (currentImageIndex < allImagesInCurrentColumn.length - 1) {
+                    currentImageIndex++;
+                    showImageByIndex(currentImageIndex, 'left');
+                } else {
+                    // Если достигнут конец, можно показать легкую "пружину"
+                    modalImageElement.style.transform = 'translateX(-20px)';
+                    setTimeout(() => {
+                        modalImageElement.style.transform = 'translateX(0)';
+                    }, 100);
+                }
+            }
         }
     });
 
+    // Это уже было, но важно, чтобы не конфликтовало со свайпом
     imageModalGlobalRef.addEventListener('touchmove', (event) => {
-        if (imageModalGlobalRef.classList.contains('show-modal')) {
+        // Мы не блокируем touchmove здесь, чтобы позволить свайп изображения.
+        // Вместо этого мы управляем прокруткой body через CSS и JS.
+        // Если event.target - это commentsList и он прокручивается, то это нормально.
+        // Если это не modalImageElement или commentsList, то можно остановить.
+        if (imageModalGlobalRef.classList.contains('show-modal') && event.target !== commentsList && !commentsList.contains(event.target)) {
+            // Проверяем, что мы не пытаемся прокрутить список комментариев
             event.preventDefault();
         }
     }, { passive: false });
