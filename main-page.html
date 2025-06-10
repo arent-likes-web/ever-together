@@ -41,16 +41,24 @@
     <div id="imageModal" class="modal">
         <div class="modal-content">
             <img id="modalImage" src="" alt="Full size image">
-            <div class="modal-actions-container">
-                <button id="moreOptionsButton" class="more-options-button">...</button>
-                <div id="optionsDropdown" class="options-dropdown">
-                    <a href="#" data-action="delete">Удалить</a>
-                    <a href="#" data-action="move" data-column="left">В Him peach</a>
-                    <a href="#" data-action="move" data-column="center">В Our dreams</a>
-                    <a href="#" data-action="move" data-column="right">В Her cat</a>
+            <div id="imageInfo"></div> <div class="modal-actions-and-comments-container"> <div class="modal-actions-container">
+                    <button id="moreOptionsButton" class="more-options-button">...</button>
+                    <div id="optionsDropdown" class="options-dropdown">
+                        <a href="#" data-action="delete">Удалить</a>
+                        <a href="#" data-action="move" data-column="left">В Him peach</a>
+                        <a href="#" data-action="move" data-column="center">В Our dreams</a>
+                        <a href="#" data-action="move" data-column="right">В Her cat</a>
+                    </div>
+                </div>
+
+                <div class="comments-section"> <div class="comments-list" id="commentsList">
+                        </div>
+                    <div class="comment-input-container">
+                        <textarea id="commentInput" placeholder="Добавить комментарий..."></textarea>
+                        <button id="sendCommentBtn">Отправить</button>
+                    </div>
                 </div>
             </div>
-            <div id="imageInfo"></div>
         </div>
     </div>
 
