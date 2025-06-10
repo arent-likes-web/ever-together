@@ -260,32 +260,61 @@ header h1 {
     box-sizing: border-box;
     /* Добавляем overflow-y: auto для прокрутки всего содержимого модального окна, если оно слишком большое */
     overflow-y: auto; 
-    overflow-x: hidden;
+    overflow-x: hidden; /* Скрываем горизонтальную прокрутку, если модальное окно не является каруселью */
 }
 
 .modal.show-modal .modal-content {
     transform: scale(1);
 }
 
-.modal-content img {
+/* Новый контейнер для карусели изображений */
+.modal-image-carousel {
+    display: flex; /* Размещаем изображения в ряд */
+    width: 100%; /* Занимаем всю доступную ширину модального окна */
+    overflow: hidden; /* Скрываем изображения, которые находятся за пределами видимой области */
+    position: relative;
+    height: auto; /* Высота будет определяться содержимым */
+    margin-bottom: 20px; /* Отступ от карусели до информации об изображении */
+    cursor: grab; /* Изменяем курсор для перетаскивания */
+    /* Важно: initial transform должен быть равен -100% для центрирования среднего изображения */
+    transform: translateX(-100%); 
+    transition: transform 0.3s ease-out; /* Для плавной анимации пролистывания */
+    /* Убедимся, что карусель не прокручивается, если ее содержимое превышает ее размер */
+    flex-shrink: 0;
+    flex-grow: 1;
+    max-height: 65vh; /* Максимальная высота, как у img ранее */
+}
+
+.modal-image-carousel.dragging {
+    cursor: grabbing;
+    transition: none; /* Отключаем transition во время перетаскивания для мгновенной реакции */
+}
+
+/* Стили для отдельных изображений в карусели */
+.carousel-image {
+    display: block;
+    width: 100%; /* Каждое изображение занимает 100% ширины контейнера (видимой части) */
+    height: 100%; /* Занимаем всю высоту контейнера карусели */
+    object-fit: contain; /* Изображение будет масштабироваться, чтобы поместиться, сохраняя пропорции */
+    border-radius: 4px;
+    flex-shrink: 0; /* Важно: предотвращает сжатие изображений */
+    opacity: 1; /* По умолчанию видимы */
+    transition: opacity 0.3s ease-out; /* Плавное появление/исчезновение при загрузке */
+}
+
+/* Убираем старые стили для modalImageElement, так как теперь они применяются к carousel-image */
+/* .modal-content img {
     max-width: 100%;
-    max-height: 65vh; /* Можем немного уменьшить, если комментарии занимают много места */
+    max-height: 65vh; 
     display: block;
     object-fit: contain;
     margin-bottom: 20px;
     border-radius: 4px;
 
-    /* Стили для свайпа */
-    position: relative; /* Чтобы можно было использовать transform */
-    transition: transform 0.3s ease-out; /* Плавность анимации свайпа */
-    cursor: grab; /* Изменяем курсор для перетаскивания */
-}
-
-.modal-content img.dragging {
-    cursor: grabbing;
-    transition: none; /* Отключаем transition во время перетаскивания для мгновенной реакции */
-}
-
+    position: relative; 
+    transition: transform 0.3s ease-out; 
+    cursor: grab; 
+} */
 
 /* Новый контейнер для действий и комментариев */
 .modal-actions-and-comments-container {
@@ -580,9 +609,9 @@ header h1 {
         padding: 10px;
     }
 
-    .modal-content img {
-        max-height: 45vh; /* Немного уменьшим для мобильных, чтобы освободить место для комментов */
-        margin-bottom: 10px;
+    .modal-image-carousel {
+        margin-bottom: 10px; /* Отступ на мобильных */
+        max-height: 45vh; /* Максимальная высота на мобильных */
     }
 
     .modal-actions-and-comments-container {
