@@ -17,9 +17,8 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-smoothing: grayscale;
     scroll-behavior: smooth;    
-    /* !!! ВАЖНО: Убираем overflow-x: hidden; чтобы допустить горизонтальную прокрутку, если 3 колонки не влезут */
     /* overflow-x: hidden; */    
-    min-width: 280px; /* Уменьшим минимальную ширину body для очень маленьких экранов */
+    min-width: 280px; 
 }
 
 /* Общие стили для элементов */
@@ -38,7 +37,7 @@ button {
     border: none;
     outline: none;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    font-family: 'Geoform', sans-serif; /* Применяем новый шрифт к кнопкам */
+    font-family: 'Geoform', sans-serif; 
 }
 
 /* Header */
@@ -55,10 +54,9 @@ header {
     top: 0;
     width: 100%;
     box-sizing: border-box;
-    /* Убираем padding-right здесь, так как кнопка будет влиять на layout по-другому */
-    /* padding-right: 100px; */ 
-    /* Добавим минимальную высоту, если заголовок может быть слишком низким */
-    min-height: 80px; /* Примерная минимальная высота для заголовка */
+    min-height: 80px; 
+    /* Добавим padding-right, чтобы освободить место для новой кнопки */
+    padding-right: 120px; /* Отступ справа для кнопки выхода */
 }
 
 header h1 {
@@ -79,8 +77,8 @@ header h1 {
     align-items: center;
     gap: 15px;
     font-size: 1.1em;
-    /* Добавим margin-right, чтобы избежать перекрытия с кнопкой, когда заголовок узкий */
-    margin-right: 60px; /* Расстояние от правого края, где будет кнопка */
+    /* Убираем margin-right, так как его место займет padding-right у header */
+    /* margin-right: 60px; */ 
 }
 
 .auth-status span {
@@ -235,7 +233,7 @@ header h1 {
     align-items: center;
     opacity: 0;
     transition: opacity 0.4s ease-out;
-    cursor: pointer; /* Добавлено для iOS, чтобы фон был кликабельным */
+    cursor: pointer; 
 }
 
 .modal.show-modal {
@@ -306,7 +304,7 @@ header h1 {
     box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.4);
     z-index: 10001;
     right: 0;
-    bottom: calc(100% + 10px); /* Привязываем к верху кнопки, чтобы он выпадал ВВЕРХ */
+    bottom: calc(100% + 10px); 
     border-radius: 6px;
     overflow: visible;
     opacity: 0;
@@ -314,9 +312,9 @@ header h1 {
     animation: dropdownFadeIn 0.3s forwards ease-out;
     border: 1px solid #C899E0;
 
-    max-height: calc(100vh - 100px); /* Ограничиваем высоту дропдауна, чтобы он не выходил за рамки экрана */
-    overflow-y: auto; /* Добавляем прокрутку, если содержимое не помещается */
-    transform-origin: bottom right; /* Точка трансформации для анимации появления вверх */
+    max-height: calc(100vh - 100px); 
+    overflow-y: auto; 
+    transform-origin: bottom right; 
 }
 
 @keyframes dropdownFadeIn {
@@ -347,90 +345,44 @@ header h1 {
     color: #A0A0A0;
 }
 
-/* --- Стили для "отклеивающейся" кнопки --- */
-
-/* Контейнер кнопки, расположенный в правом верхнем углу заголовка */
-.peel-button-container {
-    position: absolute;
-    /* Отступы от правого края, чтобы не прижималось слишком сильно к краю окна */
-    right: 0; 
-    /* Используем top: 0, чтобы выровнять по верхней границе заголовка */
-    top: 0; 
-    /* Высота контейнера кнопки - займет всю высоту хедера */
-    height: 100%; 
-    /* Минимальная ширина для кнопки, чтобы она не была слишком узкой */
-    min-width: 60px; 
-    /* Максимальная ширина, чтобы она не растягивалась слишком сильно */
-    max-width: 80px;
-    overflow: hidden; /* Обрезаем все, что выходит за пределы контейнера */
-    text-decoration: none; /* Убираем подчеркивание у ссылки */
-    display: flex;
+/* --- Стили для кнопки выхода со звездой --- */
+.logout-button {
+    position: absolute; /* Абсолютное позиционирование относительно header */
+    right: 30px; /* Отступ от правого края */
+    top: 50%; /* Центрируем по вертикали */
+    transform: translateY(-50%); /* Точная вертикальная центровка */
+    background-color: #555555; /* Темный фон кнопки */
+    color: #FFD1DC; /* Цвет звезды (розовый) */
+    border-radius: 50%; /* Делаем кнопку круглой */
+    width: 50px; /* Ширина кнопки */
+    height: 50px; /* Высота кнопки */
+    display: flex; /* Используем flexbox для центрирования иконки */
     justify-content: center;
     align-items: center;
-    z-index: 101; /* Убедитесь, что кнопка поверх header */
-    cursor: pointer;
-    /* Тень будет на уголке, а не на всем контейнере */
-    /* box-shadow: -5px 5px 15px rgba(0, 0, 0, 0.3); */
-    transition: all 0.3s ease-out; /* Анимация для контейнера (в основном для transform) */
-    /* Добавим padding-right к header, чтобы контент не заходил под кнопку */
-    /* Это было выше в header, но здесь важно, чтобы кнопка занимала свое место */
-    /* Здесь не нужно, так как кнопка абсолютная и не влияет на поток документа */
+    font-size: 2em; /* Размер иконки звезды */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* Легкая тень */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    z-index: 101; /* Убедитесь, что кнопка поверх всего */
 }
 
-.peel-button-container:hover {
-    /* box-shadow: -10px 10px 20px rgba(0, 0, 0, 0.4); */ /* Тень на уголке будет */
-    /* transform: translate(-3px, 3px); */ /* Перемещаем только уголок */
+.logout-button:hover {
+    background-color: #6A6A6A; /* Более светлый фон при наведении */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Усиленная тень при наведении */
+    transform: translateY(-50%) scale(1.05); /* Немного увеличиваем при наведении */
 }
 
-.peel-button-container:hover .peel-corner {
-    transform: rotate(0deg); /* Разворачиваем уголок при наведении */
-    box-shadow: -8px 8px 15px rgba(0, 0, 0, 0.4); /* Усиленная тень на уголке */
-}
-
-.peel-button-container:hover .peel-icon {
-    opacity: 1; /* Показываем иконку при наведении */
-    transform: scale(1);
-}
-
-/* Сам "отклеивающийся" уголок */
-.peel-corner {
-    position: absolute;
-    top: -5px; /* Немного выше, чтобы край "отклеивался" от линии заголовка */
-    right: -5px; /* Немного правее */
-    /* Размеры уголка должны быть достаточными для поворота и перекрытия части кнопки */
-    width: 120%; /* Сделаем его больше контейнера, чтобы он "выглядывал" */
-    height: 120%; /* Сделаем его больше контейнера */
-    background: #FFD1DC; /* Нежно-пастельно розовый фон */
-    /* Используем clip-path для создания треугольной формы вместо linear-gradient */
-    /* Это дает более четкий контроль над формой */
-    clip-path: polygon(100% 0, 100% 100%, 0 100%); /* Треугольник в правом нижнем углу */
-    transform-origin: bottom left; /* Точка вращения - нижний левый угол треугольника */
-    transform: rotate(45deg); /* Поворачиваем, чтобы создать эффект "отклеивания" */
-    transition: transform 0.3s ease-out, box-shadow 0.3s ease; /* Анимация при наведении */
-    box-shadow: -2px 2px 5px rgba(0, 0, 0, 0.2); /* Небольшая тень для объема */
-}
-
-/* Иконка внутри кнопки */
-.peel-icon {
-    position: absolute; /* Позиционируем абсолютно внутри контейнера кнопки */
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0.8); /* Центрируем и немного уменьшаем */
-    width: 70%; /* Размер иконки относительно контейнера кнопки */
-    height: 70%;
-    object-fit: contain; /* Чтобы иконка вписывалась без искажений */
-    opacity: 0; /* Изначально скрываем иконку */
-    transition: opacity 0.3s ease-out, transform 0.3s ease-out; /* Анимация появления иконки */
-    z-index: 2; /* Убедитесь, что иконка выше уголка */
+.logout-button:active {
+    background-color: #4A4A4A;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(-50%) scale(0.98);
 }
 
 /* ALL DEVICES: Responsive adjustments to ALWAYS have 3 columns */
-/* One single media query to enforce 3 columns on all relevant mobile sizes */
-@media (max-width: 768px) { /* Applies to all screens up to 768px width */
+@media (max-width: 768px) { 
     header {
         padding: 15px 10px;    
-        /* padding-right: 60px; */ /* Убрал, т.к. margin-right у auth-status будет это регулировать */
-        min-height: 50px; /* Уменьшим минимальную высоту хедера на мобильных */
+        min-height: 50px; 
+        padding-right: 90px; /* Уменьшим padding-right на мобильных */
     }
     header h1 {
         font-size: 1.5em;
@@ -438,18 +390,17 @@ header h1 {
     }
 
     .auth-status {
-        margin-right: 50px; /* Меньший отступ на мобильных */
+        /* margin-right: 50px; */ /* Здесь больше не нужен, т.к. кнопка будет абсолютно позиционирована */
     }
 
-    /* Общие стили для контейнеров кнопок и колонок изображений */
     .top-upload-buttons-container,
     .image-container {
         display: flex;
-        flex-direction: row; /* Всегда ряд */
-        justify-content: space-around; /* Равномерное распределение */
+        flex-direction: row; 
+        justify-content: space-around; 
         padding: 10px 5px;    
-        gap: 5px; /* Минимальный зазор между элементами */
-        flex-wrap: nowrap; /* !!! КЛЮЧЕВО: Никогда не переносить на новую строку */
+        gap: 5px; 
+        flex-wrap: nowrap; 
         align-items: flex-start;
         width: 100%;    
         max-width: none;    
@@ -457,20 +408,18 @@ header h1 {
         box-sizing: border-box;
     }
 
-    /* Стили для отдельных кнопок и колонок изображений */
     .top-upload-buttons-container .column-top-actions,
     .image-column {
-        flex: 1 1 30%; /* Базовая ширина около 30% для трех элементов */
-        min-width: 80px; /* !!! КЛЮЧЕВО: Очень низкий min-width, чтобы элементы могли сильно сжиматься */
-        max-width: 120px; /* Ограничим максимальную ширину на мобильных, чтобы не были слишком широкими */
+        flex: 1 1 30%; 
+        min-width: 80px; 
+        max-width: 120px; 
         margin: 0;
         box-sizing: border-box;
     }
 
-    /* Дополнительные стили для кнопок, чтобы они лучше сжимались */
     .top-upload-buttons-container .column-top-actions button {
-        padding: 5px 2px; /* ЕЩЁ МЕНЬШЕ padding кнопок */
-        font-size: 0.65em; /* ЕЩЁ МЕНЬШЕ шрифт кнопок */
+        padding: 5px 2px; 
+        font-size: 0.65em; 
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -478,18 +427,17 @@ header h1 {
         display: block;    
     }
 
-    /* Дополнительные стили для колонок изображений */
     .image-column {
-        padding: 5px; /* ЕЩЁ МЕНЬШЕ padding колонок */
+        padding: 5px; 
     }
 
     .image-wrapper {
-        min-height: 50px; /* ЕЩЁ МЕНЬШЕ минимальная высота для обертки изображения */
+        min-height: 50px; 
     }
 
     .image-wrapper img {
         height: auto;
-        min-height: 40px; /* ЕЩЁ МЕНЬШЕ минимальная высота для самого изображения */
+        min-height: 40px; 
     }
 
     .modal-content {
@@ -505,27 +453,19 @@ header h1 {
 
     .options-dropdown {
         bottom: calc(100% + 5px);
-        max-height: 100px; /* ЕЩЁ МЕНЬШЕ высота дропдауна */
-        min-width: 100px; /* ЕЩЁ МЕНЬШЕ мин. ширина дропдауна */
-        font-size: 0.7em; /* ЕЩЁ МЕНЬШЕ шрифт в дропдауне */
+        max-height: 100px; 
+        min-width: 100px; 
+        font-size: 0.7em; 
     }
     .options-dropdown a {
-        padding: 8px 10px; /* ЕЩЁ МЕНЬШЕ padding в дропдауне */
+        padding: 8px 10px; 
     }
 
-    /* Стили для "отклеивающейся" кнопки на мобильных */
-    .peel-button-container {
-        min-width: 50px; /* Еще меньше на мобильных */
-        max-width: 70px;
-    }
-    
-    .peel-corner {
-        top: -3px;
-        right: -3px;
-    }
-
-    .peel-icon {
-        width: 60%; /* Меньше иконка на мобильных */
-        height: 60%;
+    /* Стили для кнопки выхода на мобильных */
+    .logout-button {
+        width: 40px; /* Меньше на мобильных */
+        height: 40px;
+        font-size: 1.5em; /* Меньше звезда на мобильных */
+        right: 20px; /* Отступ от правого края на мобильных */
     }
 }
