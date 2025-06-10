@@ -15,7 +15,7 @@ body {
     color: #E0E0E0;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -moz-osx-smoothing: grayscale;
     scroll-behavior: smooth; 
     /* Убрано overflow-x: hidden; чтобы допустить горизонтальную прокрутку, если 3 колонки не влезут */
     min-width: 280px; /* Уменьшим минимальную ширину body для очень маленьких экранов */
