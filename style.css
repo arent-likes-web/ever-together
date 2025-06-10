@@ -69,13 +69,19 @@ header h1 {
     text-shadow: 0 0 5px rgba(200, 153, 224, 0.3);
 }
 
+/* Новый контейнер для правой части хедера */
+.header-right-section {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Расстояние между именем пользователя и звездочкой */
+}
+
 .auth-status {
     display: flex;
     align-items: center;
     gap: 15px;
     font-size: 1.1em;
-    /* Увеличиваем margin-right, чтобы дать место для новой кнопки */
-    margin-right: 20px; 
+    /* Убираем margin-right, так как gap в .header-right-section справляется с отступами */
 }
 
 .auth-status span {
@@ -453,14 +459,13 @@ header h1 {
 
 /* --- Стили для новой кнопки со звездой --- */
 
-.star-button-link { /* Новый класс для ссылки-обертки */
-    position: absolute; /* Делаем ссылку абсолютно позиционированной */
-    right: 20px; /* Отступ от правого края заголовка */
-    top: 50%; /* Центрируем по вертикали */
-    transform: translateY(-50%); /* Точная вертикальная центровка */
-    /* Убираем background-color, border-radius, width, height, display, justify-content, align-items, box-shadow, z-index, transition, font-size отсюда */
-    /* Эти стили теперь будут применяться к самой button внутри link */
-    z-index: 101; /* Убедимся, что ссылка поверх всего */
+.star-button-link { /* Стили для ссылки-обертки */
+    /* Убираем position: absolute и связанные стили */
+    /* right: 20px; */
+    /* top: 50%; */
+    /* transform: translateY(-50%); */
+    z-index: 101; 
+    /* Дополнительные стили, если нужны, но теперь она часть потока flexbox */
 }
 
 .star-button { /* Стили для самой кнопки внутри ссылки */
@@ -501,8 +506,12 @@ header h1 {
         letter-spacing: 1px;
     }
 
+    .header-right-section {
+        gap: 10px; /* Меньший отступ на мобильных */
+    }
+
     .auth-status {
-        margin-right: 15px; /* Меньший отступ на мобильных */
+        /* margin-right: 15px; */ /* Убрано, теперь gap */
     }
 
     .top-upload-buttons-container,
@@ -580,7 +589,7 @@ header h1 {
 
     /* Стили для кнопки со звездой на мобильных */
     .star-button-link { /* Стили для ссылки-обертки на мобильных */
-        right: 10px; /* Меньший отступ от края на мобильных */
+        /* Убираем позиционирование */
     }
     .star-button { /* Стили для самой кнопки внутри ссылки на мобильных */
         width: 30px; /* Меньший размер кнопки на мобильных */
