@@ -36,7 +36,7 @@ let currentImageWrapper = null;
 document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, (user) => {
         const isAuthPage = window.location.pathname.includes("entry.html") ||
-                           window.location.pathname.includes("registration.html");
+                               window.location.pathname.includes("registration.html");
 
         if (user) {
             window.currentUser = user.email;
