@@ -3,7 +3,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
+
 
 const firebaseConfig = {
     apiKey: "AIzaSyDIMvnTxfnpDr72fIIexWcO2Jl0_fqM7tw",
@@ -18,606 +18,780 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth();
-const storage = getStorage(app);
 
-// === DOM Elements ===
-const userNameSpan = document.getElementById('userName');
-const uploadLeftBtn = document.getElementById('uploadLeft');
-const uploadCenterBtn = document.getElementById('uploadCenter');
-const uploadRightBtn = document.getElementById('uploadRight');
-const leftColumn = document.getElementById('leftColumn');
-const centerColumn = document.getElementById('centerColumn');
-const rightColumn = document.getElementById('rightColumn');
-const imageModal = document.getElementById('imageModal');
-const closeModalButton = document.getElementById('closeModalButton');
-const modalImage = document.getElementById('modalImage');
-const prevImage = document.getElementById('prevImage');
-const nextImage = document.getElementById('nextImage');
-const imageInfoDiv = document.getElementById('imageInfo');
+const imageModalGlobalRef = document.getElementById('imageModal');
+const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
+const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
+
+// Новые ссылки на элементы карусели
+const modalImageCarousel = document.querySelector('.modal-image-carousel');
+const prevImageElement = document.getElementById('prevImage');
+const modalImageElement = document.getElementById('modalImage'); // Текущее изображение
+const nextImageElement = document.getElementById('nextImage');
+
+const imageContainerGlobalRef = document.querySelector('.image-container');
+const imageInfo = document.getElementById('imageInfo');
 const commentsList = document.getElementById('commentsList');
 const commentInput = document.getElementById('commentInput');
 const sendCommentBtn = document.getElementById('sendCommentBtn');
-const moreOptionsButton = document.getElementById('moreOptionsButton');
-const optionsDropdown = document.getElementById('optionsDropdown');
-const prevImageButton = document.getElementById('prevImageButton');
-const nextImageButton = document.getElementById('nextImageButton');
-const modalImageCarousel = document.getElementById('modal-image-carousel');
 
+const leftColumn = document.getElementById('leftColumn');
+const centerColumn = document.getElementById('centerColumn');
+const rightColumn = document.getElementById('rightColumn');
 
-// === Global Variables ===
-let currentUserId = null;
-let currentUserName = "Гость";
-let imagesData = {
-    "left": [],
-    "center": [],
-    "right": []
-};
-let currentImageIndex = 0; // Index of the currently viewed image in the modal
-let currentColumnId = null; // Column of the currently viewed image
-let currentImageKey = null; // Key of the currently viewed image in Firebase
-let currentImageUrl = null; // URL of the currently viewed image
+let currentImageWrapper = null;
+let currentImageId = null;
+let allImagesInCurrentColumn = []; // Массив всех изображений в текущей колонке
+let currentImageIndex = -1; // Индекс текущего изображения в allImagesInCurrentColumn
 
-// Carousel drag variables
+// --- Переменные для свайпа ---
+let startX = 0;
 let isDragging = false;
-let startPos = 0;
-let currentTranslate = 0;
-let prevTranslate = 0;
-let animationId;
-let carouselWidth; // Will be set dynamically based on actual carousel container width
+let currentTranslate = 0; // The actual translateX value of the carousel (px)
+let prevTranslate = 0;    // The translateX value at the start of a drag (px)
 
-// === Utility Functions ===
+document.addEventListener('DOMContentLoaded', () => {
+    onAuthStateChanged(auth, (user) => {
+        const isAuthPage = window.location.pathname.includes("entry.html") ||
+                               window.location.pathname.includes("registration.html");
 
-// Throttling function to limit how often a function can run
-function throttle(func, limit) {
-    let inThrottle;
-    return function() {
-        const args = arguments;
-        const context = this;
-        if (!inThrottle) {
-            func.apply(context, args);
-            inThrottle = true;
-            setTimeout(() => inThrottle = false, limit);
-        }
-    }
-}
+        if (user) {
+            window.currentUser = user.email;
+            const userNameSpan = document.getElementById('userName');
+            if (userNameSpan) {
+                userNameSpan.textContent = user.email.split('@')[0];
+            }
 
-// Sets the transform style for the carousel
-function setTranslate(translate) {
-    modalImageCarousel.style.transform = `translateX(${translate}px)`;
-}
-
-// Animation loop for smooth dragging
-function animation() {
-    setTranslate(currentTranslate);
-    if (isDragging) requestAnimationFrame(animation);
-}
-
-// Snaps the carousel to the correct image after drag ends
-function snapToImage() {
-    // Determine which image we landed on
-    const movedBy = currentTranslate - prevTranslate;
-    const threshold = carouselWidth * 0.25; // Move threshold (e.g., 25% of image width)
-
-    if (movedBy < -threshold && currentImageIndex < imagesData[currentColumnId].length - 1) {
-        // Swiped left, go to next image
-        currentImageIndex++;
-    } else if (movedBy > threshold && currentImageIndex > 0) {
-        // Swiped right, go to previous image
-        currentImageIndex--;
-    }
-
-    // Update carousel images and reset translation
-    updateCarouselImages(currentImageIndex);
-
-    // After updating, reset the carousel to be centered on the current image
-    currentTranslate = -carouselWidth;
-    modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Re-enable transition for snap
-    setTranslate(currentTranslate);
-    prevTranslate = currentTranslate;
-}
-
-// Function to update carousel images based on currentImageIndex
-function updateCarouselImages(index) {
-    const images = imagesData[currentColumnId];
-    if (!images || images.length === 0) {
-        prevImage.src = '';
-        modalImage.src = '';
-        nextImage.src = '';
-        prevImage.classList.remove('loaded');
-        modalImage.classList.remove('loaded');
-        nextImage.classList.remove('loaded');
-        imageInfoDiv.textContent = 'Изображений нет.';
-        prevImageButton.style.display = 'none';
-        nextImageButton.style.display = 'none';
-        modalImageCarousel.style.transform = `translateX(0)`; // Reset carousel position
-        return;
-    }
-
-    // Set correct display for nav buttons
-    prevImageButton.style.display = (index > 0) ? 'flex' : 'none';
-    nextImageButton.style.display = (index < images.length - 1) ? 'flex' : 'none';
-
-    // Current image
-    const currentImageData = images[index];
-    currentImageKey = currentImageData.key;
-    currentImageUrl = currentImageData.url;
-
-    // Previous image
-    const prevImageData = images[index - 1];
-    // Next image
-    const nextImageData = images[index + 1];
-
-    // Reset loaded class and src
-    prevImage.classList.remove('loaded');
-    modalImage.classList.remove('loaded');
-    nextImage.classList.remove('loaded');
-    prevImage.src = '';
-    modalImage.src = '';
-    nextImage.src = '';
-
-    // Function to load image with fallback for errors
-    const loadImage = (imgElement, url, altText) => {
-        imgElement.alt = altText;
-        if (url) {
-            imgElement.crossOrigin = "anonymous"; // Needed for images from Cloudinary or other CDN for canvas/etc.
-            imgElement.src = url;
-            imgElement.onload = () => {
-                imgElement.classList.add('loaded');
-                // Check if this is the modalImage being loaded and adjust carousel
-                if (imgElement === modalImage) {
-                    currentTranslate = -carouselWidth; // Ensure it's always centered on load
-                    setTranslate(currentTranslate);
-                }
-            };
-            imgElement.onerror = () => {
-                console.error(`Failed to load image: ${url}`);
-                imgElement.src = ''; // Clear broken src
-                imgElement.alt = 'Ошибка загрузки';
-                imgElement.classList.remove('loaded');
-                // Optionally display a placeholder or error message on the image itself
-                // For example, add a class to imgElement and style it to show a broken image icon
-            };
+            if (isAuthPage) {
+                window.location.href = "main-page.html";
+            } else {
+                loadImagesFromFirebase();
+            }
         } else {
-            imgElement.alt = ''; // Clear alt text if no image
+            if (!isAuthPage) {
+                window.location.href = "entry.html";
+            }
         }
-    };
+    });
 
-    // Load images
-    loadImage(prevImage, prevImageData ? prevImageData.url : '', 'Предыдущее изображение');
-    loadImage(modalImage, currentImageData.url, 'Текущее изображение');
-    loadImage(nextImage, nextImageData ? nextImageData.url : '', 'Следующее изображение');
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.multiple = true;
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
 
-    // Update info
-    imageInfoDiv.textContent = `Изображение ${index + 1} из ${images.length}`;
-    updateComments(currentImageKey);
-}
+    const uploadButtons = document.querySelectorAll('.top-upload-buttons-container button[id^="upload"]');
+    uploadButtons.forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const column = button.id.replace('upload', '').toLowerCase();
+            fileInput.dataset.column = column;
+            fileInput.click();
+        });
+    });
 
-// Handle carousel navigation
-function navigateCarousel(direction) {
-    let newIndex = currentImageIndex + direction;
-    if (newIndex >= 0 && newIndex < imagesData[currentColumnId].length) {
-        currentImageIndex = newIndex;
-        // Disable transition temporarily for instant snap to next/prev image slot
-        modalImageCarousel.style.transition = 'none';
-        currentTranslate = -carouselWidth - (direction * carouselWidth); // Move to new slot instantly
+    fileInput.addEventListener('change', async (event) => {
+        const files = event.target.files;
+        if (files.length > 0) {
+            const selectedColumn = fileInput.dataset.column;
+
+            for (const file of files) {
+                try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("upload_preset", "ever_together_upload");
+
+                    const cloudinaryResponse = await fetch("https://api.cloudinary.com/v1_1/dozbf3jis/image/upload", {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!cloudinaryResponse.ok) {
+                        let errorDetails = `HTTP ошибка ${cloudinaryResponse.status}: ${cloudinaryResponse.statusText}`;
+                        try {
+                            const errorData = await cloudinaryResponse.json();
+                            if (errorData.error && errorData.error.message) {
+                                errorDetails += ` - ${errorData.error.message}`;
+                            }
+                        } catch (e) {
+                        }
+                        alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorDetails}. Проверьте консоль.`);
+                        continue;
+                    }
+
+                    const cloudinaryData = await cloudinaryResponse.json();
+
+                    if (cloudinaryData.secure_url) {
+                        const newImageRef = push(dbRef(database, 'images'));
+                        await set(newImageRef, {
+                            url: cloudinaryData.secure_url,
+                            timestamp: new Date().toISOString(),
+                            column: selectedColumn
+                        });
+                    } else {
+                        const errorMsg = cloudinaryData.error && cloudinaryData.error.message ? cloudinaryData.error.message : "URL не получен от Cloudinary.";
+                        alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorMsg}.`);
+                    }
+                } catch (error) {
+                    alert(`Произошла ошибка при загрузке файла ${file.name}: ${error.message}. Проверьте консоль.`);
+                }
+            }
+            event.target.value = null;
+        }
+    });
+
+    function loadImagesFromFirebase() {
+        const imagesRef = dbRef(database, 'images');
+
+        onValue(imagesRef, (snapshot) => {
+            const data = snapshot.val();
+            
+            leftColumn.innerHTML = '';
+            centerColumn.innerHTML = '';
+            rightColumn.innerHTML = '';
+
+            if (data) {
+                const imageArray = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+                
+                imageArray.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                const fragments = {
+                    left: document.createDocumentFragment(),
+                    center: document.createDocumentFragment(),
+                    right: document.createDocumentFragment()
+                };
+
+                imageArray.forEach((imgData) => {
+                    const targetColumnName = imgData.column;
+                    const imageWrapper = createImageElement(imgData, imgData.id);
+                    if (fragments[targetColumnName]) {
+                        fragments[targetColumnName].appendChild(imageWrapper);
+                    } else {
+                        // Если столбец не найден (возможно, устаревшие данные), добавим в левую колонку по умолчанию
+                        fragments.left.appendChild(imageWrapper);
+                    }
+                });
+                
+                leftColumn.appendChild(fragments.left);
+                centerColumn.appendChild(fragments.center);
+                rightColumn.appendChild(fragments.right);
+                
+            } else {
+                // console.log("No images found in Firebase.");
+            }
+        }, (error) => {
+            alert("Ошибка загрузки данных из базы данных. Проверьте консоль разработчика.");
+            console.error("Firebase load error:", error);
+        });
+    }
+
+    function createImageElement(imageData, imageId) {
+        const imageWrapper = document.createElement('div');
+        imageWrapper.classList.add('image-wrapper');
+        imageWrapper.dataset.timestamp = imageData.timestamp;
+        imageWrapper.dataset.id = imageId;
+        imageWrapper.dataset.columnOrigin = imageData.column;
+
+        const img = document.createElement('img');
+        img.src = imageData.url; // <-- Здесь устанавливается URL Cloudinary
+        console.log(`DEBUG: Set src for thumbnail ID ${imageId} to: ${img.src}`);
+        img.classList.add('thumbnail');
+        img.alt = 'Gallery Image';
+        img.loading = 'lazy';
+        img.setAttribute('crossorigin', 'anonymous');
+
+        img.onload = () => {
+            img.classList.add('loaded');
+        };
+
+        img.onerror = (e) => {
+            imageWrapper.classList.add('image-load-error');
+            const errorText = document.createElement('p');
+            errorText.textContent = 'Ошибка загрузки фото';
+            errorText.style.color = 'red';
+            errorText.style.position = 'absolute';
+            errorText.style.top = '50%';
+            errorText.style.left = '50%';
+            errorText.style.transform = 'translate(-50%, -50%)';
+            errorText.style.textAlign = 'center';
+            imageWrapper.appendChild(errorText);
+        };
+
+        imageWrapper.addEventListener('click', (event) => {
+            if (event.target === imageWrapper || event.target === img) {
+                const clickedThumbnailSrc = imageWrapper.querySelector('img').src;
+                console.log(`DEBUG: Clicked thumbnail ID ${imageWrapper.dataset.id}, its src is: ${clickedThumbnailSrc}`);
+                openModal(imageWrapper);
+            }
+        });
+
+        imageWrapper.appendChild(img);
+        return imageWrapper;
+    }
+
+    function openModal(imageWrapper) {
+        if (!imageWrapper) {
+            return;
+        }
+        currentImageWrapper = imageWrapper;
+        currentImageId = imageWrapper.dataset.id;
+        const currentColumn = imageWrapper.dataset.columnOrigin;
+
+        // Заполняем allImagesInCurrentColumn и currentImageIndex
+        allImagesInCurrentColumn = Array.from(document.getElementById(`${currentColumn}Column`).querySelectorAll('.image-wrapper'))
+                                        .sort((a, b) => new Date(b.dataset.timestamp) - new Date(a.dataset.timestamp));
+        currentImageIndex = allImagesInCurrentColumn.findIndex(wrapper => wrapper.dataset.id === currentImageId);
+
+        if (!imageModalGlobalRef || !modalImageCarousel || !prevImageElement || !modalImageElement || !nextImageElement || !moreOptionsButtonGlobalRef || !optionsDropdownGlobalRef || !imageInfo || !commentsList || !commentInput || !sendCommentBtn) {
+            console.error("One or more modal elements are missing.");
+            return;
+        }
+        
+        imageModalGlobalRef.classList.add('show-modal');
+        optionsDropdownGlobalRef.style.display = 'none';
+
+        // Блокируем прокрутку body, если модальное окно открыто
+        document.body.style.overflow = 'hidden'; 
+        if (imageContainerGlobalRef) {
+            imageContainerGlobalRef.style.pointerEvents = 'none';
+        }
+
+        // Используем requestAnimationFrame, чтобы убедиться, что модальное окно и карусель
+        // полностью отрисованы и имеют правильные размеры, прежде чем мы будем использовать offsetWidth
+        requestAnimationFrame(() => {
+            modalImageCarousel.style.transition = 'none'; 
+            currentTranslate = -modalImageCarousel.offsetWidth; // Центрируем `modalImageElement`
+            setTranslate(currentTranslate);
+            updateCarouselImages(currentImageIndex); // Загружаем текущее и соседние изображения
+            
+            // После установки начального положения, можно снова включить transition
+            // Используем setTimeout 0 для отложенного включения transition,
+            // чтобы браузер успел отрисовать изменения без transition
+            setTimeout(() => {
+                modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+            }, 0);
+        });
+
+
+        imageInfo.innerHTML = '';
+        commentsList.innerHTML = '';
+        commentInput.value = '';
+
+        // Комментарии загружаются внутри updateCarouselImages
+        // loadCommentsForImage(currentImageId); 
+    }
+
+    // Обновляет src изображений в карусели
+    function updateCarouselImages(index) {
+        // УДАЛЕНЫ СТРОКИ prevImageElement.src = ''; modalImageElement.src = ''; nextImageElement.src = '';
+
+        // Текущее изображение
+        const currentImgDataWrapper = allImagesInCurrentColumn[index];
+        if (currentImgDataWrapper) {
+            const thumbnailImg = currentImgDataWrapper.querySelector('img');
+            if (thumbnailImg) {
+                const thumbnailSrc = thumbnailImg.src;
+                console.log("DEBUG: Thumbnail image source for current image in updateCarouselImages:", thumbnailSrc);
+                if (thumbnailSrc && thumbnailSrc !== window.location.href) {
+                    modalImageElement.src = thumbnailSrc;
+                    modalImageElement.dataset.id = currentImgDataWrapper.dataset.id;
+                    modalImageElement.setAttribute('crossorigin', 'anonymous');
+                    currentImageId = currentImgDataWrapper.dataset.id;
+                    modalImageElement.onerror = () => { 
+                        console.error("Failed to load modalImageElement src:", modalImageElement.src); 
+                        modalImageElement.alt = "Ошибка загрузки фото";
+                    };
+                } else {
+                    console.error("DEBUG: Thumbnail src is invalid or empty for current image, or is the page URL (in updateCarouselImages):", thumbnailSrc);
+                    modalImageElement.src = '';
+                    modalImageElement.alt = "Изображение не найдено или недействительно.";
+                }
+            } else {
+                console.error("DEBUG: No img element found in currentImgDataWrapper for current image.");
+                modalImageElement.src = '';
+                modalImageElement.alt = "Изображение не найдено.";
+            }
+        } else {
+            console.warn("Attempted to update carousel with invalid current image index:", index);
+            currentImageId = null;
+        }
+
+        // Предыдущее изображение
+        if (index > 0) {
+            const prevImgDataWrapper = allImagesInCurrentColumn[index - 1];
+            const prevThumbnailImg = prevImgDataWrapper.querySelector('img');
+            if (prevThumbnailImg) {
+                const prevThumbnailSrc = prevThumbnailImg.src;
+                console.log("DEBUG: Thumbnail image source for previous image in updateCarouselImages:", prevThumbnailSrc);
+                if (prevThumbnailSrc && prevThumbnailSrc !== window.location.href) {
+                    prevImageElement.src = prevThumbnailSrc;
+                    prevImageElement.setAttribute('crossorigin', 'anonymous');
+                    prevImageElement.onerror = () => { console.error("Failed to load prevImageElement src:", prevImageElement.src); };
+                } else {
+                    console.error("DEBUG: Thumbnail src is invalid or empty for previous image, or is the page URL (in updateCarouselImages):", prevThumbnailSrc);
+                    prevImageElement.src = '';
+                }
+            } else {
+                console.error("DEBUG: No img element found in prevImgDataWrapper for previous image.");
+                prevImageElement.src = '';
+            }
+        } else {
+            prevImageElement.src = '';
+        }
+
+        // Следующее изображение
+        if (index < allImagesInCurrentColumn.length - 1) {
+            const nextImgDataWrapper = allImagesInCurrentColumn[index + 1];
+            const nextThumbnailImg = nextImgDataWrapper.querySelector('img');
+            if (nextThumbnailImg) {
+                const nextThumbnailSrc = nextThumbnailImg.src;
+                console.log("DEBUG: Thumbnail image source for next image in updateCarouselImages:", nextThumbnailSrc);
+                if (nextThumbnailSrc && nextThumbnailSrc !== window.location.href) {
+                    nextImageElement.src = nextThumbnailSrc;
+                    nextImageElement.setAttribute('crossorigin', 'anonymous');
+                    nextImageElement.onerror = () => { console.error("Failed to load nextImageElement src:", nextImageElement.src); };
+                } else {
+                    console.error("DEBUG: Thumbnail src is invalid or empty for next image, or is the page URL (in updateCarouselImages):", nextThumbnailSrc);
+                    nextImageElement.src = '';
+                }
+            } else {
+                console.error("DEBUG: No img element found in nextImgDataWrapper for next image.");
+                nextImageElement.src = '';
+            }
+        } else {
+            nextImageElement.src = '';
+        }
+
+        loadCommentsForImage(currentImageId);
+    }
+
+    // --- Функции для свайпа ---
+    function setTranslate(xPos) {
+        modalImageCarousel.style.transform = `translateX(${xPos}px)`;
+    }
+
+    function getTranslateX(element) {
+        const style = window.getComputedStyle(element);
+        const matrix = new DOMMatrixReadOnly(style.transform);
+        return matrix.m41;
+    }
+
+    function touchStart(event) {
+        // Игнорируем, если дропдаун открыт, чтобы не конфликтовать
+        if (optionsDropdownGlobalRef.style.display === 'block') { 
+            return;
+        }
+
+        // Предотвращаем дефолтное поведение, чтобы избежать прокрутки страницы на мобильных
+        // при начале свайпа на карусели
+        if (event.target === modalImageCarousel || modalImageCarousel.contains(event.target)) {
+            event.preventDefault();
+        }
+        
+        isDragging = true;
+        startX = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+        modalImageCarousel.classList.add('dragging');
+        modalImageCarousel.style.transition = 'none'; // Отключаем transition во время перетаскивания
+        
+        prevTranslate = getTranslateX(modalImageCarousel); // Запоминаем текущее смещение в px
+    }
+
+    function touchMove(event) {
+        if (!isDragging) return;
+
+        // Ensure only one touch is tracked for mobile to prevent erratic behavior
+        if (event.type.includes('touch') && event.touches.length > 1) return;
+
+        // Предотвращаем дефолтное поведение, чтобы не прокручивалась страница
+        // если пользователь свайпает по карусели, но не по комментариям.
+        if (event.target === modalImageCarousel || modalImageCarousel.contains(event.target)) {
+            event.preventDefault();
+        }
+
+        const currentPosition = event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
+        currentTranslate = prevTranslate + (currentPosition - startX); // currentTranslate is the new calculated position based on drag
         setTranslate(currentTranslate);
-        prevTranslate = currentTranslate;
-
-        // Force a reflow to ensure the non-transitioned movement happens before re-enabling transition
-        modalImageCarousel.offsetWidth;
-
-        // Then, update the images. This will correctly center the new modalImage
-        updateCarouselImages(currentImageIndex);
-
-        // Re-enable transition after the snap
-        setTimeout(() => {
-            modalImageCarousel.style.transition = 'transform 0.3s ease-out';
-        }, 0);
-    }
-}
-
-
-// === Image Rendering ===
-
-// Renders images into a specific column
-function renderImages(columnId, images) {
-    const columnElement = document.getElementById(columnId);
-    columnElement.innerHTML = ''; // Clear existing images
-    images.forEach(img => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'image-wrapper';
-        wrapper.dataset.key = img.key;
-        wrapper.dataset.column = columnId;
-
-        const imgElement = document.createElement('img');
-        imgElement.src = img.url;
-        imgElement.alt = img.name || 'Галерея';
-
-        // Add loaded class when image loads
-        imgElement.onload = () => {
-            imgElement.classList.add('loaded');
-            // Hide spinner or placeholder if you have one
-        };
-        imgElement.onerror = () => {
-            console.error(`Error loading image from URL: ${img.url}`);
-            wrapper.classList.add('image-load-error'); // Add error class for styling
-            imgElement.alt = 'Ошибка загрузки изображения';
-            imgElement.src = ''; // Clear broken image src
-        };
-
-        wrapper.appendChild(imgElement);
-        columnElement.appendChild(wrapper);
-
-        wrapper.addEventListener('click', () => {
-            openModal(img.key, columnId);
-        });
-    });
-}
-
-// === Modal Functions ===
-
-function openModal(imageKey, column) {
-    currentColumnId = column;
-    const imagesInColumn = imagesData[column];
-    currentImageIndex = imagesInColumn.findIndex(img => img.key === imageKey);
-
-    if (currentImageIndex === -1) {
-        console.error("Image not found in the current column.");
-        return;
     }
 
-    // Calculate carousel width once modal is visible
-    imageModal.classList.add('show-modal');
-    // Ensure modal is visible and rendered before getting offsetWidth
-    requestAnimationFrame(() => {
-        carouselWidth = modalImageCarousel.offsetWidth / 3; // Width of one image slot
+    function touchEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        modalImageCarousel.classList.remove('dragging');
 
-        // Initial setup for carousel: center the current image
-        currentTranslate = -carouselWidth; // Start with modalImage centered
-        prevTranslate = currentTranslate;
-        setTranslate(currentTranslate); // Apply initial centering
-        modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Ensure transition is on
+        const carouselWidth = modalImageCarousel.offsetWidth;
+        const movedBy = currentTranslate - prevTranslate;
+        const threshold = carouselWidth / 4;
 
-        updateCarouselImages(currentImageIndex);
-    });
-    
-    document.body.style.overflow = 'hidden'; // Prevent background scroll
-}
+        let finalTranslateX = -carouselWidth;
+        let newImageIndex = currentImageIndex;
 
-function closeModal() {
-    imageModal.classList.add('hide-modal');
-    imageModal.classList.remove('show-modal');
-    // Allow animation to play before hiding
-    imageModal.addEventListener('animationend', () => {
-        imageModal.classList.remove('hide-modal');
-        document.body.style.overflow = ''; // Restore background scroll
-    }, { once: true });
-
-    // Hide dropdown just in case
-    optionsDropdown.style.display = 'none';
-}
-
-// === Image Upload Logic ===
-
-function uploadImage(file, columnId) {
-    if (!currentUserId) {
-        alert("Пожалуйста, войдите, чтобы загружать изображения.");
-        return;
-    }
-
-    const imageRef = storageRef(storage, `images/${currentUserId}/${columnId}/${file.name}-${Date.now()}`);
-    const uploadTask = uploadBytesResumable(imageRef, file);
-
-    uploadTask.on('state_changed',
-        (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log(`Upload is ${progress}% done`);
-            // You can add UI feedback for progress here
-        },
-        (error) => {
-            console.error("Upload failed:", error);
-            alert("Ошибка при загрузке изображения.");
-        },
-        () => {
-            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                const newImageRef = push(dbRef(database, `users/${currentUserId}/images/${columnId}`));
-                set(newImageRef, {
-                    url: downloadURL,
-                    name: file.name,
-                    timestamp: Date.now(),
-                    uploadedBy: currentUserName,
-                    comments: {} // Initialize comments object
-                }).then(() => {
-                    console.log("Image data saved to database.");
-                    // Data will be re-rendered by onValue listener
-                }).catch((error) => {
-                    console.error("Error saving image data:", error);
-                    alert("Ошибка при сохранении данных изображения.");
-                });
-            });
-        }
-    );
-}
-
-// Attach file input listeners
-function setupUploadButtons() {
-    [uploadLeftBtn, uploadCenterBtn, uploadRightBtn].forEach(button => {
-        button.addEventListener('click', () => {
-            if (!currentUserId) {
-                alert("Пожалуйста, войдите, чтобы загружать изображения.");
-                return;
+        if (movedBy < -threshold) { // Swiped left (towards next image)
+            if (currentImageIndex < allImagesInCurrentColumn.length - 1) {
+                newImageIndex = currentImageIndex + 1;
+                finalTranslateX = -carouselWidth * 2;
             }
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    uploadImage(file, button.id.replace('upload', '').toLowerCase());
-                }
-            };
-            input.click();
-        });
-    });
-}
+        } else if (movedBy > threshold) { // Swiped right (towards previous image)
+            if (currentImageIndex > 0) {
+                newImageIndex = currentImageIndex - 1;
+                finalTranslateX = 0;
+            }
+        }
 
-// === Comments Logic ===
+        modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+        setTranslate(finalTranslateX);
 
-function updateComments(imageKey) {
-    commentsList.innerHTML = ''; // Clear existing comments
-    const imageRef = dbRef(database, `users/${currentUserId}/images/${currentColumnId}/${imageKey}/comments`);
-    onValue(imageRef, (snapshot) => {
-        commentsList.innerHTML = ''; // Clear before re-rendering
-        const comments = snapshot.val();
-        if (comments) {
-            const commentArray = Object.values(comments).sort((a, b) => a.timestamp - b.timestamp);
-            commentArray.forEach(comment => {
-                const p = document.createElement('p');
-                p.textContent = `${comment.userName}: ${comment.text}`;
-                commentsList.appendChild(p);
-            });
+        if (newImageIndex !== currentImageIndex) {
+            currentImageIndex = newImageIndex;
+            // After the animation finishes, reset carousel to show the new current image centrally
+            modalImageCarousel.addEventListener('transitionend', function handler() {
+                modalImageCarousel.removeEventListener('transitionend', handler);
+                modalImageCarousel.style.transition = 'none'; // Temporarily disable transition for instant snap
+                currentTranslate = -carouselWidth; // Reset to center the new main image
+                setTranslate(currentTranslate);
+                updateCarouselImages(currentImageIndex); // Update image sources for the new central image
+                
+                // Use setTimeout to re-enable transition after the browser has rendered the snap
+                setTimeout(() => {
+                    modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+                }, 0);
+            }, { once: true });
         } else {
-            commentsList.innerHTML = '<p class="no-comments">Пока нет комментариев.</p>';
+            // No index change, snap back to current image
+            currentTranslate = -carouselWidth;
+            setTranslate(currentTranslate);
         }
-        // Scroll to bottom of comments list
-        commentsList.scrollTop = commentsList.scrollHeight;
+    }
+
+    // Добавляем слушателей событий для свайпа к modalImageCarousel
+    modalImageCarousel.addEventListener('touchstart', touchStart, { passive: false });
+    modalImageCarousel.addEventListener('touchmove', touchMove, { passive: false });
+    modalImageCarousel.addEventListener('touchend', touchEnd);
+
+    // Для десктопа:
+    modalImageCarousel.addEventListener('mousedown', touchStart); 
+    modalImageCarousel.addEventListener('mousemove', touchMove); 
+    // События mouseup и mouseleave должны быть на document, чтобы захватывать отпускания вне элемента
+    document.addEventListener('mouseup', touchEnd); 
+    document.addEventListener('mouseleave', (event) => { 
+        // Если курсор мыши покидает окно браузера во время перетаскивания,
+        // это считается завершением перетаскивания.
+        if (isDragging) {
+            // Дополнительная проверка, чтобы убедиться, что это не просто перемещение по элементам DOM
+            // а именно уход курсора из окна
+            if (event.clientY <= 0 || event.clientX <= 0 || (event.clientX >= window.innerWidth || event.clientY >= window.innerHeight)) {
+                touchEnd();
+            }
+        }
     });
-}
 
-sendCommentBtn.addEventListener('click', () => {
-    const commentText = commentInput.value.trim();
-    if (commentText && currentImageKey && currentUserId) {
-        const commentRef = push(dbRef(database, `users/${currentUserId}/images/${currentColumnId}/${currentImageKey}/comments`));
-        set(commentRef, {
-            text: commentText,
-            timestamp: Date.now(),
-            userName: currentUserName
-        }).then(() => {
-            commentInput.value = ''; // Clear input
-            // Comments will be updated by onValue listener
-        }).catch((error) => {
-            console.error("Error sending comment:", error);
-            alert("Ошибка при отправке комментария.");
-        });
-    } else {
-        alert("Комментарий не может быть пустым.");
-    }
-});
-
-// === Image Actions (Delete/Move) ===
-
-moreOptionsButton.addEventListener('click', (event) => {
-    event.stopPropagation(); // Prevent modal from closing immediately
-    optionsDropdown.style.display = optionsDropdown.style.display === 'block' ? 'none' : 'block';
-});
-
-document.addEventListener('click', (event) => {
-    if (!optionsDropdown.contains(event.target) && event.target !== moreOptionsButton) {
-        optionsDropdown.style.display = 'none';
-    }
-});
-
-optionsDropdown.addEventListener('click', (event) => {
-    const action = event.target.dataset.action;
-    if (!action || !currentImageKey || !currentColumnId || !currentUserId) return;
-
-    if (action === 'delete') {
-        if (confirm("Вы уверены, что хотите удалить это изображение?")) {
-            // Delete from Storage
-            const imgData = imagesData[currentColumnId].find(img => img.key === currentImageKey);
-            if (imgData && imgData.url) {
-                const imgStorageRef = storageRef(storage, imgData.url);
-                deleteObject(imgStorageRef).then(() => {
-                    console.log("Image deleted from storage.");
-                }).catch((error) => {
-                    console.error("Error deleting image from storage:", error);
-                    alert("Ошибка при удалении изображения из хранилища.");
-                });
-            }
-
-            // Delete from Database
-            remove(dbRef(database, `users/${currentUserId}/images/${currentColumnId}/${currentImageKey}`))
-                .then(() => {
-                    console.log("Image data deleted from database.");
-                    closeModal();
-                })
-                .catch((error) => {
-                    console.error("Error deleting image data:", error);
-                    alert("Ошибка при удалении данных изображения.");
-                });
+    function loadCommentsForImage(imageId) {
+        if (!imageId) {
+            commentsList.innerHTML = '';
+            return;
         }
-    } else if (action === 'move') {
-        const targetColumnId = event.target.dataset.column;
-        if (targetColumnId && targetColumnId !== currentColumnId) {
-            const imgToMove = imagesData[currentColumnId].find(img => img.key === currentImageKey);
-            if (imgToMove) {
-                // Remove from old location
-                remove(dbRef(database, `users/${currentUserId}/images/${currentColumnId}/${currentImageKey}`))
-                    .then(() => {
-                        // Add to new location
-                        set(dbRef(database, `users/${currentUserId}/images/${targetColumnId}/${currentImageKey}`), imgToMove)
-                            .then(() => {
-                                console.log(`Image moved from ${currentColumnId} to ${targetColumnId}`);
-                                closeModal(); // Close modal after move
-                            })
-                            .catch((error) => {
-                                console.error("Error moving image:", error);
-                                alert("Ошибка при перемещении изображения.");
-                            });
-                    })
-                    .catch((error) => {
-                        console.error("Error removing image from old column:", error);
-                        alert("Ошибка при перемещении изображения.");
+
+        const commentsRef = dbRef(database, `images/${imageId}/comments`);
+        onValue(commentsRef, (snapshot) => {
+            const commentsData = snapshot.val();
+            commentsList.innerHTML = '';
+
+            if (commentsData) {
+                const commentArray = Object.keys(commentsData).map(key => ({ id: key, ...commentsData[key] }));
+                commentArray.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+                commentArray.forEach(comment => {
+                    const commentElement = document.createElement('p');
+                    const authorSpan = document.createElement('span');
+                    authorSpan.classList.add('comment-author');
+                    authorSpan.textContent = `${comment.author.split('@')[0]}: `;
+
+                    const textSpan = document.createElement('span');
+                    textSpan.classList.add('comment-text');
+                    textSpan.textContent = comment.text;
+
+                    const dateSpan = document.createElement('span');
+                    dateSpan.classList.add('comment-date');
+                    const date = new Date(comment.timestamp);
+                    dateSpan.textContent = date.toLocaleString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
                     });
-            }
-        }
-    }
-    optionsDropdown.style.display = 'none'; // Hide dropdown after action
-});
 
-// === Authentication & Data Loading ===
-
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        currentUserId = user.uid;
-        // Fetch user's name or set a default
-        const userRef = dbRef(database, `users/${currentUserId}/profile/name`);
-        onValue(userRef, (snapshot) => {
-            currentUserName = snapshot.val() || user.email || "Пользователь";
-            userNameSpan.textContent = `Привет, ${currentUserName}!`;
-        }, {
-            onlyOnce: true
-        });
-
-        // Load images for all columns
-        ['left', 'center', 'right'].forEach(columnId => {
-            const columnRef = dbRef(database, `users/${currentUserId}/images/${columnId}`);
-            onValue(columnRef, (snapshot) => {
-                const images = [];
-                snapshot.forEach((childSnapshot) => {
-                    images.push({
-                        key: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
+                    commentElement.appendChild(authorSpan);
+                    commentElement.appendChild(textSpan);
+                    commentElement.appendChild(dateSpan);
+                    commentsList.appendChild(commentElement);
                 });
-                imagesData[columnId] = images;
-                renderImages(columnId, images);
+                commentsList.scrollTop = commentsList.scrollHeight;
+            }
+        }, (error) => {
+            console.error("Ошибка загрузки комментариев:", error);
+        });
+    }
+
+    sendCommentBtn.addEventListener('click', async () => {
+        const commentText = commentInput.value.trim();
+        if (commentText === '' || !currentImageId || !window.currentUser) {
+            return;
+        }
+
+        try {
+            const newCommentRef = push(dbRef(database, `images/${currentImageId}/comments`));
+            await set(newCommentRef, {
+                author: window.currentUser,
+                text: commentText,
+                timestamp: new Date().toISOString()
             });
+            commentInput.value = '';
+        } catch (error) {
+            console.error("Ошибка при добавлении комментария:", error);
+            alert("Не удалось добавить комментарий. Попробуйте снова.");
+        }
+    });
+
+    commentInput.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendCommentBtn.click();
+        }
+    });
+
+
+    function toggleOptionsDropdown() {
+        if (!currentImageWrapper) {
+            return;
+        }
+
+        document.querySelectorAll('.options-dropdown').forEach(d => {
+            if (d !== optionsDropdownGlobalRef) {
+                d.style.display = 'none';
+                d.classList.remove('show');
+            }
         });
 
-        setupUploadButtons();
+        if (optionsDropdownGlobalRef.style.display === 'block') {
+            optionsDropdownGlobalRef.style.display = 'none';
+            optionsDropdownGlobalRef.classList.remove('show');
+            return;
+        }
 
-    } else {
-        currentUserId = null;
-        currentUserName = "Гость";
-        userNameSpan.textContent = 'Вы не вошли';
-        // Clear all columns if logged out
-        leftColumn.innerHTML = '';
-        centerColumn.innerHTML = '';
-        rightColumn.innerHTML = '';
-        alert("Вы не авторизованы. Пожалуйста, войдите.");
-        // Redirect to login page or show login/signup options
-        window.location.href = 'auth.html'; // Example redirect
+        optionsDropdownGlobalRef.innerHTML = '';
+
+        const currentColumnId = currentImageWrapper.dataset.columnOrigin;
+
+        const columns = [
+            { id: 'left', name: 'Him peach' },
+            { id: 'center', name: 'Our dreams' },
+            { id: 'right', name: 'Her cat' }
+        ];
+
+        columns.forEach(col => {
+            if (col.id !== currentColumnId) {
+                const moveLink = document.createElement('a');
+                moveLink.href = '#';
+                moveLink.textContent = `Переместить в ${col.name}`;
+                moveLink.dataset.action = 'move';
+                moveLink.dataset.column = col.id;
+                moveLink.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    moveImage(currentImageWrapper.dataset.id, col.id);
+                    optionsDropdownGlobalRef.style.display = 'none';
+                    closeModal();
+                });
+                optionsDropdownGlobalRef.appendChild(moveLink);
+            }
+        });
+
+        const deleteLink = document.createElement('a');
+        deleteLink.href = '#';
+        deleteLink.textContent = 'Удалить';
+        deleteLink.dataset.action = 'delete';
+        deleteLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (confirm('Вы уверены, что хотите удалить это изображение?')) {
+                deleteImage(currentImageWrapper.dataset.id);
+                optionsDropdownGlobalRef.style.display = 'none';
+                closeModal();
+            }
+        });
+        optionsDropdownGlobalRef.appendChild(deleteLink);
+
+        optionsDropdownGlobalRef.style.display = 'block';
+        optionsDropdownGlobalRef.classList.add('show');
     }
-});
 
-
-// === Event Listeners ===
-
-closeModalButton.addEventListener('click', closeModal);
-
-// Modal close on outside click (excluding modal content and options dropdown)
-imageModal.addEventListener('click', (event) => {
-    if (event.target === imageModal) {
-        closeModal();
+    function moveImage(imageId, targetColumnId) {
+        update(dbRef(database, `images/${imageId}`), { column: targetColumnId })
+            .then(() => {
+                // console.log("Изображение перемещено успешно!");
+            })
+            .catch(error => {
+                console.error("Ошибка при перемещении изображения:", error);
+                alert("Не удалось переместить изображение.");
+            });
     }
-});
 
-// Keyboard navigation for carousel and modal close
-document.addEventListener('keydown', (event) => {
-    if (imageModal.classList.contains('show-modal')) {
-        if (event.key === 'ArrowLeft') {
-            navigateCarousel(-1);
-        } else if (event.key === 'ArrowRight') {
-            navigateCarousel(1);
-        } else if (event.key === 'Escape') {
+    function deleteImage(imageId) {
+        remove(dbRef(database, `images/${imageId}`))
+            .then(() => {
+                // console.log("Изображение удалено успешно!");
+            })
+            .catch(error => {
+                console.error("Ошибка при удалении изображения:", error);
+                alert("Не удалось удалить изображение.");
+            });
+    }
+
+    function closeModal() {
+        if (imageModalGlobalRef) {
+            imageModalGlobalRef.classList.remove('show-modal');
+        }
+        if (optionsDropdownGlobalRef) {
+            optionsDropdownGlobalRef.style.display = 'none';
+            optionsDropdownGlobalRef.classList.remove('show');
+        }
+        if (modalImageCarousel) {
+            // Reset the carousel to its default centered state without transition
+            modalImageCarousel.style.transition = 'none'; 
+            currentTranslate = -modalImageCarousel.offsetWidth;
+            setTranslate(currentTranslate);
+            // Re-enable transition for next open, delayed to allow snap
+            setTimeout(() => {
+                modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+            }, 0);
+        }
+        if (imageInfo) {
+            imageInfo.innerHTML = '';
+        }
+        if (commentsList) {
+            commentsList.innerHTML = '';
+        }
+        if (commentInput) {
+            commentInput.value = '';
+        }
+
+        document.body.style.overflow = ''; // Разблокируем прокрутку body
+        if (imageContainerGlobalRef) {
+            imageContainerGlobalRef.style.pointerEvents = 'auto';
+        }
+        currentImageWrapper = null;
+        currentImageId = null;
+        allImagesInCurrentColumn = []; // Очищаем массив при закрытии
+        currentImageIndex = -1; // Сбрасываем индекс
+
+        // Очищаем src всех изображений в карусели
+        prevImageElement.src = '';
+        modalImageElement.src = '';
+        nextImageElement.src = '';
+    }
+
+    moreOptionsButtonGlobalRef.addEventListener('click', (event) => {
+        event.stopPropagation();
+        toggleOptionsDropdown();
+    });
+
+    imageModalGlobalRef.addEventListener('click', (event) => {
+        // Проверяем, что клик был именно по фону модального окна, а не по его содержимому
+        // Исключаем клики по элементам карусели и dropdown, чтобы они не закрывали модал
+        if (event.target === imageModalGlobalRef || 
+            (event.target !== modalImageCarousel && !modalImageCarousel.contains(event.target) &&
+             event.target !== optionsDropdownGlobalRef && !optionsDropdownGlobalRef.contains(event.target) &&
+             event.target !== moreOptionsButtonGlobalRef)) {
             closeModal();
         }
-    }
-});
+    });
 
-prevImageButton.addEventListener('click', () => navigateCarousel(-1));
-nextImageButton.addEventListener('click', () => navigateCarousel(1));
-
-// === Carousel Drag/Swipe Functionality ===
-
-modalImageCarousel.addEventListener('pointerdown', (e) => {
-    isDragging = true;
-    startPos = e.clientX || e.touches[0].clientX;
-    modalImageCarousel.style.transition = 'none'; // Disable transition during drag
-    prevTranslate = currentTranslate;
-    animationId = requestAnimationFrame(animation);
-});
-
-modalImageCarousel.addEventListener('pointermove', throttle((e) => {
-    if (!isDragging) return;
-    const currentPosition = e.clientX || e.touches[0].clientX;
-    const diff = currentPosition - startPos;
-    // Limit drag to within bounds of previous and next image slots
-    const minTranslate = -2 * carouselWidth; // max left for previous image
-    const maxTranslate = 0; // max right for next image
-
-    let newTranslate = prevTranslate + diff;
-    // Clamp the translation to prevent dragging too far
-    if (newTranslate > maxTranslate + carouselWidth / 4) { // Add a small elastic effect beyond bounds
-        newTranslate = maxTranslate + carouselWidth / 4;
-    } else if (newTranslate < minTranslate - carouselWidth / 4) {
-        newTranslate = minTranslate - carouselWidth / 4;
-    }
-    currentTranslate = newTranslate;
-
-}, 100)); // Throttle to prevent performance issues
-
-modalImageCarousel.addEventListener('pointerup', () => {
-    if (!isDragging) return;
-    cancelAnimationFrame(animationId);
-    isDragging = false;
-    snapToImage();
-});
-
-modalImageCarousel.addEventListener('pointerleave', () => {
-    if (!isDragging) return;
-    cancelAnimationFrame(animationId);
-    isDragging = false;
-    snapToImage();
-});
-
-// Update carouselWidth on window resize
-window.addEventListener('resize', () => {
-    if (imageModal.classList.contains('show-modal')) {
-        carouselWidth = modalImageCarousel.offsetWidth / 3;
-        // Re-center current image after resize
-        currentTranslate = -carouselWidth;
-        prevTranslate = currentTranslate;
-        setTranslate(currentTranslate);
-    }
-});
-
-// Prevent body scroll when modal is open, but allow comment scroll and carousel drag
-imageModal.addEventListener('touchmove', (event) => {
-    if (imageModal.classList.contains('show-modal')) {
-        const isTargetComments = commentsList.contains(event.target) || event.target === commentsList;
-        const isTargetCarousel = modalImageCarousel.contains(event.target) || modalImageCarousel.contains(event.target.parentNode);
-
-        // Allow scroll if target is comments list and it's actually scrollable
-        if (isTargetComments && commentsList.scrollHeight > commentsList.clientHeight) {
-            return;
+    document.addEventListener('click', (event) => {
+        // Если дропдаун открыт и клик не был по кнопке или самому дропдауну, закрыть его
+        if (optionsDropdownGlobalRef.style.display === 'block') {
+            if (!moreOptionsButtonGlobalRef.contains(event.target) && !optionsDropdownGlobalRef.contains(event.target)) {
+                optionsDropdownGlobalRef.style.display = 'none';
+                optionsDropdownGlobalRef.classList.remove('show');
+            }
         }
-        // Allow drag if target is carousel and we are dragging
-        if (isTargetCarousel && isDragging) {
-            return;
+    });
+
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) {
+            closeModal();
+        } else if (imageModalGlobalRef && imageModalGlobalRef.classList.contains('show-modal')) {
+            const carouselWidth = modalImageCarousel.offsetWidth;
+            let newIndex = currentImageIndex;
+            let targetX = -carouselWidth; // Default to current position (centered)
+
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault(); 
+                if (currentImageIndex > 0) {
+                    newIndex = currentImageIndex - 1;
+                    targetX = 0; // Show previous image (left slot)
+                } else {
+                    // "Bounce" effect at the start
+                    modalImageCarousel.style.transition = 'transform 0.1s ease-out';
+                    setTranslate(-carouselWidth + 20); // Bounce right (from center)
+                    setTimeout(() => {
+                        setTranslate(-carouselWidth);
+                    }, 100);
+                    return; // Exit as no image change
+                }
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault(); 
+                if (currentImageIndex < allImagesInCurrentColumn.length - 1) {
+                    newIndex = currentImageIndex + 1;
+                    targetX = -carouselWidth * 2; // Show next image (right slot)
+                } else {
+                    // "Bounce" effect at the end
+                    modalImageCarousel.style.transition = 'transform 0.1s ease-out';
+                    setTranslate(-carouselWidth - 20); // Bounce left (from center)
+                    setTimeout(() => {
+                        setTranslate(-carouselWidth);
+                    }, 100);
+                    return; // Exit as no image change
+                }
+            }
+
+            if (newIndex !== currentImageIndex) {
+                currentImageIndex = newIndex;
+                modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+                setTranslate(targetX);
+
+                modalImageCarousel.addEventListener('transitionend', function handler() {
+                    modalImageCarousel.removeEventListener('transitionend', handler);
+                    modalImageCarousel.style.transition = 'none'; // Snap instantly
+                    currentTranslate = -carouselWidth; // Reset to center
+                    setTranslate(currentTranslate);
+                    updateCarouselImages(currentImageIndex);
+                    // Re-enable transition after snap
+                    setTimeout(() => {
+                        modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+                    }, 0);
+                }, { once: true });
+            }
         }
-        // Otherwise, prevent default scroll
-        event.preventDefault();
-    }
-}, { passive: false });
+    });
+
+    // Обработчик touchmove на imageModalGlobalRef (фоне модального окна)
+    imageModalGlobalRef.addEventListener('touchmove', (event) => {
+        if (imageModalGlobalRef.classList.contains('show-modal')) {
+            const isTargetComments = commentsList.contains(event.target) || event.target === commentsList;
+            const isTargetCarousel = modalImageCarousel.contains(event.target) || event.target === modalImageCarousel;
+
+            // Если это свайп по карусели и мы в режиме перетаскивания, позволяем ему работать
+            if (isTargetCarousel && isDragging) {
+                return;
+            }
+            // Если цель - список комментариев и он прокручивается, позволяем ему работать
+            if (isTargetComments && commentsList.scrollHeight > commentsList.clientHeight) {
+                return;
+            }
+            // В остальных случаях предотвращаем прокрутку фона
+            event.preventDefault();
+        }
+    }, { passive: false });
+
+});
