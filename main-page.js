@@ -28,354 +28,386 @@ const uploadRightBtn = document.getElementById('uploadRight');
 const leftColumn = document.getElementById('leftColumn');
 const centerColumn = document.getElementById('centerColumn');
 const rightColumn = document.getElementById('rightColumn');
-
-// Modal Elements
 const imageModal = document.getElementById('imageModal');
-const closeModalBtn = document.querySelector('.close-button');
+const closeModalButton = document.getElementById('closeModalButton');
 const modalImage = document.getElementById('modalImage');
 const prevImage = document.getElementById('prevImage');
 const nextImage = document.getElementById('nextImage');
-const modalImageCarousel = document.getElementById('modalImageCarousel');
-const prevImageButton = document.getElementById('prevImageButton');
-const nextImageButton = document.getElementById('nextImageButton');
-const imageInfo = document.getElementById('imageInfo');
+const imageInfoDiv = document.getElementById('imageInfo');
 const commentsList = document.getElementById('commentsList');
 const commentInput = document.getElementById('commentInput');
 const sendCommentBtn = document.getElementById('sendCommentBtn');
 const moreOptionsButton = document.getElementById('moreOptionsButton');
 const optionsDropdown = document.getElementById('optionsDropdown');
+const prevImageButton = document.getElementById('prevImageButton');
+const nextImageButton = document.getElementById('nextImageButton');
+const modalImageCarousel = document.getElementById('modal-image-carousel');
 
-// Global Variables for Modal and Carousel
-let allImagesInCurrentColumn = [];
-let currentImageIndex = 0;
-let currentColumnRef = null; // Для отслеживания текущей колонки Firebase
-let currentImageId = null; // Для отслеживания ID текущего изображения в модальном окне
 
-// Dragging/Swiping variables
+// === Global Variables ===
+let currentUserId = null;
+let currentUserName = "Гость";
+let imagesData = {
+    "left": [],
+    "center": [],
+    "right": []
+};
+let currentImageIndex = 0; // Index of the currently viewed image in the modal
+let currentColumnId = null; // Column of the currently viewed image
+let currentImageKey = null; // Key of the currently viewed image in Firebase
+let currentImageUrl = null; // URL of the currently viewed image
+
+// Carousel drag variables
 let isDragging = false;
 let startPos = 0;
 let currentTranslate = 0;
 let prevTranslate = 0;
-let animationID = 0;
-let carouselWidth = 0; // Будет динамически обновляться
+let animationId;
+let carouselWidth; // Will be set dynamically based on actual carousel container width
 
-// === Firebase Authentication ===
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        userNameSpan.textContent = user.email;
-        setupDatabaseListeners();
-    } else {
-        userNameSpan.textContent = 'Гость';
-        // Если пользователь не авторизован, можно перенаправить на страницу входа
-        window.location.href = 'index.html';
+// === Utility Functions ===
+
+// Throttling function to limit how often a function can run
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
     }
-});
+}
 
-// === Image Upload Logic ===
-const fileInput = document.createElement('input');
-fileInput.type = 'file';
-fileInput.accept = 'image/*';
+// Sets the transform style for the carousel
+function setTranslate(translate) {
+    modalImageCarousel.style.transform = `translateX(${translate}px)`;
+}
 
-uploadLeftBtn.addEventListener('click', () => {
-    fileInput.dataset.column = 'left';
-    fileInput.click();
-});
+// Animation loop for smooth dragging
+function animation() {
+    setTranslate(currentTranslate);
+    if (isDragging) requestAnimationFrame(animation);
+}
 
-uploadCenterBtn.addEventListener('click', () => {
-    fileInput.dataset.column = 'center';
-    fileInput.click();
-});
+// Snaps the carousel to the correct image after drag ends
+function snapToImage() {
+    // Determine which image we landed on
+    const movedBy = currentTranslate - prevTranslate;
+    const threshold = carouselWidth * 0.25; // Move threshold (e.g., 25% of image width)
 
-uploadRightBtn.addEventListener('click', () => {
-    fileInput.dataset.column = 'right';
-    fileInput.click();
-});
-
-fileInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    const column = fileInput.dataset.column;
-    if (file && column) {
-        uploadImage(file, column);
+    if (movedBy < -threshold && currentImageIndex < imagesData[currentColumnId].length - 1) {
+        // Swiped left, go to next image
+        currentImageIndex++;
+    } else if (movedBy > threshold && currentImageIndex > 0) {
+        // Swiped right, go to previous image
+        currentImageIndex--;
     }
-    fileInput.value = ''; // Сбросить input, чтобы можно было загрузить тот же файл снова
-});
 
-async function uploadImage(file, column) {
-    if (!auth.currentUser) {
-        alert('Пожалуйста, войдите, чтобы загружать изображения.');
+    // Update carousel images and reset translation
+    updateCarouselImages(currentImageIndex);
+
+    // After updating, reset the carousel to be centered on the current image
+    currentTranslate = -carouselWidth;
+    modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Re-enable transition for snap
+    setTranslate(currentTranslate);
+    prevTranslate = currentTranslate;
+}
+
+// Function to update carousel images based on currentImageIndex
+function updateCarouselImages(index) {
+    const images = imagesData[currentColumnId];
+    if (!images || images.length === 0) {
+        prevImage.src = '';
+        modalImage.src = '';
+        nextImage.src = '';
+        prevImage.classList.remove('loaded');
+        modalImage.classList.remove('loaded');
+        nextImage.classList.remove('loaded');
+        imageInfoDiv.textContent = 'Изображений нет.';
+        prevImageButton.style.display = 'none';
+        nextImageButton.style.display = 'none';
+        modalImageCarousel.style.transform = `translateX(0)`; // Reset carousel position
         return;
     }
 
-    const fileRef = storageRef(storage, `images/${column}/${auth.currentUser.uid}/${file.name}_${Date.now()}`);
-    const uploadTask = uploadBytesResumable(fileRef, file);
+    // Set correct display for nav buttons
+    prevImageButton.style.display = (index > 0) ? 'flex' : 'none';
+    nextImageButton.style.display = (index < images.length - 1) ? 'flex' : 'none';
+
+    // Current image
+    const currentImageData = images[index];
+    currentImageKey = currentImageData.key;
+    currentImageUrl = currentImageData.url;
+
+    // Previous image
+    const prevImageData = images[index - 1];
+    // Next image
+    const nextImageData = images[index + 1];
+
+    // Reset loaded class and src
+    prevImage.classList.remove('loaded');
+    modalImage.classList.remove('loaded');
+    nextImage.classList.remove('loaded');
+    prevImage.src = '';
+    modalImage.src = '';
+    nextImage.src = '';
+
+    // Function to load image with fallback for errors
+    const loadImage = (imgElement, url, altText) => {
+        imgElement.alt = altText;
+        if (url) {
+            imgElement.crossOrigin = "anonymous"; // Needed for images from Cloudinary or other CDN for canvas/etc.
+            imgElement.src = url;
+            imgElement.onload = () => {
+                imgElement.classList.add('loaded');
+                // Check if this is the modalImage being loaded and adjust carousel
+                if (imgElement === modalImage) {
+                    currentTranslate = -carouselWidth; // Ensure it's always centered on load
+                    setTranslate(currentTranslate);
+                }
+            };
+            imgElement.onerror = () => {
+                console.error(`Failed to load image: ${url}`);
+                imgElement.src = ''; // Clear broken src
+                imgElement.alt = 'Ошибка загрузки';
+                imgElement.classList.remove('loaded');
+                // Optionally display a placeholder or error message on the image itself
+                // For example, add a class to imgElement and style it to show a broken image icon
+            };
+        } else {
+            imgElement.alt = ''; // Clear alt text if no image
+        }
+    };
+
+    // Load images
+    loadImage(prevImage, prevImageData ? prevImageData.url : '', 'Предыдущее изображение');
+    loadImage(modalImage, currentImageData.url, 'Текущее изображение');
+    loadImage(nextImage, nextImageData ? nextImageData.url : '', 'Следующее изображение');
+
+    // Update info
+    imageInfoDiv.textContent = `Изображение ${index + 1} из ${images.length}`;
+    updateComments(currentImageKey);
+}
+
+// Handle carousel navigation
+function navigateCarousel(direction) {
+    let newIndex = currentImageIndex + direction;
+    if (newIndex >= 0 && newIndex < imagesData[currentColumnId].length) {
+        currentImageIndex = newIndex;
+        // Disable transition temporarily for instant snap to next/prev image slot
+        modalImageCarousel.style.transition = 'none';
+        currentTranslate = -carouselWidth - (direction * carouselWidth); // Move to new slot instantly
+        setTranslate(currentTranslate);
+        prevTranslate = currentTranslate;
+
+        // Force a reflow to ensure the non-transitioned movement happens before re-enabling transition
+        modalImageCarousel.offsetWidth;
+
+        // Then, update the images. This will correctly center the new modalImage
+        updateCarouselImages(currentImageIndex);
+
+        // Re-enable transition after the snap
+        setTimeout(() => {
+            modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+        }, 0);
+    }
+}
+
+
+// === Image Rendering ===
+
+// Renders images into a specific column
+function renderImages(columnId, images) {
+    const columnElement = document.getElementById(columnId);
+    columnElement.innerHTML = ''; // Clear existing images
+    images.forEach(img => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'image-wrapper';
+        wrapper.dataset.key = img.key;
+        wrapper.dataset.column = columnId;
+
+        const imgElement = document.createElement('img');
+        imgElement.src = img.url;
+        imgElement.alt = img.name || 'Галерея';
+
+        // Add loaded class when image loads
+        imgElement.onload = () => {
+            imgElement.classList.add('loaded');
+            // Hide spinner or placeholder if you have one
+        };
+        imgElement.onerror = () => {
+            console.error(`Error loading image from URL: ${img.url}`);
+            wrapper.classList.add('image-load-error'); // Add error class for styling
+            imgElement.alt = 'Ошибка загрузки изображения';
+            imgElement.src = ''; // Clear broken image src
+        };
+
+        wrapper.appendChild(imgElement);
+        columnElement.appendChild(wrapper);
+
+        wrapper.addEventListener('click', () => {
+            openModal(img.key, columnId);
+        });
+    });
+}
+
+// === Modal Functions ===
+
+function openModal(imageKey, column) {
+    currentColumnId = column;
+    const imagesInColumn = imagesData[column];
+    currentImageIndex = imagesInColumn.findIndex(img => img.key === imageKey);
+
+    if (currentImageIndex === -1) {
+        console.error("Image not found in the current column.");
+        return;
+    }
+
+    // Calculate carousel width once modal is visible
+    imageModal.classList.add('show-modal');
+    // Ensure modal is visible and rendered before getting offsetWidth
+    requestAnimationFrame(() => {
+        carouselWidth = modalImageCarousel.offsetWidth / 3; // Width of one image slot
+
+        // Initial setup for carousel: center the current image
+        currentTranslate = -carouselWidth; // Start with modalImage centered
+        prevTranslate = currentTranslate;
+        setTranslate(currentTranslate); // Apply initial centering
+        modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Ensure transition is on
+
+        updateCarouselImages(currentImageIndex);
+    });
+    
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+}
+
+function closeModal() {
+    imageModal.classList.add('hide-modal');
+    imageModal.classList.remove('show-modal');
+    // Allow animation to play before hiding
+    imageModal.addEventListener('animationend', () => {
+        imageModal.classList.remove('hide-modal');
+        document.body.style.overflow = ''; // Restore background scroll
+    }, { once: true });
+
+    // Hide dropdown just in case
+    optionsDropdown.style.display = 'none';
+}
+
+// === Image Upload Logic ===
+
+function uploadImage(file, columnId) {
+    if (!currentUserId) {
+        alert("Пожалуйста, войдите, чтобы загружать изображения.");
+        return;
+    }
+
+    const imageRef = storageRef(storage, `images/${currentUserId}/${columnId}/${file.name}-${Date.now()}`);
+    const uploadTask = uploadBytesResumable(imageRef, file);
 
     uploadTask.on('state_changed',
         (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log('Upload is ' + progress + '% done');
-            // Здесь можно обновить UI для прогресса загрузки
+            console.log(`Upload is ${progress}% done`);
+            // You can add UI feedback for progress here
         },
         (error) => {
             console.error("Upload failed:", error);
-            alert('Ошибка при загрузке изображения: ' + error.message);
+            alert("Ошибка при загрузке изображения.");
         },
         () => {
             getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-                saveImageUrlToDatabase(downloadURL, column, auth.currentUser.uid);
+                const newImageRef = push(dbRef(database, `users/${currentUserId}/images/${columnId}`));
+                set(newImageRef, {
+                    url: downloadURL,
+                    name: file.name,
+                    timestamp: Date.now(),
+                    uploadedBy: currentUserName,
+                    comments: {} // Initialize comments object
+                }).then(() => {
+                    console.log("Image data saved to database.");
+                    // Data will be re-rendered by onValue listener
+                }).catch((error) => {
+                    console.error("Error saving image data:", error);
+                    alert("Ошибка при сохранении данных изображения.");
+                });
             });
         }
     );
 }
 
-function saveImageUrlToDatabase(url, column, userId) {
-    const imageId = push(dbRef(database, `users/${userId}/images/${column}`)).key;
-    const imageData = {
-        url: url,
-        timestamp: Date.now(),
-        description: "", // Пока пустое описание
-        comments: {} // Пустой объект для комментариев
-    };
-    set(dbRef(database, `users/${userId}/images/${column}/${imageId}`), imageData)
-        .then(() => {
-            console.log("Image URL saved to database");
-        })
-        .catch((error) => {
-            console.error("Failed to save image URL:", error);
-        });
-}
-
-// === Database Listeners for Images ===
-function setupDatabaseListeners() {
-    const userId = auth.currentUser.uid;
-    const columns = ['left', 'center', 'right'];
-
-    columns.forEach(column => {
-        const columnRef = dbRef(database, `users/${userId}/images/${column}`);
-        onValue(columnRef, (snapshot) => {
-            const imagesData = snapshot.val() || {};
-            renderImages(imagesData, column);
+// Attach file input listeners
+function setupUploadButtons() {
+    [uploadLeftBtn, uploadCenterBtn, uploadRightBtn].forEach(button => {
+        button.addEventListener('click', () => {
+            if (!currentUserId) {
+                alert("Пожалуйста, войдите, чтобы загружать изображения.");
+                return;
+            }
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    uploadImage(file, button.id.replace('upload', '').toLowerCase());
+                }
+            };
+            input.click();
         });
     });
 }
 
-function renderImages(imagesData, column) {
-    const columnElement = document.getElementById(`${column}Column`);
-    columnElement.innerHTML = ''; // Очищаем колонку перед рендерингом
+// === Comments Logic ===
 
-    const sortedImages = Object.entries(imagesData)
-        .sort(([, a], [, b]) => b.timestamp - a.timestamp); // Сортируем по убыванию даты
-
-    sortedImages.forEach(([id, data]) => {
-        const imageWrapper = createImageElement(data.url, id, column, data.description);
-        columnElement.appendChild(imageWrapper);
-    });
-}
-
-function createImageElement(imageUrl, imageId, column, description) {
-    const imageWrapper = document.createElement('div');
-    imageWrapper.className = 'image-wrapper';
-    imageWrapper.dataset.imageId = imageId;
-    imageWrapper.dataset.column = column;
-
-    const img = document.createElement('img');
-    img.src = imageUrl;
-    img.alt = description || 'Галерея изображений';
-    img.loading = 'lazy'; // Оптимизация загрузки
-    img.crossOrigin = "anonymous"; // Для работы с CORS, если изображение на другом домене
-
-    img.onload = () => {
-        img.classList.add('loaded'); // Добавляем класс после загрузки для анимации
-    };
-
-    img.onerror = () => {
-        imageWrapper.classList.add('image-load-error'); // Добавляем класс ошибки
-        img.alt = 'Ошибка загрузки изображения';
-        img.src = ''; // Очищаем src, чтобы не пыталось загрузиться снова
-        imageWrapper.innerHTML = `<p>Ошибка загрузки</p><p>(${img.alt})</p>`;
-    };
-
-    imageWrapper.appendChild(img);
-
-    imageWrapper.addEventListener('click', () => {
-        openModal(imageId, column);
-    });
-
-    return imageWrapper;
-}
-
-// === Modal Logic ===
-function openModal(imageId, column) {
-    if (!auth.currentUser) return;
-
-    currentColumnRef = dbRef(database, `users/${auth.currentUser.uid}/images/${column}`);
-    currentImageId = imageId;
-
-    // Скрыть прокрутку на body
-    document.body.style.overflow = 'hidden';
-
-    onValue(currentColumnRef, (snapshot) => {
-        const imagesData = snapshot.val() || {};
-        allImagesInCurrentColumn = Object.entries(imagesData)
-            .map(([id, data]) => ({ id, ...data }))
-            .sort((a, b) => b.timestamp - a.timestamp);
-
-        currentImageIndex = allImagesInCurrentColumn.findIndex(img => img.id === currentImageId);
-        if (currentImageIndex === -1) {
-            // Изображение не найдено (возможно, удалено), закрываем модальное окно
-            closeModal();
-            return;
-        }
-
-        // Обновляем карусель и информацию
-        updateCarouselImages(currentImageIndex);
-        imageModal.classList.add('show-modal');
-    }, {
-        onlyOnce: true // Получаем данные один раз, чтобы не вызывать updateCarouselImages при каждом изменении в колонке
-    });
-}
-
-function closeModal() {
-    imageModal.classList.remove('show-modal');
-    document.body.style.overflow = ''; // Восстановить прокрутку на body
-    // Очистить данные модального окна при закрытии
-    modalImage.src = '';
-    prevImage.src = '';
-    nextImage.src = '';
-    imageInfo.textContent = '';
-    commentsList.innerHTML = '';
-    commentInput.value = '';
-    optionsDropdown.style.display = 'none'; // Скрыть выпадающее меню
-    isDragging = false; // Сброс состояния перетаскивания
-    currentTranslate = 0; // Сброс смещения
-    setTranslate(0); // Сброс transform
-    modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Восстановить переход
-}
-
-// Update carousel images and position
-function updateCarouselImages(index) {
-    carouselWidth = modalImageCarousel.offsetWidth; // Получаем текущую ширину карусели
-
-    currentImageIndex = index;
-
-    // Убедимся, что индекс не выходит за границы
-    if (currentImageIndex < 0) {
-        currentImageIndex = allImagesInCurrentColumn.length - 1;
-    } else if (currentImageIndex >= allImagesInCurrentColumn.length) {
-        currentImageIndex = 0;
-    }
-
-    const currentImageData = allImagesInCurrentColumn[currentImageIndex];
-    currentImageId = currentImageData.id; // Обновляем глобальный ID текущего изображения
-
-    // Загрузка основного изображения
-    modalImage.src = currentImageData.url;
-    modalImage.alt = currentImageData.description || 'Изображение';
-    modalImage.crossOrigin = "anonymous"; // Важно для CORS
-
-    modalImage.onload = () => {
-        modalImage.classList.add('loaded');
-    };
-    modalImage.onerror = () => {
-        modalImage.classList.add('image-load-error');
-        modalImage.alt = 'Ошибка загрузки изображения';
-        modalImage.src = '';
-    };
-
-    // Загрузка предыдущего изображения
-    if (allImagesInCurrentColumn.length > 1) {
-        const prevIndex = (currentImageIndex - 1 + allImagesInCurrentColumn.length) % allImagesInCurrentColumn.length;
-        prevImage.src = allImagesInCurrentColumn[prevIndex].url;
-        prevImage.alt = allImagesInCurrentColumn[prevIndex].description || 'Предыдущее изображение';
-        prevImage.crossOrigin = "anonymous";
-        prevImage.onload = () => prevImage.classList.add('loaded');
-        prevImage.onerror = () => { prevImage.src = ''; prevImage.alt = 'Ошибка загрузки'; };
-
-        // Загрузка следующего изображения
-        const nextIndex = (currentImageIndex + 1) % allImagesInCurrentColumn.length;
-        nextImage.src = allImagesInCurrentColumn[nextIndex].url;
-        nextImage.alt = allImagesInCurrentColumn[nextIndex].description || 'Следующее изображение';
-        nextImage.crossOrigin = "anonymous";
-        nextImage.onload = () => nextImage.classList.add('loaded');
-        nextImage.onerror = () => { nextImage.src = ''; nextImage.alt = 'Ошибка загрузки'; };
-
-        // Показываем кнопки навигации
-        prevImageButton.style.display = 'flex';
-        nextImageButton.style.display = 'flex';
-    } else {
-        // Если только одно изображение, скрываем соседние и кнопки
-        prevImage.src = '';
-        nextImage.src = '';
-        prevImageButton.style.display = 'none';
-        nextImageButton.style.display = 'none';
-    }
-
-    // Устанавливаем положение карусели так, чтобы текущее изображение было по центру
-    currentTranslate = -carouselWidth;
-    setTranslate(currentTranslate);
-
-    imageInfo.textContent = currentImageData.description || 'Нет описания.';
-    fetchCommentsForImage(currentImageData.id, allImagesInCurrentColumn[0].column); // Передаем column из данных
-}
-
-function fetchCommentsForImage(imageId, column) {
-    commentsList.innerHTML = ''; // Очистить список комментариев
-    if (!auth.currentUser || !imageId || !column) return;
-
-    const commentsRef = dbRef(database, `users/${auth.currentUser.uid}/images/${column}/${imageId}/comments`);
-    onValue(commentsRef, (snapshot) => {
-        commentsList.innerHTML = ''; // Очистить список перед обновлением
-        const comments = snapshot.val() || {};
-        if (Object.keys(comments).length === 0) {
-            commentsList.innerHTML = '<p class="no-comments">Пока нет комментариев.</p>';
-        } else {
-            Object.values(comments).sort((a, b) => a.timestamp - b.timestamp).forEach(comment => {
+function updateComments(imageKey) {
+    commentsList.innerHTML = ''; // Clear existing comments
+    const imageRef = dbRef(database, `users/${currentUserId}/images/${currentColumnId}/${imageKey}/comments`);
+    onValue(imageRef, (snapshot) => {
+        commentsList.innerHTML = ''; // Clear before re-rendering
+        const comments = snapshot.val();
+        if (comments) {
+            const commentArray = Object.values(comments).sort((a, b) => a.timestamp - b.timestamp);
+            commentArray.forEach(comment => {
                 const p = document.createElement('p');
-                const date = new Date(comment.timestamp).toLocaleString();
-                p.textContent = `${comment.text} (${date})`;
+                p.textContent = `${comment.userName}: ${comment.text}`;
                 commentsList.appendChild(p);
             });
-            commentsList.scrollTop = commentsList.scrollHeight; // Прокрутить к последнему комментарию
+        } else {
+            commentsList.innerHTML = '<p class="no-comments">Пока нет комментариев.</p>';
         }
+        // Scroll to bottom of comments list
+        commentsList.scrollTop = commentsList.scrollHeight;
     });
 }
 
-function sendComment() {
+sendCommentBtn.addEventListener('click', () => {
     const commentText = commentInput.value.trim();
-    if (commentText === "" || !auth.currentUser || !currentImageId || !currentColumnRef) return;
-
-    const commentData = {
-        text: commentText,
-        timestamp: Date.now()
-    };
-
-    const commentsRef = dbRef(database, `users/${auth.currentUser.uid}/images/${allImagesInCurrentColumn[0].column}/${currentImageId}/comments`);
-    push(commentsRef, commentData)
-        .then(() => {
-            commentInput.value = '';
-            commentsList.scrollTop = commentsList.scrollHeight; // Прокрутить к последнему комментарию
-        })
-        .catch((error) => {
-            console.error("Failed to add comment:", error);
-            alert("Не удалось отправить комментарий.");
+    if (commentText && currentImageKey && currentUserId) {
+        const commentRef = push(dbRef(database, `users/${currentUserId}/images/${currentColumnId}/${currentImageKey}/comments`));
+        set(commentRef, {
+            text: commentText,
+            timestamp: Date.now(),
+            userName: currentUserName
+        }).then(() => {
+            commentInput.value = ''; // Clear input
+            // Comments will be updated by onValue listener
+        }).catch((error) => {
+            console.error("Error sending comment:", error);
+            alert("Ошибка при отправке комментария.");
         });
-}
-
-// === Event Listeners ===
-closeModalBtn.addEventListener('click', closeModal);
-sendCommentBtn.addEventListener('click', sendComment);
-
-// Navigation buttons
-prevImageButton.addEventListener('click', () => {
-    updateCarouselImages(currentImageIndex - 1);
+    } else {
+        alert("Комментарий не может быть пустым.");
+    }
 });
 
-nextImageButton.addEventListener('click', () => {
-    updateCarouselImages(currentImageIndex + 1);
-});
+// === Image Actions (Delete/Move) ===
 
-// Dropdown for more options (delete, move)
 moreOptionsButton.addEventListener('click', (event) => {
-    event.stopPropagation(); // Предотвращаем закрытие модального окна
+    event.stopPropagation(); // Prevent modal from closing immediately
     optionsDropdown.style.display = optionsDropdown.style.display === 'block' ? 'none' : 'block';
 });
 
@@ -386,202 +418,206 @@ document.addEventListener('click', (event) => {
 });
 
 optionsDropdown.addEventListener('click', (event) => {
-    event.preventDefault();
     const action = event.target.dataset.action;
-    const targetColumn = event.target.dataset.column;
-
-    if (!currentImageId || !auth.currentUser || !currentColumnRef) {
-        alert('Ошибка: изображение или пользователь не определены.');
-        return;
-    }
-
-    const currentColumnName = allImagesInCurrentColumn[0].column; // Получаем имя текущей колонки
+    if (!action || !currentImageKey || !currentColumnId || !currentUserId) return;
 
     if (action === 'delete') {
-        if (confirm('Вы уверены, что хотите удалить это изображение?')) {
-            deleteImage(currentImageId, currentColumnName);
+        if (confirm("Вы уверены, что хотите удалить это изображение?")) {
+            // Delete from Storage
+            const imgData = imagesData[currentColumnId].find(img => img.key === currentImageKey);
+            if (imgData && imgData.url) {
+                const imgStorageRef = storageRef(storage, imgData.url);
+                deleteObject(imgStorageRef).then(() => {
+                    console.log("Image deleted from storage.");
+                }).catch((error) => {
+                    console.error("Error deleting image from storage:", error);
+                    alert("Ошибка при удалении изображения из хранилища.");
+                });
+            }
+
+            // Delete from Database
+            remove(dbRef(database, `users/${currentUserId}/images/${currentColumnId}/${currentImageKey}`))
+                .then(() => {
+                    console.log("Image data deleted from database.");
+                    closeModal();
+                })
+                .catch((error) => {
+                    console.error("Error deleting image data:", error);
+                    alert("Ошибка при удалении данных изображения.");
+                });
         }
-    } else if (action === 'move' && targetColumn) {
-        if (currentColumnName === targetColumn) {
-            alert('Изображение уже находится в этой колонке.');
-            return;
+    } else if (action === 'move') {
+        const targetColumnId = event.target.dataset.column;
+        if (targetColumnId && targetColumnId !== currentColumnId) {
+            const imgToMove = imagesData[currentColumnId].find(img => img.key === currentImageKey);
+            if (imgToMove) {
+                // Remove from old location
+                remove(dbRef(database, `users/${currentUserId}/images/${currentColumnId}/${currentImageKey}`))
+                    .then(() => {
+                        // Add to new location
+                        set(dbRef(database, `users/${currentUserId}/images/${targetColumnId}/${currentImageKey}`), imgToMove)
+                            .then(() => {
+                                console.log(`Image moved from ${currentColumnId} to ${targetColumnId}`);
+                                closeModal(); // Close modal after move
+                            })
+                            .catch((error) => {
+                                console.error("Error moving image:", error);
+                                alert("Ошибка при перемещении изображения.");
+                            });
+                    })
+                    .catch((error) => {
+                        console.error("Error removing image from old column:", error);
+                        alert("Ошибка при перемещении изображения.");
+                    });
+            }
         }
-        moveImage(currentImageId, currentColumnName, targetColumn);
     }
-    optionsDropdown.style.display = 'none';
+    optionsDropdown.style.display = 'none'; // Hide dropdown after action
 });
 
-async function deleteImage(imageId, column) {
-    const userId = auth.currentUser.uid;
-    const imageDbRef = dbRef(database, `users/${userId}/images/${column}/${imageId}`);
-    const imageUrl = allImagesInCurrentColumn.find(img => img.id === imageId)?.url;
+// === Authentication & Data Loading ===
 
-    if (imageUrl) {
-        try {
-            // Удаляем изображение из Storage
-            const fileRef = storageRef(storage, imageUrl);
-            await deleteObject(fileRef);
-            console.log('Image deleted from storage.');
-        } catch (error) {
-            console.warn('Could not delete image from storage (might not exist or permissions issue):', error);
-            // Продолжаем удаление из базы данных, даже если удаление из хранилища не удалось
-        }
-    }
-
-    // Удаляем запись из Database
-    remove(imageDbRef)
-        .then(() => {
-            console.log("Image data deleted from database.");
-            closeModal(); // Закрываем модальное окно после удаления
-            // Перезагрузка данных колонки будет вызвана слушателем onValue
-        })
-        .catch((error) => {
-            console.error("Failed to delete image data:", error);
-            alert("Ошибка при удалении изображения.");
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        currentUserId = user.uid;
+        // Fetch user's name or set a default
+        const userRef = dbRef(database, `users/${currentUserId}/profile/name`);
+        onValue(userRef, (snapshot) => {
+            currentUserName = snapshot.val() || user.email || "Пользователь";
+            userNameSpan.textContent = `Привет, ${currentUserName}!`;
+        }, {
+            onlyOnce: true
         });
-}
 
-async function moveImage(imageId, fromColumn, toColumn) {
-    const userId = auth.currentUser.uid;
-    const fromImageRef = dbRef(database, `users/${userId}/images/${fromColumn}/${imageId}`);
-    const toImagesRef = dbRef(database, `users/${userId}/images/${toColumn}`);
+        // Load images for all columns
+        ['left', 'center', 'right'].forEach(columnId => {
+            const columnRef = dbRef(database, `users/${currentUserId}/images/${columnId}`);
+            onValue(columnRef, (snapshot) => {
+                const images = [];
+                snapshot.forEach((childSnapshot) => {
+                    images.push({
+                        key: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+                imagesData[columnId] = images;
+                renderImages(columnId, images);
+            });
+        });
 
-    try {
-        // Получаем данные изображения из старой колонки
-        const snapshot = await onValue(fromImageRef, (snap) => snap.val(), { onlyOnce: true });
-        const imageData = snapshot.val();
+        setupUploadButtons();
 
-        if (imageData) {
-            // Добавляем изображение в новую колонку
-            await set(push(toImagesRef), imageData);
-            // Удаляем изображение из старой колонки
-            await remove(fromImageRef);
-            alert('Изображение успешно перемещено!');
-            closeModal(); // Закрываем модальное окно после перемещения
-        } else {
-            alert('Изображение не найдено для перемещения.');
+    } else {
+        currentUserId = null;
+        currentUserName = "Гость";
+        userNameSpan.textContent = 'Вы не вошли';
+        // Clear all columns if logged out
+        leftColumn.innerHTML = '';
+        centerColumn.innerHTML = '';
+        rightColumn.innerHTML = '';
+        alert("Вы не авторизованы. Пожалуйста, войдите.");
+        // Redirect to login page or show login/signup options
+        window.location.href = 'auth.html'; // Example redirect
+    }
+});
+
+
+// === Event Listeners ===
+
+closeModalButton.addEventListener('click', closeModal);
+
+// Modal close on outside click (excluding modal content and options dropdown)
+imageModal.addEventListener('click', (event) => {
+    if (event.target === imageModal) {
+        closeModal();
+    }
+});
+
+// Keyboard navigation for carousel and modal close
+document.addEventListener('keydown', (event) => {
+    if (imageModal.classList.contains('show-modal')) {
+        if (event.key === 'ArrowLeft') {
+            navigateCarousel(-1);
+        } else if (event.key === 'ArrowRight') {
+            navigateCarousel(1);
+        } else if (event.key === 'Escape') {
+            closeModal();
         }
-    } catch (error) {
-        console.error("Ошибка при перемещении изображения:", error);
-        alert("Не удалось переместить изображение.");
     }
-}
+});
 
-// === Carousel Dragging/Swiping Logic ===
+prevImageButton.addEventListener('click', () => navigateCarousel(-1));
+nextImageButton.addEventListener('click', () => navigateCarousel(1));
 
-// Обновление трансформации карусели
-function setTranslate(translate) {
-    modalImageCarousel.style.transform = `translateX(${translate}px)`;
-}
+// === Carousel Drag/Swipe Functionality ===
 
-// Запуск перетаскивания
-function startDrag(event) {
-    // Получаем текущую ширину карусели при начале перетаскивания
-    carouselWidth = modalImageCarousel.offsetWidth;
-
+modalImageCarousel.addEventListener('pointerdown', (e) => {
     isDragging = true;
-    modalImageCarousel.style.transition = 'none'; // Отключаем CSS-переход при перетаскивании
+    startPos = e.clientX || e.touches[0].clientX;
+    modalImageCarousel.style.transition = 'none'; // Disable transition during drag
+    prevTranslate = currentTranslate;
+    animationId = requestAnimationFrame(animation);
+});
 
-    if (event.type === 'touchstart') {
-        startPos = event.touches[0].clientX;
-    } else {
-        startPos = event.clientX;
-        document.addEventListener('mouseup', endDrag);
-        document.addEventListener('mouseleave', endDrag); // На случай, если мышь ушла с элемента
-    }
-    prevTranslate = currentTranslate; // Сохраняем начальное смещение для расчета дельты
-    animationID = requestAnimationFrame(animation);
-}
-
-// Перетаскивание
-function drag(event) {
+modalImageCarousel.addEventListener('pointermove', throttle((e) => {
     if (!isDragging) return;
+    const currentPosition = e.clientX || e.touches[0].clientX;
+    const diff = currentPosition - startPos;
+    // Limit drag to within bounds of previous and next image slots
+    const minTranslate = -2 * carouselWidth; // max left for previous image
+    const maxTranslate = 0; // max right for next image
 
-    let currentPosition = 0;
-    if (event.type === 'touchmove') {
-        currentPosition = event.touches[0].clientX;
-    } else {
-        currentPosition = event.clientX;
+    let newTranslate = prevTranslate + diff;
+    // Clamp the translation to prevent dragging too far
+    if (newTranslate > maxTranslate + carouselWidth / 4) { // Add a small elastic effect beyond bounds
+        newTranslate = maxTranslate + carouselWidth / 4;
+    } else if (newTranslate < minTranslate - carouselWidth / 4) {
+        newTranslate = minTranslate - carouselWidth / 4;
     }
+    currentTranslate = newTranslate;
 
-    const deltaX = currentPosition - startPos;
-    currentTranslate = prevTranslate + deltaX;
+}, 100)); // Throttle to prevent performance issues
 
-    setTranslate(currentTranslate);
-}
-
-// Окончание перетаскивания
-function endDrag() {
-    cancelAnimationFrame(animationID);
+modalImageCarousel.addEventListener('pointerup', () => {
+    if (!isDragging) return;
+    cancelAnimationFrame(animationId);
     isDragging = false;
-    modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Включаем CSS-переход обратно
+    snapToImage();
+});
 
-    const movedBy = currentTranslate - prevTranslate; // На сколько пикселей сдвинули
+modalImageCarousel.addEventListener('pointerleave', () => {
+    if (!isDragging) return;
+    cancelAnimationFrame(animationId);
+    isDragging = false;
+    snapToImage();
+});
 
-    // Логика "прилипания" к ближайшему изображению
-    snapToImage(movedBy);
-
-    document.removeEventListener('mouseup', endDrag);
-    document.removeEventListener('mouseleave', endDrag);
-}
-
-// Функция для "прилипания" к изображению после свайпа/перетаскивания
-function snapToImage(movedBy) {
-    if (movedBy < -50) { // Свайп влево (к следующему изображению)
-        updateCarouselImages(currentImageIndex + 1);
-    } else if (movedBy > 50) { // Свайп вправо (к предыдущему изображению)
-        updateCarouselImages(currentImageIndex - 1);
-    } else {
-        // Если сдвиг небольшой, возвращаемся к текущему изображению
-        setTranslate(-carouselWidth);
+// Update carouselWidth on window resize
+window.addEventListener('resize', () => {
+    if (imageModal.classList.contains('show-modal')) {
+        carouselWidth = modalImageCarousel.offsetWidth / 3;
+        // Re-center current image after resize
+        currentTranslate = -carouselWidth;
+        prevTranslate = currentTranslate;
+        setTranslate(currentTranslate);
     }
-}
+});
 
-
-// Анимация для плавного перетаскивания
-function animation() {
-    setTranslate(currentTranslate);
-    if (isDragging) {
-        requestAnimationFrame(animation);
-    }
-}
-
-// Event Listeners for carousel dragging
-modalImageCarousel.addEventListener('mousedown', startDrag);
-modalImageCarousel.addEventListener('mouseup', endDrag); // Добавил сюда, чтобы перехватывать отпускание мыши внутри карусели
-modalImageCarousel.addEventListener('mouseleave', endDrag); // Добавил сюда для ухода мыши из карусели во время драга
-modalImageCarousel.addEventListener('mousemove', drag);
-
-modalImageCarousel.addEventListener('touchstart', startDrag, { passive: true }); // passive: true для лучшей производительности
-modalImageCarousel.addEventListener('touchend', endDrag);
-modalImageCarousel.addEventListener('touchmove', drag, { passive: true }); // passive: true для лучшей производительности
-
-
-// Обработчик touchmove на imageModal (фоне модального окна)
-// Это нужно, чтобы предотвратить прокрутку основного body, но позволить свайп карусели и скролл комментариев
+// Prevent body scroll when modal is open, but allow comment scroll and carousel drag
 imageModal.addEventListener('touchmove', (event) => {
     if (imageModal.classList.contains('show-modal')) {
         const isTargetComments = commentsList.contains(event.target) || event.target === commentsList;
-        const isTargetCarousel = modalImageCarousel.contains(event.target) || event.target === modalImageCarousel || prevImageButton.contains(event.target) || nextImageButton.contains(event.target);
+        const isTargetCarousel = modalImageCarousel.contains(event.target) || modalImageCarousel.contains(event.target.parentNode);
 
-        // Если это свайп по карусели или кнопкам навигации
-        if (isTargetCarousel && isDragging) {
-            return; // Позволяем drag-логике карусели обрабатывать это
-        }
-        // Если цель - список комментариев и он прокручивается
+        // Allow scroll if target is comments list and it's actually scrollable
         if (isTargetComments && commentsList.scrollHeight > commentsList.clientHeight) {
-            return; // Позволяем прокрутку списка комментариев
+            return;
         }
-        // В остальных случаях предотвращаем прокрутку фона
+        // Allow drag if target is carousel and we are dragging
+        if (isTargetCarousel && isDragging) {
+            return;
+        }
+        // Otherwise, prevent default scroll
         event.preventDefault();
     }
-}, { passive: false }); // passive: false, чтобы можно было использовать preventDefault
-
-
-// Обновление ширины карусели при изменении размера окна
-window.addEventListener('resize', () => {
-    if (imageModal.classList.contains('show-modal')) {
-        carouselWidth = modalImageCarousel.offsetWidth;
-        setTranslate(-carouselWidth); // Центрируем изображение
-    }
-});
+}, { passive: false });
