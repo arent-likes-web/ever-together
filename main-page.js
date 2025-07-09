@@ -3,7 +3,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-// Импорт для Firebase Storage
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
 
 
@@ -20,28 +19,25 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth();
-const storage = getStorage(app); // Инициализация Firebase Storage
+const storage = getStorage(app);
 
 
-// Убедитесь, что DOM полностью загружен, прежде чем получать доступ к элементам
 document.addEventListener('DOMContentLoaded', () => {
+    // --- Все ссылки на DOM-элементы теперь внутри DOMContentLoaded ---
     const imageModalGlobalRef = document.getElementById('imageModal');
     const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
     const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
 
-    // Новые ссылки на элементы карусели
     const modalImageCarousel = document.querySelector('.modal-image-carousel');
     const prevImageButton = document.getElementById('prevImage');
     const nextImageButton = document.getElementById('nextImage');
     const modalImage = document.getElementById('modalImage');
     const imageInfoDiv = document.getElementById('imageInfo');
 
-    // Ссылки на секцию комментариев
     const commentsList = document.getElementById('commentsList');
     const commentInput = document.getElementById('commentInput');
     const sendCommentBtn = document.getElementById('sendCommentBtn');
 
-    // Ссылки на колонки и кнопки загрузки
     const leftColumn = document.getElementById('leftColumn');
     const centerColumn = document.getElementById('centerColumn');
     const rightColumn = document.getElementById('rightColumn');
@@ -50,26 +46,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadCenterButton = document.getElementById('uploadCenter');
     const uploadRightButton = document.getElementById('uploadRight');
 
-    // Ссылки на скрытые input[type="file"]
     const fileInputLeft = document.getElementById('fileInputLeft');
     const fileInputCenter = document.getElementById('fileInputCenter');
     const fileInputRight = document.getElementById('fileInputRight');
+    // --- Конец ссылок на DOM-элементы ---
 
 
     let imageList = [];
     let currentIndex = 0;
-    let currentColumn = 'left'; // По умолчанию 'left' или определяется по контексту
+    let currentColumn = 'left';
 
     // --- Firebase Auth Status Listener ---
     onAuthStateChanged(auth, (user) => {
-        const userNameSpan = document.getElementById('userName');
+        const userNameSpan = document.getElementById('userName'); // Эту ссылку тоже стоит объявить здесь
         if (user) {
             userNameSpan.textContent = user.displayName || user.email;
-            // Загружаем изображения после аутентификации пользователя
             loadImages();
         } else {
             userNameSpan.textContent = 'Гость';
-            // Перенаправление на страницу входа или отображение соответствующего контента для гостей
             window.location.href = 'index.html';
         }
     });
@@ -86,23 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (images) {
                 Object.keys(images).forEach(key => {
                     const image = { id: key, ...images[key] };
-                    // --- ВАЖНОЕ ИЗМЕНЕНИЕ: Преобразование timestamp в число ---
-                    // Проверяем, если timestamp строка, то преобразуем её.
-                    // Если timestamp уже число (например, для новых загрузок через Date.now()), оставляем как есть.
                     if (typeof image.timestamp === 'string') {
                         image.timestamp = new Date(image.timestamp).getTime();
                     } else if (typeof image.timestamp === 'undefined' || image.timestamp === null) {
-                         // Если timestamp отсутствует, устанавливаем текущее время для корректной сортировки
-                         // Это важно для старых изображений без timestamp
                         image.timestamp = Date.now();
                     }
-                    // --- Конец важного изменения ---
                     imageList.push(image);
                 });
-                // Сортировка изображений по timestamp в убывающем порядке (новые сверху)
                 imageList.sort((a, b) => b.timestamp - a.timestamp);
 
-                // Теперь отображаем отсортированные изображения
                 imageList.forEach(image => {
                     displayImageInColumn(image);
                 });
@@ -150,9 +136,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateCarouselImages(index) {
         modalImage.src = imageList[index].url;
-        // Обновление источников предыдущего/следующего изображений для визуального эффекта карусели, если необходимо
-        // Для простого отображения достаточно обновить modalImage.src.
-        // Если реализована реальная логика карусели, убедитесь, что она здесь.
     }
 
     function updateImageInfo(image) {
@@ -202,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Выпадающее меню для дополнительных опций ---
     moreOptionsButtonGlobalRef.addEventListener('click', (event) => {
-        event.stopPropagation(); // Предотвращает закрытие модального окна при клике на кнопку
+        event.stopPropagation();
         optionsDropdownGlobalRef.classList.toggle('show-dropdown');
     });
 
@@ -247,7 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
         update(dbRef(database, `images/${imageId}`), { column: newColumn })
             .then(() => {
                 console.log(`Image moved to ${newColumn} column.`);
-                // Не нужно закрывать модальное окно, просто обновите отображение
             })
             .catch(error => {
                 console.error('Error moving image:', error);
@@ -259,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadComments(imageId) {
         const commentsRef = dbRef(database, `images/${imageId}/comments`);
         onValue(commentsRef, (snapshot) => {
-            commentsList.innerHTML = ''; // Очищаем существующие комментарии
+            commentsList.innerHTML = '';
             const comments = snapshot.val();
             if (comments) {
                 Object.values(comments).forEach(comment => {
@@ -286,8 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
             timestamp: Date.now()
         })
         .then(() => {
-            commentInput.value = ''; // Очищаем поле ввода
-            commentsList.scrollTop = commentsList.scrollHeight; // Прокручиваем до конца
+            commentInput.value = '';
+            commentsList.scrollTop = commentsList.scrollHeight;
         })
         .catch(error => {
             console.error("Error adding comment:", error);
@@ -297,7 +279,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Логика загрузки изображений ---
 
-    // Функция загрузки изображения в Firebase Storage и сохранения данных в Realtime Database
     async function uploadImageToFirebase(file, column) {
         if (!file) {
             alert('Пожалуйста, выберите файл для загрузки.');
@@ -310,30 +291,27 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Показываем, что идет загрузка (можно добавить индикатор)
         console.log(`Начинается загрузка файла: ${file.name} в колонку: ${column}`);
-        alert(`Начинается загрузка файла: ${file.name} в колонку: ${column}`); // Временный alert
+        alert(`Начинается загрузка файла: ${file.name} в колонку: ${column}`);
 
         try {
-            // 1. Загрузка файла в Firebase Storage
             const storagePath = `images/${user.uid}/${Date.now()}_${file.name}`;
             const imageRef = storageRef(storage, storagePath);
             const uploadResult = await uploadBytes(imageRef, file);
             const imageUrl = await getDownloadURL(uploadResult.ref);
 
-            // 2. Сохранение информации об изображении в Realtime Database
-            const newImageRef = push(dbRef(database, 'images')); // Генерируем уникальный ID
+            const newImageRef = push(dbRef(database, 'images'));
             await set(newImageRef, {
                 url: imageUrl,
                 column: column,
-                description: '', // Можно добавить поле для описания, если нужно
-                timestamp: Date.now(), // Используем числовой timestamp для новых загрузок
+                description: '',
+                timestamp: Date.now(),
                 uploadedBy: user.uid,
                 uploadedByName: user.displayName || user.email
             });
 
             console.log('Изображение успешно загружено и информация сохранена в базу данных!');
-            alert('Фотография успешно загружена!'); // Уведомление об успехе
+            alert('Фотография успешно загружена!');
 
         } catch (error) {
             console.error('Ошибка при загрузке изображения:', error);
@@ -343,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Обработчики для кнопок загрузки
     uploadLeftButton.addEventListener('click', () => {
-        fileInputLeft.click(); // Инициируем клик по скрытому input
+        fileInputLeft.click();
     });
     uploadCenterButton.addEventListener('click', () => {
         fileInputCenter.click();
@@ -358,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (file) {
             uploadImageToFirebase(file, fileInputLeft.dataset.column);
         }
-        event.target.value = ''; // Очищаем input, чтобы можно было загрузить тот же файл снова
+        event.target.value = '';
     });
 
     fileInputCenter.addEventListener('change', (event) => {
@@ -382,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let startX;
     let currentTranslate;
     let isDragging = false;
-    const carouselWidth = modalImageCarousel.offsetWidth + 40; // ширина + gap (предполагая 40px gap)
+    const carouselWidth = modalImageCarousel.offsetWidth + 40;
 
     function setTranslate(xPos) {
         modalImageCarousel.style.transform = `translateX(${xPos}px)`;
@@ -393,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
             startX = event.touches[0].clientX;
             currentTranslate = getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4] ? parseFloat(getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4]) : 0;
             isDragging = true;
-            modalImageCarousel.style.transition = 'none'; // Отключаем переход во время перетаскивания
+            modalImageCarousel.style.transition = 'none';
         }
     });
 
@@ -407,13 +385,13 @@ document.addEventListener('DOMContentLoaded', () => {
     modalImageCarousel.addEventListener('touchend', () => {
         if (!isDragging) return;
         isDragging = false;
-        modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Снова включаем переход
+        modalImageCarousel.style.transition = 'transform 0.3s ease-out';
 
         const movedBy = currentTranslate - (getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4] ? parseFloat(getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4]) : 0);
 
-        if (movedBy < -50 && currentIndex < imageList.length - 1) { // Свайп влево
+        if (movedBy < -50 && currentIndex < imageList.length - 1) {
             currentIndex++;
-        } else if (movedBy > 50 && currentIndex > 0) { // Свайп вправо
+        } else if (movedBy > 50 && currentIndex > 0) {
             currentIndex--;
         }
 
@@ -422,21 +400,17 @@ document.addEventListener('DOMContentLoaded', () => {
         loadComments(imageList[currentIndex].id);
     });
 
-    // Обработчик touchmove на imageModalGlobalRef (фоне модального окна)
     imageModalGlobalRef.addEventListener('touchmove', (event) => {
         if (imageModalGlobalRef.classList.contains('show-modal')) {
             const isTargetComments = commentsList.contains(event.target) || event.target === commentsList;
             const isTargetCarousel = modalImageCarousel.contains(event.target) || event.target === modalImageCarousel;
 
-            // Если это свайп по карусели и мы в режиме перетаскивания, позволяем ему работать
             if (isTargetCarousel && isDragging) {
                 return;
             }
-            // Если цель - список комментариев и он прокручивается, позволяем ему работать
             if (isTargetComments && commentsList.scrollHeight > commentsList.clientHeight) {
                 return;
             }
-            // В остальных случаях предотвращаем прокрутку фона
             event.preventDefault();
         }
     }, { passive: false });
