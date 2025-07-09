@@ -3,7 +3,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
+// Firebase Storage больше не нужен для загрузки фото
+// import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
 
 
 const firebaseConfig = {
@@ -19,7 +20,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth();
-const storage = getStorage(app);
+// Firebase Storage больше не используется для загрузки
+// const storage = getStorage(app);
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -29,8 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
 
     const modalImageCarousel = document.querySelector('.modal-image-carousel');
-    const prevImageButton = document.getElementById('prevImageButton'); // Исправлено на prevImageButton
-    const nextImageButton = document.getElementById('nextImageButton'); // Исправлено на nextImageButton
+    const prevImageButton = document.getElementById('prevImageButton');
+    const nextImageButton = document.getElementById('nextImageButton');
     const modalImage = document.getElementById('modalImage');
     const imageInfoDiv = document.getElementById('imageInfo');
 
@@ -42,13 +44,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const centerColumn = document.getElementById('centerColumn');
     const rightColumn = document.getElementById('rightColumn');
 
+    // Кнопки загрузки, теперь без прямого fileInput
     const uploadLeftButton = document.getElementById('uploadLeft');
     const uploadCenterButton = document.getElementById('uploadCenter');
     const uploadRightButton = document.getElementById('uploadRight');
 
-    const fileInputLeft = document.getElementById('fileInputLeft');
-    const fileInputCenter = document.getElementById('fileInputCenter');
-    const fileInputRight = document.getElementById('fileInputRight');
+    // Эти элементы input[type="file"] теперь не нужны, так как мы создаем один динамически
+    // const fileInputLeft = document.getElementById('fileInputLeft');
+    // const fileInputCenter = document.getElementById('fileInputCenter');
+    // const fileInputRight = document.getElementById('fileInputRight');
+
     const userNameSpan = document.getElementById('userName');
 
     // --- Конец ссылок на DOM-элементы ---
@@ -57,6 +62,93 @@ document.addEventListener('DOMContentLoaded', () => {
     let imageList = [];
     let currentIndex = 0;
 
+    // --- НАСТРОЙКИ CLOUDINARY (из вашего кода) ---
+    const CLOUDINARY_CLOUD_NAME = 'dozbf3jis';
+    const CLOUDINARY_UPLOAD_PRESET = 'ever_together_upload';
+    // --- КОНЕЦ НАСТРОЕК CLOUDINARY ---
+
+
+    // --- Инициализация файлового ввода для пакетной загрузки (из вашего кода) ---
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.multiple = true; // Разрешаем выбор нескольких файлов
+    fileInput.style.display = 'none'; // Скрываем элемент input, так как будем вызывать его через кнопку
+    document.body.appendChild(fileInput);
+
+    // Обработчики для кнопок загрузки (перенаправляют на fileInput)
+    const uploadButtons = document.querySelectorAll('.top-upload-buttons-container button'); // Селектор для ваших кнопок загрузки
+    uploadButtons.forEach((button) => {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const column = button.id.replace('upload', '').toLowerCase(); // Получаем column из id кнопки (e.g., 'uploadLeft' -> 'left')
+            fileInput.dataset.column = column; // Сохраняем целевую колонку
+            fileInput.click(); // Открываем диалог выбора файла
+        });
+    });
+
+    // Обработчик изменения скрытого input[type="file"] для пакетной загрузки
+    fileInput.addEventListener('change', async (event) => {
+        const files = event.target.files;
+        if (files.length > 0) {
+            const selectedColumn = fileInput.dataset.column;
+            console.log(`[main-page.js] Начало пакетной загрузки ${files.length} файлов в колонку ${selectedColumn}`);
+
+            for (const file of files) {
+                console.log(`[main-page.js] Загрузка файла: ${file.name} (${file.type}, ${file.size} байт)...`);
+                try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+                    const cloudinaryResponse = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    if (!cloudinaryResponse.ok) {
+                        let errorDetails = `HTTP ошибка ${cloudinaryResponse.status}: ${cloudinaryResponse.statusText}`;
+                        try {
+                            const errorData = await cloudinaryResponse.json();
+                            if (errorData.error && errorData.error.message) {
+                                errorDetails += ` - ${errorData.error.message}`;
+                            }
+                        } catch (e) {
+                            console.warn("[main-page.js] Не удалось распарсить JSON ошибки Cloudinary.", e);
+                        }
+                        console.error(`[main-page.js] Ошибка Cloudinary при загрузке ${file.name}: ${errorDetails}`);
+                        alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorDetails}. Проверьте консоль.`);
+                        continue; // Продолжаем загрузку других файлов
+                    }
+
+                    const cloudinaryData = await cloudinaryResponse.json();
+
+                    if (cloudinaryData.secure_url) {
+                        const newImageRef = push(dbRef(database, 'images')); // Генерируем уникальный ключ
+                        await set(newImageRef, {
+                            url: cloudinaryData.secure_url,
+                            timestamp: new Date().toISOString(), // Используем ISO String для консистентности
+                            views: 0, // Начальное количество просмотров
+                            column: selectedColumn,
+                            uploadedBy: auth.currentUser ? auth.currentUser.uid : 'anonymous', // Добавлено, если пользователь есть
+                            uploadedByName: auth.currentUser ? (auth.currentUser.displayName || auth.currentUser.email) : 'Аноним'
+                        });
+                        console.log(`[main-page.js] Файл ${file.name} успешно загружен в Cloudinary и сохранен в Firebase.`);
+                    } else {
+                        const errorMsg = cloudinaryData.error && cloudinaryData.error.message ? cloudinaryData.error.message : "URL не получен от Cloudinary.";
+                        console.error(`[main-page.js] Ошибка: URL не получен от Cloudinary для ${file.name}:`, cloudinaryData);
+                        alert(`Ошибка при загрузке файла ${file.name} в Cloudinary: ${errorMsg}.`);
+                    }
+                } catch (error) {
+                    console.error(`[main-page.js] Критическая ошибка при загрузке файла ${file.name}:`, error);
+                    alert(`Произошла ошибка при загрузке файла ${file.name}: ${error.message}. Проверьте консоль.`);
+                }
+            }
+            event.target.value = null; // Сбрасываем выбранные файлы для возможности повторной загрузки тех же файлов
+            console.log("[main-page.js] Пакетная загрузка завершена.");
+            loadImages(); // Перезагружаем изображения после завершения пакетной загрузки
+        }
+    });
 
     // --- Firebase Auth Status Listener ---
     onAuthStateChanged(auth, (user) => {
@@ -69,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Загрузка изображений из Firebase ---
+    // --- Загрузка изображений из Firebase (URLы теперь приходят с Cloudinary) ---
     function loadImages() {
         onValue(dbRef(database, 'images'), (snapshot) => {
             const images = snapshot.val();
@@ -81,10 +173,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (images) {
                 Object.keys(images).forEach(key => {
                     const image = { id: key, ...images[key] };
+                    // Преобразуем timestamp из ISO String обратно в число, если это необходимо для сортировки
                     if (typeof image.timestamp === 'string') {
                         image.timestamp = new Date(image.timestamp).getTime();
                     } else if (typeof image.timestamp === 'undefined' || image.timestamp === null) {
-                        image.timestamp = Date.now();
+                        image.timestamp = Date.now(); // Fallback, если timestamp отсутствует
                     }
                     imageList.push(image);
                 });
@@ -99,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayImageInColumn(image) {
         const imgElement = document.createElement('img');
-        imgElement.src = image.url;
+        imgElement.src = image.url; // URL теперь с Cloudinary
         imgElement.alt = image.description || 'Gallery image';
         imgElement.dataset.id = image.id;
         imgElement.classList.add('gallery-image');
@@ -143,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         imageInfoDiv.innerHTML = `
             <p><strong>Описание:</strong> ${image.description || 'Нет описания'}</p>
             <p><strong>Дата:</strong> ${new Date(image.timestamp).toLocaleString()}</p>
+            <p><strong>Загрузил:</strong> ${image.uploadedByName || 'Неизвестно'}</p>
         `;
     }
 
@@ -200,8 +294,16 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         const action = event.target.dataset.action;
         const currentImage = imageList[currentIndex];
+        const user = auth.currentUser;
 
-        if (!currentImage) return;
+        if (!currentImage || !user) return; // Проверка, что изображение выбрано и пользователь аутентифицирован
+
+        // Проверяем, что только загрузивший пользователь может удалить или переместить фото
+        if (currentImage.uploadedBy !== user.uid) {
+            alert('Вы можете удалять или перемещать только те фотографии, которые загрузили сами.');
+            return;
+        }
+
 
         if (action === 'delete') {
             if (confirm('Вы уверены, что хотите удалить это изображение?')) {
@@ -278,92 +380,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Логика загрузки изображений ---
-
-    async function uploadImageToFirebase(file, column) {
-        if (!file) {
-            // alert('Пожалуйста, выберите файл для загрузки.'); // Убрано по запросу пользователя
-            console.log('No file selected for upload.'); // Оставлено для отладки в консоли
-            return;
-        }
-
-        const user = auth.currentUser;
-        if (!user) {
-            alert('Для загрузки изображений необходимо войти в систему.'); // Это важное сообщение, его оставляем
-            return;
-        }
-
-        console.log(`Начинается загрузка файла: ${file.name} в колонку: ${column}`);
-        // alert(`Начинается загрузка файла: ${file.name} в колонку: ${column}`); // Убрано по запросу пользователя
-
-        try {
-            const storagePath = `images/${user.uid}/${Date.now()}_${file.name}`;
-            const imageRef = storageRef(storage, storagePath);
-            const uploadResult = await uploadBytes(imageRef, file);
-            const imageUrl = await getDownloadURL(uploadResult.ref);
-
-            const newImageRef = push(dbRef(database, 'images'));
-            await set(newImageRef, {
-                url: imageUrl,
-                column: column,
-                description: '',
-                timestamp: Date.now(),
-                uploadedBy: user.uid,
-                uploadedByName: user.displayName || user.email
-            });
-
-            console.log('Изображение успешно загружено и информация сохранена в базу данных!');
-            // alert('Фотография успешно загружена!'); // Убрано по запросу пользователя
-
-        } catch (error) {
-            console.error('Ошибка при загрузке изображения:', error);
-            alert('Ошибка при загрузке фотографии: ' + error.message); // Это сообщение об ошибке, его оставляем для отладки
-        }
-    }
-
-    // Обработчики для кнопок загрузки
-    uploadLeftButton.addEventListener('click', () => {
-        fileInputLeft.click();
-    });
-    uploadCenterButton.addEventListener('click', () => {
-        fileInputCenter.click();
-    });
-    uploadRightButton.addEventListener('click', () => {
-        fileInputRight.click();
-    });
-
-    // Обработчики изменения скрытых input[type="file"]
-    fileInputLeft.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            uploadImageToFirebase(file, fileInputLeft.dataset.column);
-        }
-        event.target.value = '';
-    });
-
-    fileInputCenter.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            uploadImageToFirebase(file, fileInputCenter.dataset.column);
-        }
-        event.target.value = '';
-    });
-
-    fileInputRight.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            uploadImageToFirebase(file, fileInputRight.dataset.column);
-        }
-        event.target.value = '';
-    });
-
 
     // --- Функциональность касания/свайпа для карусели модального окна ---
     let startX;
     let currentTranslate;
     let isDragging = false;
     // Убедимся, что modalImageCarousel существует перед доступом к offsetWidth
-    const carouselWidth = modalImageCarousel ? (modalImageCarousel.offsetWidth + 40) : 0;
+    const carouselWidth = modalImageCarousel ? (modalImageCarousel.offsetWidth + 40) : 0; // Добавлено +40 для учета gap
 
     function setTranslate(xPos) {
         if(modalImageCarousel) {
@@ -375,9 +398,10 @@ document.addEventListener('DOMContentLoaded', () => {
         modalImageCarousel.addEventListener('touchstart', (event) => {
             if (event.touches.length === 1) {
                 startX = event.touches[0].clientX;
+                // Получаем текущее смещение, чтобы продолжить с него
                 currentTranslate = getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4] ? parseFloat(getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4]) : 0;
                 isDragging = true;
-                modalImageCarousel.style.transition = 'none';
+                modalImageCarousel.style.transition = 'none'; // Отключаем переход для плавного перетаскивания
             }
         });
 
@@ -391,16 +415,17 @@ document.addEventListener('DOMContentLoaded', () => {
         modalImageCarousel.addEventListener('touchend', () => {
             if (!isDragging) return;
             isDragging = false;
-            modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+            modalImageCarousel.style.transition = 'transform 0.3s ease-out'; // Включаем переход обратно
 
-            const movedBy = currentTranslate - (getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4] ? parseFloat(getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4]) : 0);
+            const finalTranslate = getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4] ? parseFloat(getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4]) : 0;
+            const movedBy = currentTranslate - finalTranslate; // Направление и дистанция свайпа
 
-            if (movedBy < -50 && currentIndex < imageList.length - 1) {
+            if (movedBy > 50 && currentIndex < imageList.length - 1) { // Свайп влево
                 currentIndex++;
-            } else if (movedBy > 50 && currentIndex > 0) {
+            } else if (movedBy < -50 && currentIndex > 0) { // Свайп вправо
                 currentIndex--;
             }
-
+            // Обновляем карусель и информацию
             updateCarouselImages(currentIndex);
             updateImageInfo(imageList[currentIndex]);
             loadComments(imageList[currentIndex].id);
@@ -414,12 +439,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isTargetCarousel = modalImageCarousel && (modalImageCarousel.contains(event.target) || event.target === modalImageCarousel);
 
                 if (isTargetCarousel && isDragging) {
-                    return;
+                    return; // Если это свайп по карусели и мы в режиме перетаскивания, позволяем ему работать
                 }
                 if (isTargetComments && commentsList.scrollHeight > commentsList.clientHeight) {
-                    return;
+                    return; // Если цель - список комментариев и он прокручивается, позволяем ему работать
                 }
-                event.preventDefault();
+                event.preventDefault(); // В остальных случаях предотвращаем прокрутку фона
             }
         }, { passive: false });
     }
