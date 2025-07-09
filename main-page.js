@@ -3,6 +3,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
 import { getDatabase, ref as dbRef, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+// Импорт для Firebase Storage
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
 
 
 const firebaseConfig = {
@@ -18,6 +20,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth();
+const storage = getStorage(app); // Инициализация Firebase Storage
 
 
 // Убедитесь, что DOM полностью загружен, прежде чем получать доступ к элементам
@@ -46,6 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadLeftButton = document.getElementById('uploadLeft');
     const uploadCenterButton = document.getElementById('uploadCenter');
     const uploadRightButton = document.getElementById('uploadRight');
+
+    // Ссылки на скрытые input[type="file"]
+    const fileInputLeft = document.getElementById('fileInputLeft');
+    const fileInputCenter = document.getElementById('fileInputCenter');
+    const fileInputRight = document.getElementById('fileInputRight');
+
 
     let imageList = [];
     let currentIndex = 0;
@@ -78,8 +87,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 Object.keys(images).forEach(key => {
                     const image = { id: key, ...images[key] };
                     // --- ВАЖНОЕ ИЗМЕНЕНИЕ: Преобразование timestamp в число ---
+                    // Проверяем, если timestamp строка, то преобразуем её.
+                    // Если timestamp уже число (например, для новых загрузок через Date.now()), оставляем как есть.
                     if (typeof image.timestamp === 'string') {
                         image.timestamp = new Date(image.timestamp).getTime();
+                    } else if (typeof image.timestamp === 'undefined' || image.timestamp === null) {
+                         // Если timestamp отсутствует, устанавливаем текущее время для корректной сортировки
+                         // Это важно для старых изображений без timestamp
+                        image.timestamp = Date.now();
                     }
                     // --- Конец важного изменения ---
                     imageList.push(image);
@@ -280,24 +295,88 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Кнопки загрузки изображений (Заглушка - фактическая логика загрузки может быть сложнее) ---
-    // Предполагается, что эти кнопки запускают механизм загрузки, не обрабатываемый напрямую здесь.
-    // Фактический ввод файла и загрузка в хранилище обычно более сложны.
+    // --- Логика загрузки изображений ---
+
+    // Функция загрузки изображения в Firebase Storage и сохранения данных в Realtime Database
+    async function uploadImageToFirebase(file, column) {
+        if (!file) {
+            alert('Пожалуйста, выберите файл для загрузки.');
+            return;
+        }
+
+        const user = auth.currentUser;
+        if (!user) {
+            alert('Для загрузки изображений необходимо войти в систему.');
+            return;
+        }
+
+        // Показываем, что идет загрузка (можно добавить индикатор)
+        console.log(`Начинается загрузка файла: ${file.name} в колонку: ${column}`);
+        alert(`Начинается загрузка файла: ${file.name} в колонку: ${column}`); // Временный alert
+
+        try {
+            // 1. Загрузка файла в Firebase Storage
+            const storagePath = `images/${user.uid}/${Date.now()}_${file.name}`;
+            const imageRef = storageRef(storage, storagePath);
+            const uploadResult = await uploadBytes(imageRef, file);
+            const imageUrl = await getDownloadURL(uploadResult.ref);
+
+            // 2. Сохранение информации об изображении в Realtime Database
+            const newImageRef = push(dbRef(database, 'images')); // Генерируем уникальный ID
+            await set(newImageRef, {
+                url: imageUrl,
+                column: column,
+                description: '', // Можно добавить поле для описания, если нужно
+                timestamp: Date.now(), // Используем числовой timestamp для новых загрузок
+                uploadedBy: user.uid,
+                uploadedByName: user.displayName || user.email
+            });
+
+            console.log('Изображение успешно загружено и информация сохранена в базу данных!');
+            alert('Фотография успешно загружена!'); // Уведомление об успехе
+
+        } catch (error) {
+            console.error('Ошибка при загрузке изображения:', error);
+            alert('Ошибка при загрузке фотографии: ' + error.message);
+        }
+    }
+
+    // Обработчики для кнопок загрузки
     uploadLeftButton.addEventListener('click', () => {
-        currentColumn = 'left';
-        // Запуск файлового ввода или диалога загрузки
-        alert('Загрузка в Him peach (реализация загрузки файла не показана в этом фрагменте)');
+        fileInputLeft.click(); // Инициируем клик по скрытому input
     });
-
     uploadCenterButton.addEventListener('click', () => {
-        currentColumn = 'center';
-        alert('Загрузка в Our dreams (реализация загрузки файла не показана в этом фрагменте)');
+        fileInputCenter.click();
+    });
+    uploadRightButton.addEventListener('click', () => {
+        fileInputRight.click();
     });
 
-    uploadRightButton.addEventListener('click', () => {
-        currentColumn = 'right';
-        alert('Загрузка в Her cat (реализация загрузки файла не показана в этом фрагменте)');
+    // Обработчики изменения скрытых input[type="file"]
+    fileInputLeft.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            uploadImageToFirebase(file, fileInputLeft.dataset.column);
+        }
+        event.target.value = ''; // Очищаем input, чтобы можно было загрузить тот же файл снова
     });
+
+    fileInputCenter.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            uploadImageToFirebase(file, fileInputCenter.dataset.column);
+        }
+        event.target.value = '';
+    });
+
+    fileInputRight.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            uploadImageToFirebase(file, fileInputRight.dataset.column);
+        }
+        event.target.value = '';
+    });
+
 
     // --- Функциональность касания/свайпа для карусели модального окна ---
     let startX;
