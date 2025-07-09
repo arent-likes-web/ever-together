@@ -230,11 +230,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return imageWrapper;
     }
 
-    function openModal(imageWrapper) {
-        if (!imageWrapper) {
-            return;
-        }
-        currentImageWrapper = imageWrapper;
+    currentImageWrapper = imageWrapper;
         currentImageId = imageWrapper.dataset.id;
         const currentColumn = imageWrapper.dataset.columnOrigin;
 
@@ -801,6 +797,61 @@ document.addEventListener('DOMContentLoaded', () => {
 let currentIndex = 0;
 let imageList = [];
 
+Column .image-wrapper`));
+    currentIndex = imageList.findIndex(w => w === wrapper);
+    setCarouselImages();
+    document.getElementById('imageModal').classList.add('show-modal');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('imageModal').classList.remove('show-modal');
+    document.body.style.overflow = '';
+}
+
+px))`;
+
+    // Прелоад
+    for (let i = -1; i <= 1; i++) {
+        const img = carousel.children[currentIndex + i];
+        if (img) new Image().src = img.src;
+    }
+}
+
+document.getElementById('prevImage')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentIndex > 0) {
+        currentIndex--;
+        setCarouselImages();
+    }
+});
+
+document.getElementById('nextImage')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentIndex < imageList.length - 1) {
+        currentIndex++;
+        setCarouselImages();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('imageModal');
+    if (!modal.classList.contains('show-modal')) return;
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        currentIndex--;
+        setCarouselImages();
+    }
+    if (e.key === 'ArrowRight' && currentIndex < imageList.length - 1) {
+        currentIndex++;
+        setCarouselImages();
+    }
+});
+
+
+let currentIndex = 0;
+let imageList = [];
+
 function openModal(wrapper) {
     const column = wrapper.dataset.columnOrigin;
     imageList = Array.from(document.querySelectorAll(`#${column}Column .image-wrapper`));
@@ -816,25 +867,19 @@ function closeModal() {
 }
 
 function setCarouselImages() {
-    const main = document.getElementById('modalImage');
-    const prev = document.getElementById('prevImage');
-    const next = document.getElementById('nextImage');
+    const carousel = document.querySelector('.modal-image-carousel');
+    const images = carousel.querySelectorAll('img');
 
-    const getImgSrc = (index) => imageList[index]?.querySelector('img')?.src || '';
+    const getImageSrc = (index) => imageList[index]?.querySelector('img')?.src || '';
 
-    main.src = getImgSrc(currentIndex);
-    prev.src = getImgSrc(currentIndex - 1);
-    next.src = getImgSrc(currentIndex + 1);
+    images[0].src = getImageSrc(currentIndex - 1);
+    images[1].src = getImageSrc(currentIndex);
+    images[2].src = getImageSrc(currentIndex + 1);
 
-    prev.style.display = currentIndex > 0 ? 'block' : 'none';
-    next.style.display = currentIndex < imageList.length - 1 ? 'block' : 'none';
-}px))`;
+    images[0].style.visibility = currentIndex > 0 ? 'visible' : 'hidden';
+    images[2].style.visibility = currentIndex < imageList.length - 1 ? 'visible' : 'hidden';
 
-    // Прелоад
-    for (let i = -1; i <= 1; i++) {
-        const img = carousel.children[currentIndex + i];
-        if (img) new Image().src = img.src;
-    }
+    carousel.style.transform = `translateX(calc(-100% / 3))`;
 }
 
 document.getElementById('prevImage')?.addEventListener('click', (e) => {
