@@ -820,9 +820,14 @@ function setCarouselImages() {
     const prev = document.getElementById('prevImage');
     const next = document.getElementById('nextImage');
 
-    main.src = imageList[currentIndex]?.querySelector('img')?.src || '';
-    prev.src = imageList[currentIndex - 1]?.querySelector('img')?.src || '';
-    next.src = imageList[currentIndex + 1]?.querySelector('img')?.src || '';
+    const getImgSrc = (index) => imageList[index]?.querySelector('img')?.src || '';
+
+    main.src = getImgSrc(currentIndex);
+    prev.src = getImgSrc(currentIndex - 1);
+    next.src = getImgSrc(currentIndex + 1);
+
+    if (prev.src) new Image().src = prev.src;
+    if (next.src) new Image().src = next.src;
 
     prev.style.display = currentIndex > 0 ? 'block' : 'none';
     next.style.display = currentIndex < imageList.length - 1 ? 'block' : 'none';
