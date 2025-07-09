@@ -816,9 +816,19 @@ function closeModal() {
 }
 
 function setCarouselImages() {
-    const carousel = document.querySelector('.modal-image-carousel');
-    const offset = currentIndex * (carousel.children[0]?.offsetWidth + 40); // ширина + gap
-    carousel.style.transform = `translateX(calc(50vw - ${offset + (carousel.children[0]?.offsetWidth / 2)}px))`;
+    const main = document.getElementById('modalImage');
+    const prev = document.getElementById('prevImage');
+    const next = document.getElementById('nextImage');
+
+    const getImgSrc = (index) => imageList[index]?.querySelector('img')?.src || '';
+
+    main.src = getImgSrc(currentIndex);
+    prev.src = getImgSrc(currentIndex - 1);
+    next.src = getImgSrc(currentIndex + 1);
+
+    prev.style.display = currentIndex > 0 ? 'block' : 'none';
+    next.style.display = currentIndex < imageList.length - 1 ? 'block' : 'none';
+}px))`;
 
     // Прелоад
     for (let i = -1; i <= 1; i++) {
