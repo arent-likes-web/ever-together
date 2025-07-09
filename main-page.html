@@ -23,22 +23,25 @@
     <div class="top-upload-buttons-container">
         <div class="column-top-actions">
             <button id="uploadLeft">Him peach</button>
+            <input type="file" id="fileInputLeft" accept="image/*" data-column="left" style="display: none;">
         </div>
         <div class="column-top-actions">
             <button id="uploadCenter">Our dreams</button>
+            <input type="file" id="fileInputCenter" accept="image/*" data-column="center" style="display: none;">
         </div>
         <div class="column-top-actions">
             <button id="uploadRight">Her cat</button>
+            <input type="file" id="fileInputRight" accept="image/*" data-column="right" style="display: none;">
         </div>
     </div>
 
     <div class="image-container">
         <div class="image-column" id="leftColumn">
-            </div>
+        </div>
         <div class="image-column" id="centerColumn">
-            </div>
+        </div>
         <div class="image-column" id="rightColumn">
-            </div>
+        </div>
     </div>
 
     <div id="imageModal" class="modal">
@@ -68,7 +71,7 @@
 
                 <div class="comments-section">
                     <div class="comments-list" id="commentsList">
-                        </div>
+                    </div>
                     <div class="comment-input-container">
                         <textarea id="commentInput" placeholder="Добавить комментарий..."></textarea>
                         <button id="sendCommentBtn">Отправить</button>
