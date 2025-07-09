@@ -77,6 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (images) {
                 Object.keys(images).forEach(key => {
                     const image = { id: key, ...images[key] };
+                    // --- ВАЖНОЕ ИЗМЕНЕНИЕ: Преобразование timestamp в число ---
+                    if (typeof image.timestamp === 'string') {
+                        image.timestamp = new Date(image.timestamp).getTime();
+                    }
+                    // --- Конец важного изменения ---
                     imageList.push(image);
                 });
                 // Сортировка изображений по timestamp в убывающем порядке (новые сверху)
