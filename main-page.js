@@ -23,7 +23,7 @@ const storage = getStorage(app);
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Все ссылки на DOM-элементы теперь внутри DOMContentLoaded ---
+    // --- Все ссылки на DOM-элементы теперь гарантированно внутри DOMContentLoaded ---
     const imageModalGlobalRef = document.getElementById('imageModal');
     const optionsDropdownGlobalRef = document.getElementById('optionsDropdown');
     const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
@@ -49,16 +49,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInputLeft = document.getElementById('fileInputLeft');
     const fileInputCenter = document.getElementById('fileInputCenter');
     const fileInputRight = document.getElementById('fileInputRight');
+    const userNameSpan = document.getElementById('userName'); // Перемещено сюда на случай, если раньше было вне
+
     // --- Конец ссылок на DOM-элементы ---
 
 
     let imageList = [];
     let currentIndex = 0;
-    let currentColumn = 'left';
+    // currentColumn может быть определен динамически, но пока оставим как есть, если нет других мест использования
+    // let currentColumn = 'left';
+
 
     // --- Firebase Auth Status Listener ---
     onAuthStateChanged(auth, (user) => {
-        const userNameSpan = document.getElementById('userName'); // Эту ссылку тоже стоит объявить здесь
         if (user) {
             userNameSpan.textContent = user.displayName || user.email;
             loadImages();
@@ -360,59 +363,68 @@ document.addEventListener('DOMContentLoaded', () => {
     let startX;
     let currentTranslate;
     let isDragging = false;
-    const carouselWidth = modalImageCarousel.offsetWidth + 40;
+    // Убедимся, что modalImageCarousel существует перед доступом к offsetWidth
+    const carouselWidth = modalImageCarousel ? (modalImageCarousel.offsetWidth + 40) : 0;
 
     function setTranslate(xPos) {
-        modalImageCarousel.style.transform = `translateX(${xPos}px)`;
+        if(modalImageCarousel) { // Добавлена проверка на существование
+            modalImageCarousel.style.transform = `translateX(${xPos}px)`;
+        }
     }
 
-    modalImageCarousel.addEventListener('touchstart', (event) => {
-        if (event.touches.length === 1) {
-            startX = event.touches[0].clientX;
-            currentTranslate = getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4] ? parseFloat(getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4]) : 0;
-            isDragging = true;
-            modalImageCarousel.style.transition = 'none';
-        }
-    });
-
-    modalImageCarousel.addEventListener('touchmove', (event) => {
-        if (!isDragging || event.touches.length !== 1) return;
-        const currentX = event.touches[0].clientX;
-        const diffX = currentX - startX;
-        setTranslate(currentTranslate + diffX);
-    });
-
-    modalImageCarousel.addEventListener('touchend', () => {
-        if (!isDragging) return;
-        isDragging = false;
-        modalImageCarousel.style.transition = 'transform 0.3s ease-out';
-
-        const movedBy = currentTranslate - (getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4] ? parseFloat(getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4]) : 0);
-
-        if (movedBy < -50 && currentIndex < imageList.length - 1) {
-            currentIndex++;
-        } else if (movedBy > 50 && currentIndex > 0) {
-            currentIndex--;
-        }
-
-        updateCarouselImages(currentIndex);
-        updateImageInfo(imageList[currentIndex]);
-        loadComments(imageList[currentIndex].id);
-    });
-
-    imageModalGlobalRef.addEventListener('touchmove', (event) => {
-        if (imageModalGlobalRef.classList.contains('show-modal')) {
-            const isTargetComments = commentsList.contains(event.target) || event.target === commentsList;
-            const isTargetCarousel = modalImageCarousel.contains(event.target) || event.target === modalImageCarousel;
-
-            if (isTargetCarousel && isDragging) {
-                return;
+    if(modalImageCarousel) { // Добавлена проверка на существование
+        modalImageCarousel.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 1) {
+                startX = event.touches[0].clientX;
+                currentTranslate = getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4] ? parseFloat(getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4]) : 0;
+                isDragging = true;
+                modalImageCarousel.style.transition = 'none';
             }
-            if (isTargetComments && commentsList.scrollHeight > commentsList.clientHeight) {
-                return;
+        });
+
+        modalImageCarousel.addEventListener('touchmove', (event) => {
+            if (!isDragging || event.touches.length !== 1) return;
+            const currentX = event.touches[0].clientX;
+            const diffX = currentX - startX;
+            setTranslate(currentTranslate + diffX);
+        });
+
+        modalImageCarousel.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            modalImageCarousel.style.transition = 'transform 0.3s ease-out';
+
+            const movedBy = currentTranslate - (getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4] ? parseFloat(getComputedStyle(modalImageCarousel).transform.replace(/[^0-9\-.,]/g, '').split(',')[4]) : 0);
+
+            if (movedBy < -50 && currentIndex < imageList.length - 1) {
+                currentIndex++;
+            } else if (movedBy > 50 && currentIndex > 0) {
+                currentIndex--;
             }
-            event.preventDefault();
-        }
-    }, { passive: false });
+
+            updateCarouselImages(currentIndex);
+            updateImageInfo(imageList[currentIndex]);
+            loadComments(imageList[currentIndex].id);
+        });
+    } // Конец проверки modalImageCarousel
+
+    // Проверка imageModalGlobalRef перед добавлением обработчика
+    if(imageModalGlobalRef) {
+        imageModalGlobalRef.addEventListener('touchmove', (event) => {
+            if (imageModalGlobalRef.classList.contains('show-modal')) {
+                // Убедимся, что commentsList и modalImageCarousel существуют перед использованием
+                const isTargetComments = commentsList && (commentsList.contains(event.target) || event.target === commentsList);
+                const isTargetCarousel = modalImageCarousel && (modalImageCarousel.contains(event.target) || event.target === modalImageCarousel);
+
+                if (isTargetCarousel && isDragging) {
+                    return;
+                }
+                if (isTargetComments && commentsList.scrollHeight > commentsList.clientHeight) {
+                    return;
+                }
+                event.preventDefault();
+            }
+        }, { passive: false });
+    } // Конец проверки imageModalGlobalRef
 
 });
