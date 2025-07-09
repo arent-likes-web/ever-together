@@ -239,7 +239,7 @@ header h1 {
     cursor: pointer; /* Добавлено для iOS, чтобы фон был кликабельным */
     /* Важно для свайпа: предотвращаем прокрутку body при открытом модале */
     overflow: hidden; 
-}
+overflow: hidden;}
 
 .modal.show-modal {
     display: flex;
@@ -261,11 +261,11 @@ header h1 {
     /* Добавляем overflow-y: auto для прокрутки всего содержимого модального окна, если оно слишком большое */
     overflow-y: auto; 
     overflow-x: hidden; /* Скрываем горизонтальную прокрутку, если модальное окно не является каруселью */
-}
+overflow: hidden;}
 
 .modal.show-modal .modal-content {
     transform: scale(1);
-}
+overflow: hidden;}
 
 /* Новый контейнер для карусели изображений */
 .modal-image-carousel {
@@ -607,7 +607,7 @@ header h1 {
         max-width: 95%;
         max-height: 95%; /* Увеличено для мобильных */
         padding: 10px;
-    }
+    overflow: hidden;}
 
     .modal-image-carousel {
         margin-bottom: 10px; /* Отступ на мобильных */
