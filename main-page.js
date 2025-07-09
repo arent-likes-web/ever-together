@@ -230,7 +230,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return imageWrapper;
     }
 
-    currentImageWrapper = imageWrapper;
+    function openModal(imageWrapper) {
+        if (!imageWrapper) {
+            return;
+        }
+        currentImageWrapper = imageWrapper;
         currentImageId = imageWrapper.dataset.id;
         const currentColumn = imageWrapper.dataset.columnOrigin;
 
@@ -797,7 +801,9 @@ document.addEventListener('DOMContentLoaded', () => {
 let currentIndex = 0;
 let imageList = [];
 
-Column .image-wrapper`));
+function openModal(wrapper) {
+    const column = wrapper.dataset.columnOrigin;
+    imageList = Array.from(document.querySelectorAll(`#${column}Column .image-wrapper`));
     currentIndex = imageList.findIndex(w => w === wrapper);
     setCarouselImages();
     document.getElementById('imageModal').classList.add('show-modal');
@@ -809,7 +815,10 @@ function closeModal() {
     document.body.style.overflow = '';
 }
 
-px))`;
+function setCarouselImages() {
+    const carousel = document.querySelector('.modal-image-carousel');
+    const offset = currentIndex * (carousel.children[0]?.offsetWidth + 40); // ширина + gap
+    carousel.style.transform = `translateX(calc(50vw - ${offset + (carousel.children[0]?.offsetWidth / 2)}px))`;
 
     // Прелоад
     for (let i = -1; i <= 1; i++) {
@@ -848,7 +857,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-
+// === Modal Carousel Logic ===
 let currentIndex = 0;
 let imageList = [];
 
@@ -878,8 +887,6 @@ function setCarouselImages() {
 
     images[0].style.visibility = currentIndex > 0 ? 'visible' : 'hidden';
     images[2].style.visibility = currentIndex < imageList.length - 1 ? 'visible' : 'hidden';
-
-    carousel.style.transform = `translateX(calc(-100% / 3))`;
 }
 
 document.getElementById('prevImage')?.addEventListener('click', (e) => {
@@ -911,3 +918,4 @@ document.addEventListener('keydown', (e) => {
         setCarouselImages();
     }
 });
+// === End Modal Carousel Logic ===
