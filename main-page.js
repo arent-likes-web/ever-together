@@ -78,10 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 Object.keys(images).forEach(key => {
                     const image = { id: key, ...images[key] };
                     imageList.push(image);
+                });
+                // Сортировка изображений по timestamp в убывающем порядке (новые сверху)
+                imageList.sort((a, b) => b.timestamp - a.timestamp);
+
+                // Теперь отображаем отсортированные изображения
+                imageList.forEach(image => {
                     displayImageInColumn(image);
                 });
-                // Сортировка изображений по timestamp для обеспечения последовательного порядка
-                imageList.sort((a, b) => a.timestamp - b.timestamp);
             }
         });
     }
