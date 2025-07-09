@@ -6,15 +6,17 @@
     <title>Ever Together - Your Gallery</title>
     <link rel="icon" href="heart.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
-    </head>
+</head>
 <body>
     <header>
         <h1>EVER TOGETHER</h1>
-        <div class="header-right-section"> <div class="auth-status">
+        <div class="header-right-section">
+            <div class="auth-status">
                 <span id="userName"></span>
             </div>
             <a href="wish.html" class="star-button-link" aria-label="Открыть страницу желаний">
-                <button class="star-button">★</button> </a>
+                <button class="star-button">★</button>
+            </a>
         </div>
     </header>
 
@@ -32,22 +34,29 @@
 
     <div class="image-container">
         <div class="image-column" id="leftColumn">
-        </div>
+            </div>
         <div class="image-column" id="centerColumn">
-        </div>
+            </div>
         <div class="image-column" id="rightColumn">
-        </div>
+            </div>
     </div>
 
     <div id="imageModal" class="modal">
         <div class="modal-content">
-            <div class="modal-image-carousel">
+            <span class="close-button" id="closeModalButton">&times;</span>
+            <div class="modal-nav-buttons">
+                <button id="prevImageButton" class="modal-nav-button prev">&#10094;</button>
+                <button id="nextImageButton" class="modal-nav-button next">&#10095;</button>
+            </div>
+            <div id="modal-image-carousel" class="modal-image-carousel">
                 <img id="prevImage" class="carousel-image" src="" alt="Previous image">
                 <img id="modalImage" class="carousel-image" src="" alt="Full size image">
                 <img id="nextImage" class="carousel-image" src="" alt="Next image">
             </div>
             
-            <div id="imageInfo"></div> <div class="modal-actions-and-comments-container"> <div class="modal-actions-container">
+            <div id="imageInfo"></div>
+            <div class="modal-actions-and-comments-container">
+                <div class="modal-actions-container">
                     <button id="moreOptionsButton" class="more-options-button">...</button>
                     <div id="optionsDropdown" class="options-dropdown">
                         <a href="#" data-action="delete">Удалить</a>
@@ -57,7 +66,8 @@
                     </div>
                 </div>
 
-                <div class="comments-section"> <div class="comments-list" id="commentsList">
+                <div class="comments-section">
+                    <div class="comments-list" id="commentsList">
                         </div>
                     <div class="comment-input-container">
                         <textarea id="commentInput" placeholder="Добавить комментарий..."></textarea>
