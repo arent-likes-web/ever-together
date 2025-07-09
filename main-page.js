@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const moreOptionsButtonGlobalRef = document.getElementById('moreOptionsButton');
 
     const modalImageCarousel = document.querySelector('.modal-image-carousel');
-    const prevImageButton = document.getElementById('prevImage');
-    const nextImageButton = document.getElementById('nextImage');
+    const prevImageButton = document.getElementById('prevImageButton'); // Исправлено на prevImageButton
+    const nextImageButton = document.getElementById('nextImageButton'); // Исправлено на nextImageButton
     const modalImage = document.getElementById('modalImage');
     const imageInfoDiv = document.getElementById('imageInfo');
 
@@ -49,15 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInputLeft = document.getElementById('fileInputLeft');
     const fileInputCenter = document.getElementById('fileInputCenter');
     const fileInputRight = document.getElementById('fileInputRight');
-    const userNameSpan = document.getElementById('userName'); // Перемещено сюда на случай, если раньше было вне
+    const userNameSpan = document.getElementById('userName');
 
     // --- Конец ссылок на DOM-элементы ---
 
 
     let imageList = [];
     let currentIndex = 0;
-    // currentColumn может быть определен динамически, но пока оставим как есть, если нет других мест использования
-    // let currentColumn = 'left';
 
 
     // --- Firebase Auth Status Listener ---
@@ -284,18 +282,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function uploadImageToFirebase(file, column) {
         if (!file) {
-            alert('Пожалуйста, выберите файл для загрузки.');
+            // alert('Пожалуйста, выберите файл для загрузки.'); // Убрано по запросу пользователя
+            console.log('No file selected for upload.'); // Оставлено для отладки в консоли
             return;
         }
 
         const user = auth.currentUser;
         if (!user) {
-            alert('Для загрузки изображений необходимо войти в систему.');
+            alert('Для загрузки изображений необходимо войти в систему.'); // Это важное сообщение, его оставляем
             return;
         }
 
         console.log(`Начинается загрузка файла: ${file.name} в колонку: ${column}`);
-        alert(`Начинается загрузка файла: ${file.name} в колонку: ${column}`);
+        // alert(`Начинается загрузка файла: ${file.name} в колонку: ${column}`); // Убрано по запросу пользователя
 
         try {
             const storagePath = `images/${user.uid}/${Date.now()}_${file.name}`;
@@ -314,11 +313,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             console.log('Изображение успешно загружено и информация сохранена в базу данных!');
-            alert('Фотография успешно загружена!');
+            // alert('Фотография успешно загружена!'); // Убрано по запросу пользователя
 
         } catch (error) {
             console.error('Ошибка при загрузке изображения:', error);
-            alert('Ошибка при загрузке фотографии: ' + error.message);
+            alert('Ошибка при загрузке фотографии: ' + error.message); // Это сообщение об ошибке, его оставляем для отладки
         }
     }
 
@@ -367,12 +366,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const carouselWidth = modalImageCarousel ? (modalImageCarousel.offsetWidth + 40) : 0;
 
     function setTranslate(xPos) {
-        if(modalImageCarousel) { // Добавлена проверка на существование
+        if(modalImageCarousel) {
             modalImageCarousel.style.transform = `translateX(${xPos}px)`;
         }
     }
 
-    if(modalImageCarousel) { // Добавлена проверка на существование
+    if(modalImageCarousel) {
         modalImageCarousel.addEventListener('touchstart', (event) => {
             if (event.touches.length === 1) {
                 startX = event.touches[0].clientX;
@@ -406,13 +405,11 @@ document.addEventListener('DOMContentLoaded', () => {
             updateImageInfo(imageList[currentIndex]);
             loadComments(imageList[currentIndex].id);
         });
-    } // Конец проверки modalImageCarousel
+    }
 
-    // Проверка imageModalGlobalRef перед добавлением обработчика
     if(imageModalGlobalRef) {
         imageModalGlobalRef.addEventListener('touchmove', (event) => {
             if (imageModalGlobalRef.classList.contains('show-modal')) {
-                // Убедимся, что commentsList и modalImageCarousel существуют перед использованием
                 const isTargetComments = commentsList && (commentsList.contains(event.target) || event.target === commentsList);
                 const isTargetCarousel = modalImageCarousel && (modalImageCarousel.contains(event.target) || event.target === modalImageCarousel);
 
@@ -425,6 +422,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 event.preventDefault();
             }
         }, { passive: false });
-    } // Конец проверки imageModalGlobalRef
+    }
 
 });
