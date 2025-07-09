@@ -1,153 +1,685 @@
+/* style.css */
 
-/* style.css - updated */
-
-body {
-    margin: 0;
-    font-family: sans-serif;
-    background: #fdfdfd;
-    color: #333;
+/* Добавляем @font-face для шрифта ofont.ru_Geoform.ttf */
+@font-face {
+    font-family: 'Geoform'; /* Используем новое имя для шрифта */
+    src: url('ofont.ru_Geoform.ttf') format('truetype'); /* Указываем путь к файлу в корне */
+    font-weight: normal;
+    font-style: normal;
 }
 
+body {
+    font-family: 'Geoform', sans-serif; /* Теперь используем 'Geoform' */
+    margin: 0;
+    background-color: #1A1A1A;
+    color: #E0E0E0;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-smoothing: grayscale;
+    scroll-behavior: smooth;    
+    min-width: 280px; /* Уменьшим минимальную ширину body для очень маленьких экранов */
+}
+
+/* Общие стили для элементов */
+a {
+    color: #9C829C;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #C0A4C0;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    font-family: 'Geoform', sans-serif; /* Применяем новый шрифт к кнопкам */
+}
+
+/* Header */
 header {
+    background-color: #2D2D2D;
+    color: #E0E0E0;
+    padding: 20px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2rem;
-    background-color: #a78bfa;
-    color: white;
-    border-bottom: 3px solid #7c3aed;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 100;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 80px; /* Примерная минимальная высота для заголовка */
 }
 
+header h1 {
+    margin: 0;
+    font-size: 2.2em;
+    font-weight: normal;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #E0E0E0;
+    background: linear-gradient(90deg, #E0E0E0 0%, #C899E0 50%, #E0E0E0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 5px rgba(200, 153, 224, 0.3);
+}
+
+/* Новый контейнер для правой части хедера */
+.header-right-section {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Расстояние между именем пользователя и звездочкой */
+}
+
+.auth-status {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.1em;
+    /* Убираем margin-right, так как gap в .header-right-section справляется с отступами */
+}
+
+.auth-status span {
+    font-weight: normal;
+    color: #B0B0B0;
+}
+
+/* Top Upload Buttons Container */
+.top-upload-buttons-container {
+    display: flex;
+    justify-content: center;    
+    padding: 30px 20px 20px;
+    gap: 30px;
+    flex-wrap: wrap;    
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.top-upload-buttons-container .column-top-actions {
+    flex: 1;    
+    min-width: 250px;
+    max-width: 350px;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.top-upload-buttons-container .column-top-actions button {
+    background-color: #8CACEA;
+    color: white;
+    border-radius: 6px;
+    padding: 15px 30px;
+    font-size: 1.2em;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.top-upload-buttons-container .column-top-actions button:hover {
+    background-color: #B4CCF5;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px);
+}
+
+.top-upload-buttons-container .column-top-actions button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Image Grid Container */
 .image-container {
     display: flex;
-    justify-content: space-around;
-    margin-top: 20px;
-    padding: 0 10px;
+    justify-content: center;    
+    padding: 30px 20px;
+    gap: 30px;
+    flex-wrap: wrap;    
+    max-width: 1200px;
+    margin: 0 auto 50px;
 }
 
+/* Column Styles */
 .image-column {
-    width: 30%;
+    flex: 1;
+    min-width: 300px;
+    max-width: 380px;
+    background-color: #2D2D2D;
+    border-radius: 8px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 20px;
+    box-sizing: border-box;
+    position: relative;
 }
 
+/* Image Wrapper */
 .image-wrapper {
     position: relative;
-    overflow: hidden;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-}
-
-.thumbnail {
     width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 10px;
+    background-color: #4A4A4A;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease;
+    opacity: 0;
+    animation: fadeIn 0.8s forwards ease-out;
+    transform: translateY(20px);
 }
 
+.image-wrapper:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    outline: 2px solid #C899E0;
+    outline-offset: -2px;
+}
+
+.image-wrapper img {
+    display: block;
+    width: 100%;
+    height: auto;    
+    object-fit: cover;
+    border-radius: 6px;
+    transition: opacity 0.5s ease;
+}
+
+/* Initial state for image fade-in */
+.image-wrapper img:not(.loaded) {
+    opacity: 0;
+}
+
+/* Loaded state for image fade-in */
+.image-wrapper img.loaded {
+    opacity: 1;
+}
+
+/* Keyframes for fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Error state for image loading */
+.image-wrapper.image-load-error {
+    background-color: #5C2D2D;
+    border: 1px dashed #FF6B6B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    text-align: center;
+    font-size: 1em;
+    color: #FFC0C0;
+    font-weight: bold;
+}
+
+/* Modal styles */
 .modal {
     display: none;
     position: fixed;
     z-index: 1000;
-    left: 0; top: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.85);
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(8px);
     justify-content: center;
     align-items: center;
+    opacity: 0;
+    transition: opacity 0.4s ease-out;
+    cursor: pointer; /* Добавлено для iOS, чтобы фон был кликабельным */
+    /* Важно для свайпа: предотвращаем прокрутку body при открытом модале */
+    overflow: hidden; 
 }
 
-.show-modal {
+.modal.show-modal {
     display: flex;
+    opacity: 1;
 }
 
 .modal-content {
-    background: #fff;
-    border-radius: 10px;
-    padding: 1rem;
-    max-width: 90%;
-    max-height: 90%;
-    overflow: hidden;
-}
-
-.modal-image-carousel {
-    display: flex;
-    width: 100%;
-    height: 70vh;
-    overflow: hidden;
-    align-items: center;
-    justify-content: center;
     position: relative;
-}
-
-.carousel-image {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    transition: transform 0.3s ease;
-    pointer-events: none;
-    user-select: none;
-}
-
-.dragging {
-    cursor: grabbing;
-}
-
-.modal-actions-and-comments-container {
+    background-color: #2D2D2D;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    max-width: 80%;
+    max-height: 80%; /* Увеличим максимальную высоту, чтобы вмещать комментарии */
     display: flex;
-    flex-direction: row;
-    gap: 1rem;
-    margin-top: 1rem;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+    /* Добавляем overflow-y: auto для прокрутки всего содержимого модального окна, если оно слишком большое */
+    overflow-y: auto; 
+    overflow-x: hidden; /* Скрываем горизонтальную прокрутку, если модальное окно не является каруселью */
 }
 
-.comments-section {
-    flex: 1;
+.modal.show-modal .modal-content {
+    transform: scale(1);
 }
 
-.comments-list {
-    max-height: 200px;
-    overflow-y: auto;
-    padding-right: 5px;
-    font-size: 0.9rem;
+/* Новый контейнер для карусели изображений */
+.modal-image-carousel {
+    display: flex; /* Размещаем изображения в ряд */
+    width: 100%; /* Занимаем всю доступную ширину модального окна */
+    overflow: hidden; /* Скрываем изображения, которые находятся за пределами видимой области */
+    position: relative;
+    height: auto; /* Высота будет определяться содержимым */
+    margin-bottom: 20px; /* Отступ от карусели до информации об изображении */
+    cursor: grab; /* Изменяем курсор для перетаскивания */
+    /* Важно: initial transform должен быть равен -100% для центрирования среднего изображения */
+    transform: translateX(-100%); 
+    transition: transform 0.3s ease-out; /* Для плавной анимации пролистывания */
+    /* Убедимся, что карусель не прокручивается, если ее содержимое превышает ее размер */
+    flex-shrink: 0;
+    flex-grow: 1;
+    max-height: 65vh; /* Максимальная высота, как у img ранее */
 }
 
-.comment-input-container textarea {
+.modal-image-carousel.dragging {
+    cursor: grabbing;
+    transition: none; /* Отключаем transition во время перетаскивания для мгновенной реакции */
+}
+
+/* Стили для отдельных изображений в карусели */
+.carousel-image {
+    display: block;
+    width: 100%; /* Каждое изображение занимает 100% ширины контейнера (видимой части) */
+    height: 100%; /* Занимаем всю высоту контейнера карусели */
+    object-fit: contain; /* Изображение будет масштабироваться, чтобы поместиться, сохраняя пропорции */
+    border-radius: 4px;
+    flex-shrink: 0; /* Важно: предотвращает сжатие изображений */
+    opacity: 1; /* По умолчанию видимы */
+    transition: opacity 0.3s ease-out; /* Плавное появление/исчезновение при загрузке */
+}
+
+/* Убираем старые стили для modalImageElement, так как теперь они применяются к carousel-image */
+/* .modal-content img {
+    max-width: 100%;
+    max-height: 65vh; 
+    display: block;
+    object-fit: contain;
+    margin-bottom: 20px;
+    border-radius: 4px;
+
+    position: relative; 
+    transition: transform 0.3s ease-out; 
+    cursor: grab; 
+} */
+
+/* Новый контейнер для действий и комментариев */
+.modal-actions-and-comments-container {
     width: 100%;
-    height: 60px;
-    border-radius: 8px;
-    padding: 8px;
-    resize: vertical;
-    border: 1px solid #ccc;
+    display: flex;
+    flex-direction: column; /* По умолчанию располагаем по вертикали */
+    align-items: flex-end; /* Выравнивание элементов по правому краю */
+    gap: 15px; /* Промежуток между блоком действий и комментариями */
+    padding-top: 15px;
+    border-top: 1px solid #4A4A4A;
 }
 
-.comment-input-container button {
-    margin-top: 5px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: none;
-    background: #a78bfa;
-    color: #fff;
-    cursor: pointer;
+.modal-actions-container {
+    position: relative;
+    width: 100%; /* Занимает всю ширину родителя */
+    display: flex;
+    justify-content: flex-end; /* Выравнивание кнопки "..." вправо */
+    /* Убраны padding и border-top отсюда, т.к. они перенесены в .modal-actions-and-comments-container */
+    z-index: 10;
 }
 
 .more-options-button {
     background: none;
-    border: none;
-    font-size: 1.2rem;
+    border: 1px solid #9C829C;
+    font-size: 1.4em;
     cursor: pointer;
+    color: #9C829C;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.more-options-button:hover {
+    background-color: #9C829C;
+    color: white;
+    border-color: #9C829C;
 }
 
 .options-dropdown {
     display: none;
     position: absolute;
-    background: white;
-    border: 1px solid #ccc;
+    background-color: #3A3A3A;
+    min-width: 180px;
+    box-shadow: 0px 8px 20px 0px rgba(0,0,0,0.4);
+    z-index: 10001;
+    right: 0;
+    bottom: calc(100% + 10px); /* Привязываем к верху кнопки, чтобы он выпадал ВВЕРХ */
     border-radius: 6px;
-    padding: 0.5rem;
-    z-index: 1100;
+    overflow: visible;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: dropdownFadeIn 0.3s forwards ease-out;
+    border: 1px solid #C899E0;
+
+    max-height: calc(100vh - 100px); /* Ограничиваем высоту дропдауна, чтобы он не выходил за рамки экрана */
+    overflow-y: auto; /* Добавляем прокрутку, если содержимое не помещается */
+    transform-origin: bottom right; /* Точка трансформации для анимации появления вверх */
 }
 
-.options-dropdown.show {
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.options-dropdown a {
+    color: #E0E0E0;
+    padding: 14px 18px;
+    text-decoration: none;
     display: block;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-size: 0.95em;
+}
+
+.options-dropdown a:hover {
+    background-color: #B4CCF5;
+    color: #1A1A1A;
+}
+
+/* Image Info */
+#imageInfo {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 0.9em;
+    color: #A0A0A0;
+    margin-bottom: 15px; /* Отступ перед новым блоком комментариев */
+}
+
+/* --- Стили для секции комментариев --- */
+.comments-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.comments-list {
+    background-color: #3A3A3A;
+    border-radius: 8px;
+    padding: 15px;
+    max-height: 200px; /* Ограничиваем высоту для прокрутки */
+    overflow-y: auto; /* Включаем прокрутку */
+    border: 1px solid #4A4A4A;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.comments-list p {
+    margin: 0 0 8px 0;
+    word-wrap: break-word; /* Перенос длинных слов */
+    line-height: 1.4;
+}
+
+.comments-list p:last-child {
+    margin-bottom: 0;
+}
+
+.comment-author {
+    font-weight: bold;
+    color: #C899E0; /* Цвет для автора */
+    margin-right: 5px;
+}
+
+.comment-date {
+    font-size: 0.8em;
+    color: #888;
+    float: right; /* Выравнивание даты по правому краю */
+}
+
+.comment-text {
+    color: #E0E0E0;
+}
+
+
+.comment-input-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#commentInput {
+    flex-grow: 1;
+    padding: 10px 15px;
+    border: 1px solid #4A4A4A;
+    border-radius: 6px;
+    background-color: #252525;
+    color: #E0E0E0;
+    font-family: 'Geoform', sans-serif;
+    resize: vertical; /* Разрешаем изменение размера по вертикали */
+    min-height: 40px; /* Минимальная высота поля ввода */
+    max-height: 120px; /* Максимальная высота, чтобы не слишком растягивалось */
+    box-sizing: border-box; /* Включаем padding в размер */
+}
+
+#commentInput::placeholder {
+    color: #888;
+}
+
+#commentInput:focus {
+    outline: none;
+    border-color: #C899E0;
+    box-shadow: 0 0 0 2px rgba(200, 153, 224, 0.5);
+}
+
+#sendCommentBtn {
+    background-color: #8CACEA;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    white-space: nowrap; /* Предотвращаем перенос текста на кнопке */
+}
+
+#sendCommentBtn:hover {
+    background-color: #B4CCF5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+#sendCommentBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+
+/* --- Стили для новой кнопки со звездой --- */
+
+.star-button-link { /* Стили для ссылки-обертки */
+    /* Убираем position: absolute и связанные стили */
+    /* right: 20px; */
+    /* top: 50%; */
+    /* transform: translateY(-50%); */
+    z-index: 101; 
+    /* Дополнительные стили, если нужны, но теперь она часть потока flexbox */
+}
+
+.star-button { /* Стили для самой кнопки внутри ссылки */
+    background-color: #C899E0; /* Приятный фиолетовый цвет */
+    color: white;
+    border-radius: 50%; /* Круглая кнопка */
+    width: 40px; /* Ширина кнопки */
+    height: 40px; /* Высота кнопки (для круглой формы должны быть равны) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    font-size: 1.5em; /* Размер иконки звезды (если это текст) */
+    /* Если иконка будет SVG или IMG, то уберем font-size и зададим ширину/высоту для img */
+}
+
+.star-button:hover {
+    background-color: #E0B0FF; /* Более светлый фиолетовый при наведении */
+    transform: scale(1.1); /* Небольшое увеличение при наведении */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.star-button:active {
+    transform: scale(1); /* Возвращение к исходному размеру при нажатии */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ALL DEVICES: Responsive adjustments to ALWAYS have 3 columns */
+@media (max-width: 768px) {
+    header {
+        padding: 15px 10px;    
+        min-height: 50px; 
+    }
+    header h1 {
+        font-size: 1.5em;
+        letter-spacing: 1px;
+    }
+
+    .header-right-section {
+        gap: 10px; /* Меньший отступ на мобильных */
+    }
+
+    .auth-status {
+        /* margin-right: 15px; */ /* Убрано, теперь gap */
+    }
+
+    .top-upload-buttons-container,
+    .image-container {
+        display: flex;
+        flex-direction: row; 
+        justify-content: space-around; 
+        padding: 10px 5px;    
+        gap: 5px; 
+        flex-wrap: nowrap; 
+        align-items: flex-start;
+        width: 100%;    
+        max-width: none;    
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+
+    .top-upload-buttons-container .column-top-actions,
+    .image-column {
+        flex: 1 1 30%; 
+        min-width: 80px; 
+        max-width: 120px; 
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    .top-upload-buttons-container .column-top-actions button {
+        padding: 5px 2px; 
+        font-size: 0.65em; 
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: 100%;    
+        display: block;    
+    }
+
+    .image-column {
+        padding: 5px; 
+    }
+
+    .image-wrapper {
+        min-height: 50px; 
+    }
+
+    .image-wrapper img {
+        height: auto;
+        min-height: 40px; 
+    }
+
+    .modal-content {
+        max-width: 95%;
+        max-height: 95%; /* Увеличено для мобильных */
+        padding: 10px;
+    }
+
+    .modal-image-carousel {
+        margin-bottom: 10px; /* Отступ на мобильных */
+        max-height: 45vh; /* Максимальная высота на мобильных */
+    }
+
+    .modal-actions-and-comments-container {
+        flex-direction: column; /* На мобильных всегда колонкой */
+        gap: 10px;
+    }
+
+    .options-dropdown {
+        bottom: calc(100% + 5px);
+        max-height: 100px; 
+        min-width: 100px; 
+        font-size: 0.7em; 
+    }
+    .options-dropdown a {
+        padding: 8px 10px; 
+    }
+
+    /* Стили для кнопки со звездой на мобильных */
+    .star-button-link { /* Стили для ссылки-обертки на мобильных */
+        /* Убираем позиционирование */
+    }
+    .star-button { /* Стили для самой кнопки внутри ссылки на мобильных */
+        width: 30px; /* Меньший размер кнопки на мобильных */
+        height: 30px;
+        font-size: 1.2em; /* Меньший размер иконки на мобильных */
+    }
+
+    .comments-list {
+        max-height: 150px; /* Меньшая высота списка комментариев на мобильных */
+        padding: 10px;
+    }
+
+    .comment-input-container {
+        flex-direction: column; /* Поле ввода и кнопка будут вертикально на мобильных */
+        gap: 5px;
+    }
+
+    #commentInput {
+        min-height: 35px;
+        max-height: 80px;
+        padding: 8px 10px;
+    }
+
+    #sendCommentBtn {
+        width: 100%; /* Кнопка занимает всю ширину на мобильных */
+        padding: 8px 15px;
+    }
+}
+
+@media (min-width: 769px) {
+    /* На больших экранах располагаем действия и комментарии в одну строку,
+       чтобы поле ввода комментария было справа от кнопки "..." */
+    .modal-actions-and-comments-container {
+        flex-direction: row; /* В одну строку на больших экранах */
+        justify-content: space-between; /* Распределяем пространство */
+        align-items: flex-start; /* Выравнивание по верху */
+    }
+
+    .modal-actions-container {
+        width: auto; /* Кнопка "..." не занимает всю ширину */
+    }
+
+    .comments-section {
+        flex-grow: 1; /* Занимает оставшееся пространство */
+        max-width: calc(100% - 100px); /* Примерная ширина, чтобы не наезжать на кнопку "..." */
+    }
+
+    .comments-list {
+        max-height: 250px; /* Большая высота списка комментариев на десктопе */
+    }
 }
