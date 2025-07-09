@@ -1,3 +1,66 @@
+// === Modal Carousel Logic ===
+let currentIndex = 0;
+let imageList = [];
+
+function openModal(wrapper) {
+    const column = wrapper.dataset.columnOrigin;
+    imageList = Array.from(document.querySelectorAll(`#${column}Column .image-wrapper`));
+    currentIndex = imageList.findIndex(w => w === wrapper);
+    setCarouselImages();
+    document.getElementById('imageModal').classList.add('show-modal');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    document.getElementById('imageModal').classList.remove('show-modal');
+    document.body.style.overflow = '';
+}
+
+function setCarouselImages() {
+    const carousel = document.querySelector('.modal-image-carousel');
+    const [prev, main, next] = carousel.querySelectorAll('img');
+
+    const getSrc = (i) => imageList[i]?.querySelector('img')?.src || '';
+
+    prev.src = getSrc(currentIndex - 1);
+    main.src = getSrc(currentIndex);
+    next.src = getSrc(currentIndex + 1);
+
+    prev.style.visibility = currentIndex > 0 ? 'visible' : 'hidden';
+    next.style.visibility = currentIndex < imageList.length - 1 ? 'visible' : 'hidden';
+}
+
+document.getElementById('prevImage')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentIndex > 0) {
+        currentIndex--;
+        setCarouselImages();
+    }
+});
+
+document.getElementById('nextImage')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentIndex < imageList.length - 1) {
+        currentIndex++;
+        setCarouselImages();
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('imageModal');
+    if (!modal.classList.contains('show-modal')) return;
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'ArrowLeft' && currentIndex > 0) {
+        currentIndex--;
+        setCarouselImages();
+    }
+    if (e.key === 'ArrowRight' && currentIndex < imageList.length - 1) {
+        currentIndex++;
+        setCarouselImages();
+    }
+});
+// === End Modal Carousel Logic ===
+
 // main-page.js
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
@@ -856,66 +919,3 @@ document.addEventListener('keydown', (e) => {
         setCarouselImages();
     }
 });
-
-// === Modal Carousel Logic ===
-let currentIndex = 0;
-let imageList = [];
-
-function openModal(wrapper) {
-    const column = wrapper.dataset.columnOrigin;
-    imageList = Array.from(document.querySelectorAll(`#${column}Column .image-wrapper`));
-    currentIndex = imageList.findIndex(w => w === wrapper);
-    setCarouselImages();
-    document.getElementById('imageModal').classList.add('show-modal');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-    document.getElementById('imageModal').classList.remove('show-modal');
-    document.body.style.overflow = '';
-}
-
-function setCarouselImages() {
-    const carousel = document.querySelector('.modal-image-carousel');
-    const [prev, main, next] = carousel.querySelectorAll('img');
-
-    const getSrc = (i) => imageList[i]?.querySelector('img')?.src || '';
-
-    prev.src = getSrc(currentIndex - 1);
-    main.src = getSrc(currentIndex);
-    next.src = getSrc(currentIndex + 1);
-
-    prev.style.visibility = currentIndex > 0 ? 'visible' : 'hidden';
-    next.style.visibility = currentIndex < imageList.length - 1 ? 'visible' : 'hidden';
-}
-
-document.getElementById('prevImage')?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (currentIndex > 0) {
-        currentIndex--;
-        setCarouselImages();
-    }
-});
-
-document.getElementById('nextImage')?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    if (currentIndex < imageList.length - 1) {
-        currentIndex++;
-        setCarouselImages();
-    }
-});
-
-document.addEventListener('keydown', (e) => {
-    const modal = document.getElementById('imageModal');
-    if (!modal.classList.contains('show-modal')) return;
-    if (e.key === 'Escape') closeModal();
-    if (e.key === 'ArrowLeft' && currentIndex > 0) {
-        currentIndex--;
-        setCarouselImages();
-    }
-    if (e.key === 'ArrowRight' && currentIndex < imageList.length - 1) {
-        currentIndex++;
-        setCarouselImages();
-    }
-});
-// === End Modal Carousel Logic ===
