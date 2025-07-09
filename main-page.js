@@ -877,16 +877,16 @@ function closeModal() {
 
 function setCarouselImages() {
     const carousel = document.querySelector('.modal-image-carousel');
-    const images = carousel.querySelectorAll('img');
+    const [prev, main, next] = carousel.querySelectorAll('img');
 
-    const getImageSrc = (index) => imageList[index]?.querySelector('img')?.src || '';
+    const getSrc = (i) => imageList[i]?.querySelector('img')?.src || '';
 
-    images[0].src = getImageSrc(currentIndex - 1);
-    images[1].src = getImageSrc(currentIndex);
-    images[2].src = getImageSrc(currentIndex + 1);
+    prev.src = getSrc(currentIndex - 1);
+    main.src = getSrc(currentIndex);
+    next.src = getSrc(currentIndex + 1);
 
-    images[0].style.visibility = currentIndex > 0 ? 'visible' : 'hidden';
-    images[2].style.visibility = currentIndex < imageList.length - 1 ? 'visible' : 'hidden';
+    prev.style.visibility = currentIndex > 0 ? 'visible' : 'hidden';
+    next.style.visibility = currentIndex < imageList.length - 1 ? 'visible' : 'hidden';
 }
 
 document.getElementById('prevImage')?.addEventListener('click', (e) => {
