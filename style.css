@@ -39,26 +39,25 @@ button {
     font-family: 'Geoform', sans-serif; /* Применяем новый шрифт к кнопкам */
 }
 
-/* Header */
+/* Стили для заголовка */
 header {
-    background-color: #000;
+    background-color: #2D2D2D;
+    color: #E0E0E0;
     padding: 15px 20px;
-    color: #FFF;
-    text-align: center;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 500;
 }
 
 header h1 {
     margin: 0;
     font-size: 1.8em;
-    letter-spacing: 2px;
-    color: #FFF;
+    color: #9C829C;
+    letter-spacing: 1px;
 }
 
 .header-right-section {
@@ -68,8 +67,8 @@ header h1 {
 }
 
 .auth-status {
-    font-size: 1em;
-    color: #BBB;
+    font-size: 1.1em;
+    color: #B0B0B0;
 }
 
 .star-button-link {
@@ -78,94 +77,96 @@ header h1 {
 
 .star-button {
     background-color: #9C829C;
-    color: #FFF;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 1.5em;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    color: #1A1A1A;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .star-button:hover {
     background-color: #C0A4C0;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Top Upload Buttons Container */
+/* Стили для кнопок загрузки в верхней части страницы */
 .top-upload-buttons-container {
     display: flex;
     justify-content: space-around;
-    padding: 15px 10px;
+    padding: 20px;
     background-color: #222;
     border-bottom: 1px solid #333;
-    gap: 10px; /* Добавим небольшой зазор между кнопками */
-    flex-wrap: wrap; /* Позволяет кнопкам переноситься на новую строку на маленьких экранах */
 }
 
-.column-top-actions {
-    flex-grow: 1; /* Позволяет кнопкам занимать доступное пространство */
-    text-align: center;
-    min-width: 100px; /* Минимальная ширина для каждой кнопки */
-}
-
-.top-upload-buttons-container button {
-    background-color: #9C829C;
-    color: #FFF;
-    padding: 10px 15px;
-    border-radius: 5px;
+.column-top-actions button {
+    background-color: #555;
+    color: #E0E0E0;
+    padding: 10px 20px;
+    border-radius: 8px;
     font-size: 1em;
-    width: 100%; /* Кнопки занимают всю доступную ширину в своем контейнере */
-    max-width: 200px; /* Ограничим максимальную ширину кнопок */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.top-upload-buttons-container button:hover {
-    background-color: #C0A4C0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+.column-top-actions button:hover {
+    background-color: #777;
+    transform: translateY(-1px);
 }
 
-/* Image Grid */
+
+/* Стили для контейнера изображений */
 .image-container {
     display: flex;
     justify-content: space-around;
     padding: 20px;
-    gap: 20px; /* Пространство между колонками */
-    flex-wrap: wrap; /* Позволяет колонкам переноситься на новую строку на маленьких экранах */
+    gap: 20px;
 }
 
 .image-column {
-    flex: 1; /* Каждая колонка занимает равное пространство */
-    min-width: 280px; /* Минимальная ширина колонки для лучшего отображения на мобильных */
-    max-width: 380px; /* Ограничим максимальную ширину колонки */
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 15px; /* Пространство между изображениями внутри колонки */
-    background-color: #222;
-    padding: 15px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    gap: 20px;
+    align-items: center; /* Центрирование изображений в колонке */
 }
 
-.gallery-image {
+.image-wrapper {
     width: 100%;
-    height: auto; /* Автоматическая высота для сохранения пропорций */
-    border-radius: 6px;
+    background-color: #2D2D2D;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out;
     cursor: pointer;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-    display: block; /* Убираем лишние пробелы под изображениями */
+    position: relative; /* Для позиционирования иконки */
 }
 
-.gallery-image:hover {
-    transform: scale(1.02);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+.image-wrapper:hover {
+    transform: translateY(-5px);
 }
 
-/* Modal styles */
+.image-wrapper img {
+    width: 100%;
+    height: 100%; /* Заполняем высоту контейнера */
+    object-fit: cover; /* Обрезаем изображение, чтобы оно заполняло контейнер */
+    display: block;
+}
+
+.image-info {
+    padding: 15px;
+    color: #B0B0B0;
+    font-size: 0.9em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.image-info .date {
+    font-size: 0.8em;
+    color: #888;
+}
+
+/* Стили для модального окна */
 .modal {
   display: none;
   position: fixed;
@@ -174,7 +175,7 @@ header h1 {
   top: 0;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden; /* This should stay 'hidden' to prevent body scroll */
   background-color: rgba(0, 0, 0, 0.9);
   justify-content: center;
   align-items: center;
@@ -186,192 +187,208 @@ header h1 {
 
 .modal-content {
   position: relative;
-  width: 100%;
-  max-width: 100vw;
-  height: 80vh;
-  display: flex;
-  flex-direction: column;
-  background-color: #1a1a1a;
+  width: 90%; /* Можно использовать проценты для адаптивности */
+  max-width: 900px; /* Максимальная ширина модального окна */
+  height: auto; /* Устанавливаем высоту 'auto' */
+  max-height: 90vh; /* Максимальная высота, чтобы не выходить за границы экрана */
+  overflow-y: auto; /* Добавляем вертикальную прокрутку */
+  background-color: #2D2D2D;
   border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-  overflow: hidden; /* Prevent content inside from overflowing */
-  padding: 20px;
-  max-width: 900px; /* Limit modal width on larger screens */
-  box-sizing: border-box; /* Include padding in width/height calculation */
-  z-index: 1005; /* Content typically above overlay */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column; /* Изменяем на column, чтобы элементы располагались сверху вниз */
+  align-items: center; /* Выравниваем элементы по центру горизонтали */
+  padding: 20px; /* Добавляем внутренние отступы */
+  box-sizing: border-box; /* Включаем padding в общую ширину/высоту */
 }
 
-.modal-carousel-container {
-    position: relative;
-    width: 100%;
-    flex-grow: 1; /* Allow carousel to take available height */
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden; /* Important for carousel swiping effect */
+.modal-close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 2em;
+    color: #E0E0E0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 100;
+}
+
+.modal-close-button:hover {
+    color: #9C829C;
 }
 
 .modal-image-carousel {
     display: flex;
-    height: 100%; /* Ensure carousel takes full height of its container */
     align-items: center;
-    transition: transform 0.3s ease-out; /* For smooth transitions */
-    gap: 40px; /* Space between images in carousel */
+    justify-content: center;
+    width: 100%; /* Занимает всю доступную ширину */
+    max-height: 70vh; /* Ограничиваем максимальную высоту карусели */
+    overflow: hidden; /* Скрываем часть изображений, выходящих за пределы */
+    margin-bottom: 20px; /* Отступ снизу */
+    position: relative; /* Для стрелок навигации */
+    touch-action: pan-y; /* Разрешаем только вертикальную прокрутку */
 }
 
 .carousel-image {
-    max-height: 100%; /* Image fills available height */
-    max-width: 100%; /* Image fills available width */
-    object-fit: contain; /* Ensure the image fits within the container without cropping */
-    flex-shrink: 0; /* Prevent images from shrinking */
+    max-width: 100%; /* Изображение будет масштабироваться по ширине */
+    max-height: 65vh; /* Ограничиваем максимальную высоту изображения */
+    width: auto; /* Чтобы изображение масштабировалось пропорционально */
+    height: auto; /* Чтобы изображение масштабировалось пропорционально */
+    object-fit: contain; /* Масштабирует изображение, сохраняя пропорции, чтобы оно полностью поместилось в контейнер */
+    display: block; /* Убирает лишние пробелы под изображением */
+    flex-shrink: 0; /* Предотвращаем сжатие изображений */
+    transition: transform 0.3s ease-out; /* Анимация для скролла карусели */
+    margin: 0 20px; /* Пространство между изображениями */
 }
 
-.carousel-control-button {
+.modal-nav-button {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     background-color: rgba(0, 0, 0, 0.5);
-    color: white;
+    color: #E0E0E0;
     border: none;
-    padding: 10px;
+    padding: 10px 15px;
     cursor: pointer;
-    font-size: 1.5em;
     z-index: 10;
     border-radius: 5px;
-    transition: background-color 0.3s ease;
+    font-size: 1.5em;
 }
 
-.carousel-control-button:hover {
-    background-color: rgba(0, 0, 0, 0.8);
+.modal-nav-button:hover {
+    background-color: rgba(0, 0, 0, 0.7);
 }
 
-#prevImageButton {
+#prevImageBtn {
     left: 10px;
 }
 
-#nextImageButton {
+#nextImageBtn {
     right: 10px;
 }
 
+/* Стили для информации об изображении (дата, описание) */
 #imageInfo {
-    background-color: #2b2b2b;
-    padding: 10px 15px;
-    border-radius: 5px;
-    font-size: 0.9em;
-    color: #BBB;
-    margin-bottom: 15px;
-}
-
-#imageInfo p {
-    margin: 5px 0;
-}
-
-.modal-actions-and-comments-container {
-    display: flex;
-    flex-direction: column; /* По умолчанию вертикально */
-    gap: 20px;
     width: 100%;
-    flex-shrink: 0; /* Prevents this section from shrinking */
+    padding: 0 10px 15px;
+    font-size: 0.9em;
+    color: #B0B0B0;
+    text-align: center;
+}
+
+/* Контейнер для действий и комментариев */
+.modal-actions-and-comments-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* По умолчанию располагаем в столбец */
+    gap: 15px; /* Отступ между секциями */
 }
 
 .modal-actions-container {
-    position: relative; /* CRUCIAL for dropdown positioning */
-    width: 100%; /* По умолчанию занимает всю ширину */
-    text-align: left; /* Выравнивание кнопки "..." влево */
+    position: relative; /* Важно: устанавливаем относительное позиционирование для родителя dropdown */
+    display: flex;
+    justify-content: flex-end; /* Выравниваем кнопку "..." вправо */
+    width: 100%;
 }
 
-/* Styles for the More Options Button and Dropdown */
 .more-options-button {
-    background-color: #333;
+    background: none;
     color: #E0E0E0;
-    padding: 8px 15px;
+    font-size: 1.5em;
+    padding: 5px 10px;
     border-radius: 5px;
-    font-size: 1em;
-    position: relative; /* Essential for positioning the dropdown */
-    z-index: 1010; /* Ensure button is above other things if needed */
+    align-self: flex-end; /* Выравнивание кнопки внизу, если flex-direction: column */
 }
 
 .more-options-button:hover {
-    background-color: #555;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .options-dropdown {
-    display: none; /* Hidden by default */
-    position: absolute;
-    /* Positioning relative to the more-options-button (its parent with position: relative) */
-    /* bottom: calc(100% + 10px); /* Position above the button, with a 10px gap - controlled by JS */
-    /* left: 0; /* Aligned left with button - controlled by JS */
-    background-color: #2b2b2b;
-    border: 1px solid #444;
+    position: absolute; /* Позиционируем абсолютно относительно кнопки "..." */
+    top: 100%; /* Размещаем список сразу под кнопкой */
+    right: 0; /* Изменено на 'right: 0' для выравнивания по правому краю кнопки */
+    background-color: #333; /* Цвет фона выпадающего списка */
+    border: 1px solid #555;
     border-radius: 5px;
-    min-width: 150px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    z-index: 1020; /* Higher than modal content and button to ensure it's on top */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1001; /* Устанавливаем z-index выше, чем у модального окна, чтобы он был поверх */
+    min-width: 160px; /* Минимальная ширина для содержимого */
+    display: none; /* Скрыт по умолчанию */
+    flex-direction: column;
     padding: 5px 0;
 }
 
-.options-dropdown.show-dropdown {
-    display: block; /* Show when class is added by JS */
+.options-dropdown.show {
+    display: flex;
 }
 
 .options-dropdown a {
-    color: #E0E0E0;
-    padding: 8px 15px;
+    padding: 10px 15px;
     text-decoration: none;
+    color: #E0E0E0;
     display: block;
-    white-space: nowrap; /* Prevent text wrapping */
+    white-space: nowrap; /* Предотвращает перенос текста */
 }
 
 .options-dropdown a:hover {
-    background-color: #444;
-    color: #C0A4C0;
+    background-color: #555;
 }
 
 .comments-section {
-    background-color: #2b2b2b;
-    border-radius: 5px;
-    padding: 15px;
+    width: 100%; /* Занимает всю доступную ширину */
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
 .comments-list {
-    max-height: 200px; /* Высота списка комментариев */
-    overflow-y: auto; /* Прокрутка, если комментариев много */
-    padding-right: 5px; /* Для отступа от скроллбара */
-    margin-bottom: 10px;
+    max-height: 200px; /* Пример: ограничьте высоту списка комментариев, но родитель будет прокручиваться */
+    overflow-y: auto; /* Добавьте прокрутку для списка комментариев, если их много */
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #222;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .comment-item {
-    background-color: #3e3e3e;
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin-bottom: 5px;
-    font-size: 0.9em;
-    line-height: 1.4;
+    background-color: #333;
+    padding: 10px;
+    border-radius: 5px;
 }
 
-.comment-item strong {
-    color: #C0A4C0;
+.comment-author {
+    font-weight: bold;
+    color: #9C829C;
+    margin-bottom: 5px;
+}
+
+.comment-text {
+    font-size: 0.9em;
+    color: #E0E0E0;
 }
 
 .comment-input-container {
     display: flex;
     gap: 10px;
+    align-items: center;
 }
 
 #commentInput {
     flex-grow: 1;
-    background-color: #3e3e3e;
+    padding: 10px 15px;
     border: 1px solid #555;
-    border-radius: 4px;
-    padding: 10px;
+    border-radius: 5px;
+    background-color: #333;
     color: #E0E0E0;
-    resize: vertical; /* Разрешить вертикальное изменение размера */
-    min-height: 40px;
     font-family: 'Geoform', sans-serif;
+    resize: vertical; /* Разрешаем вертикальное изменение размера */
+    min-height: 40px;
+    max-height: 120px;
 }
 
 #commentInput::placeholder {
@@ -380,72 +397,57 @@ header h1 {
 
 #sendCommentBtn {
     background-color: #9C829C;
-    color: #FFF;
+    color: #1A1A1A;
     padding: 10px 20px;
-    border-radius: 5px;
-    font-size: 1em;
-    flex-shrink: 0; /* Не сжимать кнопку */
+    border-radius: 8px;
+    font-size: 0.9em;
+    flex-shrink: 0;
 }
 
 #sendCommentBtn:hover {
     background-color: #C0A4C0;
+    transform: translateY(-1px);
 }
 
-
-/* Scrollbar Styles */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #333;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #555;
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #777;
-}
-
-/* Mobile adjustments */
+/* Медиа-запросы для адаптивности */
 @media (max-width: 768px) {
-    header h1 {
-        font-size: 1.5em;
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .header-right-section {
+        width: 100%;
+        justify-content: space-between;
     }
 
     .top-upload-buttons-container {
         flex-direction: column;
-        align-items: center;
-    }
-
-    .top-upload-buttons-container button {
-        max-width: 90%; /* Больше ширины на маленьких экранах */
+        gap: 10px;
     }
 
     .image-container {
         flex-direction: column;
-        align-items: center;
-        padding: 10px;
+        gap: 15px;
     }
 
     .image-column {
-        min-width: unset; /* Сброс минимальной ширины */
-        width: 95%; /* Занимаем почти всю ширину */
-        max-width: 400px; /* Ограничение максимальной ширины */
+        gap: 15px;
     }
 
     .modal-content {
-        width: 95%;
-        height: 90vh;
+        width: 95%; /* Шире на мобильных */
         padding: 15px;
     }
 
-    .carousel-control-button {
+    .modal-close-button {
+        font-size: 1.8em;
+    }
+
+    .modal-nav-button {
+        /* Скрываем кнопки навигации на очень маленьких экранах, если используем свайп */
+        /* display: none; */
         width: 30px; /* Меньший размер кнопки на мобильных */
         height: 30px;
         font-size: 1.2em; /* Меньший размер иконки на мобильных */
