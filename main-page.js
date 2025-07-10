@@ -49,11 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadCenterButton = document.getElementById('uploadCenter');
     const uploadRightButton = document.getElementById('uploadRight');
 
-    // Эти элементы input[type="file"] теперь не нужны, так как мы создаем один динамически
-    // const fileInputLeft = document.getElementById('fileInputLeft');
-    // const fileInputCenter = document.getElementById('fileInputCenter');
-    // const fileInputRight = document.getElementById('fileInputRight');
-
     const userNameSpan = document.getElementById('userName');
 
     // --- Конец ссылок на DOM-элементы ---
@@ -228,13 +223,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     }
 
+    // --- Новое: Закрытие модального окна по клику вне контента ---
+    imageModalGlobalRef.addEventListener('click', (event) => {
+        // Закрываем модальное окно, только если клик был непосредственно по его фону (не по контенту внутри)
+        if (event.target === imageModalGlobalRef) {
+            closeModal();
+        }
+    });
+
     function updateCarouselImages(index) {
         modalImage.src = imageList[index].url;
     }
 
+    // --- Изменено: Убрана строка "Описание" ---
     function updateImageInfo(image) {
         imageInfoDiv.innerHTML = `
-            <p><strong>Описание:</strong> ${image.description || 'Нет описания'}</p>
             <p><strong>Дата:</strong> ${new Date(image.timestamp).toLocaleString()}</p>
             <p><strong>Загрузил:</strong> ${image.uploadedByName || 'Неизвестно'}</p>
         `;
@@ -290,6 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // --- Функционал перемещения и удаления (уже был в предыдущей версии) ---
     optionsDropdownGlobalRef.addEventListener('click', (event) => {
         event.preventDefault();
         const action = event.target.dataset.action;
@@ -303,7 +307,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Вы можете удалять или перемещать только те фотографии, которые загрузили сами.');
             return;
         }
-
 
         if (action === 'delete') {
             if (confirm('Вы уверены, что хотите удалить это изображение?')) {
