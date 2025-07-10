@@ -6,7 +6,7 @@
     <title>Ever Together - Your Gallery</title>
     <link rel="icon" href="heart.ico" type="image/x-icon">
     <link rel="stylesheet" href="style.css">
-</head>
+    </head>
 <body>
     <header>
         <h1>EVER TOGETHER</h1>
@@ -23,15 +23,12 @@
     <div class="top-upload-buttons-container">
         <div class="column-top-actions">
             <button id="uploadLeft">Him peach</button>
-            <input type="file" id="fileInputLeft" accept="image/*" data-column="left" style="display: none;">
         </div>
         <div class="column-top-actions">
             <button id="uploadCenter">Our dreams</button>
-            <input type="file" id="fileInputCenter" accept="image/*" data-column="center" style="display: none;">
         </div>
         <div class="column-top-actions">
             <button id="uploadRight">Her cat</button>
-            <input type="file" id="fileInputRight" accept="image/*" data-column="right" style="display: none;">
         </div>
     </div>
 
@@ -46,11 +43,11 @@
 
     <div id="imageModal" class="modal">
         <div class="modal-content">
-            <div class="modal-nav-buttons">
-                <button id="prevImageButton" class="modal-nav-button prev">&#10094;</button>
-                <button id="nextImageButton" class="modal-nav-button next">&#10095;</button>
-            </div>
-            <div id="modal-image-carousel" class="modal-image-carousel">
+            <button class="modal-close-button" id="closeModalBtn">&times;</button>
+            <button class="modal-nav-button" id="prevImageBtn">&#10094;</button>
+            <button class="modal-nav-button" id="nextImageBtn">&#10095;</button>
+            
+            <div class="modal-image-carousel" id="modalImageCarousel">
                 <img id="prevImage" class="carousel-image" src="" alt="Previous image">
                 <img id="modalImage" class="carousel-image" src="" alt="Full size image">
                 <img id="nextImage" class="carousel-image" src="" alt="Next image">
@@ -70,7 +67,7 @@
 
                 <div class="comments-section">
                     <div class="comments-list" id="commentsList">
-                    </div>
+                        </div>
                     <div class="comment-input-container">
                         <textarea id="commentInput" placeholder="Добавить комментарий..."></textarea>
                         <button id="sendCommentBtn">Отправить</button>
