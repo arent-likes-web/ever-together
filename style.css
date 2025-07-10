@@ -218,7 +218,39 @@ header h1 {
     color: #9C829C;
 }
 
-.modal-image-carousel {
+/* Стили для контейнера кнопок навигации */
+.modal-nav-buttons {
+    position: absolute;
+    top: 50%; /* Центрируем по вертикали относительно родителя (.modal-content) */
+    left: 0;
+    right: 0;
+    transform: translateY(-50%); /* Точная центровка */
+    display: flex;
+    justify-content: space-between; /* Размещаем кнопки по краям */
+    width: 100%;
+    padding: 0 10px; /* Отступы от краев модального окна */
+    box-sizing: border-box;
+    z-index: 20; /* Выше карусели, но ниже кнопки закрытия */
+    pointer-events: none; /* Позволяет кликам проходить сквозь контейнер, если не попадают на кнопки */
+}
+
+.modal-nav-button {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #E0E0E0;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1.5em;
+    pointer-events: auto; /* Включает события указателя для самих кнопок */
+}
+
+.modal-nav-button:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Стили для карусели изображений (контейнера) */
+#modal-image-carousel { /* Используем ID как в новом HTML */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -240,32 +272,6 @@ header h1 {
     flex-shrink: 0; /* Предотвращаем сжатие изображений */
     transition: transform 0.3s ease-out; /* Анимация для скролла карусели */
     margin: 0 20px; /* Пространство между изображениями */
-}
-
-.modal-nav-button {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(0, 0, 0, 0.5);
-    color: #E0E0E0;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    z-index: 10;
-    border-radius: 5px;
-    font-size: 1.5em;
-}
-
-.modal-nav-button:hover {
-    background-color: rgba(0, 0, 0, 0.7);
-}
-
-#prevImageBtn {
-    left: 10px;
-}
-
-#nextImageBtn {
-    right: 10px;
 }
 
 /* Стили для информации об изображении (дата, описание) */
@@ -444,13 +450,16 @@ header h1 {
     .modal-close-button {
         font-size: 1.8em;
     }
+    
+    .modal-nav-buttons {
+        padding: 0 5px; /* Меньший отступ на мобильных */
+    }
 
     .modal-nav-button {
-        /* Скрываем кнопки навигации на очень маленьких экранах, если используем свайп */
-        /* display: none; */
         width: 30px; /* Меньший размер кнопки на мобильных */
         height: 30px;
         font-size: 1.2em; /* Меньший размер иконки на мобильных */
+        padding: 5px; /* Меньший padding для компактности */
     }
 
     .comments-list {
