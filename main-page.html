@@ -1,85 +1,169 @@
 <!DOCTYPE html>
+
 <html lang="ru">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ever Together - Your Gallery</title>
-    <link rel="icon" href="heart.ico" type="image/x-icon">
-    <link rel="stylesheet" href="style.css">
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ever Together - Your Gallery</title>
+
+    <link rel="icon" href="heart.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href="style.css">
+
 </head>
+
 <body>
-    <header>
-        <h1>EVER TOGETHER</h1>
-        <div class="header-right-section">
-            <div class="auth-status">
-                <span id="userName"></span>
-            </div>
-            <a href="wish.html" class="star-button-link" aria-label="Открыть страницу желаний">
-                <button class="star-button">★</button>
-            </a>
-        </div>
-    </header>
 
-    <div class="top-upload-buttons-container">
-        <div class="column-top-actions">
-            <button id="uploadLeft">Him peach</button>
-            <input type="file" id="fileInputLeft" accept="image/*" data-column="left" style="display: none;">
-        </div>
-        <div class="column-top-actions">
-            <button id="uploadCenter">Our dreams</button>
-            <input type="file" id="fileInputCenter" accept="image/*" data-column="center" style="display: none;">
-        </div>
-        <div class="column-top-actions">
-            <button id="uploadRight">Her cat</button>
-            <input type="file" id="fileInputRight" accept="image/*" data-column="right" style="display: none;">
-        </div>
-    </div>
+    <header>
 
-    <div class="image-container">
-        <div class="image-column" id="leftColumn">
-        </div>
-        <div class="image-column" id="centerColumn">
-        </div>
-        <div class="image-column" id="rightColumn">
-        </div>
-    </div>
+        <h1>EVER TOGETHER</h1>
 
-    <div id="imageModal" class="modal">
-        <div class="modal-content">
-            <button class="modal-close-button" id="closeModalBtn">&times;</button> <div class="modal-nav-buttons">
-                <button id="prevImageButton" class="modal-nav-button prev">&#10094;</button>
-                <button id="nextImageButton" class="modal-nav-button next">&#10095;</button>
-            </div>
-            <div id="modal-image-carousel" class="modal-image-carousel">
-                <img id="prevImage" class="carousel-image" src="" alt="Previous image">
-                <img id="modalImage" class="carousel-image" src="" alt="Full size image">
-                <img id="nextImage" class="carousel-image" src="" alt="Next image">
-            </div>
-            
-            <div id="imageInfo"></div>
-            <div class="modal-actions-and-comments-container">
-                <div class="modal-actions-container">
-                    <button id="moreOptionsButton" class="more-options-button">...</button>
-                    <div id="optionsDropdown" class="options-dropdown">
-                        <a href="#" data-action="delete">Удалить</a>
-                        <a href="#" data-action="move" data-column="left">В Him peach</a>
-                        <a href="#" data-action="move" data-column="center">В Our dreams</a>
-                        <a href="#" data-action="move" data-column="right">В Her cat</a>
-                    </div>
-                </div>
+        <div class="header-right-section">
 
-                <div class="comments-section">
-                    <div class="comments-list" id="commentsList">
-                    </div>
-                    <div class="comment-input-container">
-                        <textarea id="commentInput" placeholder="Добавить комментарий..."></textarea>
-                        <button id="sendCommentBtn">Отправить</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            <div class="auth-status">
 
-    <script type="module" src="main-page.js"></script>
+                <span id="userName"></span>
+
+            </div>
+
+            <a href="wish.html" class="star-button-link" aria-label="Открыть страницу желаний">
+
+                <button class="star-button">★</button>
+
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <div class="top-upload-buttons-container">
+
+        <div class="column-top-actions">
+
+            <button id="uploadLeft">Him peach</button>
+
+            <input type="file" id="fileInputLeft" accept="image/*" data-column="left" style="display: none;">
+
+        </div>
+
+        <div class="column-top-actions">
+
+            <button id="uploadCenter">Our dreams</button>
+
+            <input type="file" id="fileInputCenter" accept="image/*" data-column="center" style="display: none;">
+
+        </div>
+
+        <div class="column-top-actions">
+
+            <button id="uploadRight">Her cat</button>
+
+            <input type="file" id="fileInputRight" accept="image/*" data-column="right" style="display: none;">
+
+        </div>
+
+    </div>
+
+
+
+    <div class="image-container">
+
+        <div class="image-column" id="leftColumn">
+
+        </div>
+
+        <div class="image-column" id="centerColumn">
+
+        </div>
+
+        <div class="image-column" id="rightColumn">
+
+        </div>
+
+    </div>
+
+
+
+    <div id="imageModal" class="modal">
+
+        <div class="modal-content">
+
+            <div class="modal-nav-buttons">
+
+                <button id="prevImageButton" class="modal-nav-button prev">&#10094;</button>
+
+                <button id="nextImageButton" class="modal-nav-button next">&#10095;</button>
+
+            </div>
+
+            <div id="modal-image-carousel" class="modal-image-carousel">
+
+                <img id="prevImage" class="carousel-image" src="" alt="Previous image">
+
+                <img id="modalImage" class="carousel-image" src="" alt="Full size image">
+
+                <img id="nextImage" class="carousel-image" src="" alt="Next image">
+
+            </div>
+
+            
+
+            <div id="imageInfo"></div>
+
+            <div class="modal-actions-and-comments-container">
+
+                <div class="modal-actions-container">
+
+                    <button id="moreOptionsButton" class="more-options-button">...</button>
+
+                    <div id="optionsDropdown" class="options-dropdown">
+
+                        <a href="#" data-action="delete">Удалить</a>
+
+                        <a href="#" data-action="move" data-column="left">В Him peach</a>
+
+                        <a href="#" data-action="move" data-column="center">В Our dreams</a>
+
+                        <a href="#" data-action="move" data-column="right">В Her cat</a>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="comments-section">
+
+                    <div class="comments-list" id="commentsList">
+
+                    </div>
+
+                    <div class="comment-input-container">
+
+                        <textarea id="commentInput" placeholder="Добавить комментарий..."></textarea>
+
+                        <button id="sendCommentBtn">Отправить</button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script type="module" src="main-page.js"></script>
+
 </body>
+
 </html>
